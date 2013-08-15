@@ -1,0 +1,13 @@
+#!/bin/bash
+DIR="$(dirname $0)/.."
+cd $DIR
+bin/build && \
+cp -R src/public/* public && \
+cd public && \
+git add -A && \
+git commit -m "Site update" 
+
+
+
+#&& \
+#git push
