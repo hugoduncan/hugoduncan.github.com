@@ -13,11 +13,13 @@
       {{ template "chrome/topnav.html" . }}
       {{ template "chrome/start-content.html" . }}
 
+      <h1>{{ .Data.Plural }}</h1>
       <ul class="list-unstyled">
-        {{ range .Site.Recent }}
+        {{ range $k, $_ := .Data.Index }}
           <li>
-           <span class="post-date">{{ .Date.Day }} {{ .Date.Month }} {{ .Date.Year }}</span>
-            &nbsp;<a href="{{ .Permalink }}">{{ .Title }}</a></li>
+           <span class="post-date"></span>
+            &nbsp;<a href="{{$k | urlize}}">{{$k}}</a>
+          </li>
         {{ end }}
       </ul>
 

@@ -19,3 +19,10 @@ pre {
   background-color: white;
   border: none;
 }
+
+.post-date {
+    width: 150px;
+    text-align: right;
+    display: inline-block;
+    font-size: smaller;
+}
