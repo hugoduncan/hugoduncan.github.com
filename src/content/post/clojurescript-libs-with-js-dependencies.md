@@ -1,7 +1,7 @@
 ---
 title: "How to Build Clojurescript Libs with JavaScript Dependencies"
 Pubdate: "2013-08-16"
-tags: [ "clojurescript", "javascript", "packaging" ]
+tags: [ "clojurescript", "javascript", "packaging", "clojure" ]
 description: "A summary of different strategies for packaging JavaScipt dependencies in a Clojurescript library"
 ---
 

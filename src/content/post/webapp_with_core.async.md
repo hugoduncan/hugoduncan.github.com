@@ -1,7 +1,7 @@
 ---
 title: "Exploring a todo app with core.async"
 Pubdate: "2013-08-15"
-tags: [ "clojurescript", "core.async", "templating" ]
+tags: [ "clojurescript", "core.async", "templating", "clojure" ]
 Description: "Builds the equivalent of the angularJS TODO example with core.async"
 ---
 
