@@ -95,7 +95,7 @@ just &lt;code&gt;:whitespace&lt;/code&gt;, but as soon as you try anything else,
 provide an :externs definition for the JavaScript libraries.&lt;/p&gt;
 </content></entry>
 
-<entry xml:base="http://hugoduncan.github.com/post/webapp_with_core.async"><title>Exploring a todo app with core.async</title><link href="http://hugoduncan.github.com/post/webapp_with_core.async"/><id>http://hugoduncan.github.com/post/webapp_with_core.async</id><published></published><updated>2013-08-11T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;We&amp;rsquo;re going to build an equivalent of the &lt;a href=&#34;http://angularjs.org/#add-some-control&#34; title=&#34;Angular TODO example&#34;&gt;AngularJS TODO example&lt;/a&gt;
+<entry xml:base="http://hugoduncan.github.com/post/webapp_with_core.async"><title>Exploring a todo app with core.async</title><link href="http://hugoduncan.github.com/post/webapp_with_core.async"/><id>http://hugoduncan.github.com/post/webapp_with_core.async</id><published></published><updated>2013-08-15T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;We&amp;rsquo;re going to build an equivalent of the &lt;a href=&#34;http://angularjs.org/#add-some-control&#34; title=&#34;Angular TODO example&#34;&gt;AngularJS TODO example&lt;/a&gt;
 using core.async, and a templating library, &lt;a href=&#34;https://github.com/hugoduncan/papadom&#34; title=&#34;Papadom templating library&#34;&gt;papadom&lt;/a&gt;, that I&amp;rsquo;ve
 written to help in this.&lt;/p&gt;
 
