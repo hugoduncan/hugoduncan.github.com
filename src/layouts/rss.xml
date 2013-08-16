@@ -11,6 +11,6 @@
  <updated>{{ with .Site.LastChange }}{{ .Format "2006-01-02T15:04:05Z07:00"  }}{{ end }}</updated>
 
 {{ range .Site.Recent }}
-<entry xml:base="{{ .Permalink }}"><title>{{ .Title }}</title><link href="{{ .Permalink }}"/><id>{{ .Permalink }}</id><published>{{ with .Params.Pubdate  }}{{ .Format "2006-01-02T15:04:05Z07:00" }}{{ end }}</published><updated>{{with .Date }}{{ .Format "2006-01-02T15:04:05Z07:00" }}{{ end }}</updated><summary type="html">{{ .Params.Description }} </summary><content type="html">{{ html .Content }}</content></entry>
+<entry xml:base="{{ .Permalink }}"><title>{{ .Title }}</title><link href="{{ .Permalink }}"/><id>{{ .Permalink }}</id><published>{{ with .Date  }}{{ .Format "2006-01-02T15:04:05Z07:00" }}{{ end }}</published><updated>{{with .Date }}{{ .Format "2006-01-02T15:04:05Z07:00" }}{{ end }}</updated><summary type="html">{{ .Params.Description }} </summary><content type="html">{{ html .Content }}</content></entry>
 {{ end }}
 </feed>
