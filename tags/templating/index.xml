@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<feed xmlns='http://www.w3.org/2005/Atom' xml:lang='en-us'>
+ <title>pelure</title>
+ <id>http://hugoduncan.github.com/</id>
+ <link href='./' />
+ <link rel='self' href='' />
+ <logo>rsslogo.jpg</logo>
+ <icon>/favicon.ico</icon>
+ <author><name>Hugo Duncan</name></author>
+ <subtitle>Pelure </subtitle>
+ <rights>All content written by Hugo Duncan and photos by Hugo Duncan Copyright Hugo Duncan, all rights reserved.</rights> 
+ <updated>2013-08-11T00:00:00Z</updated>
+
+
+<entry xml:base="http://hugoduncan.github.com/post/webapp_with_core.async"><title>Exploring a todo app with core.async</title><link href="http://hugoduncan.github.com/post/webapp_with_core.async"/><id>http://hugoduncan.github.com/post/webapp_with_core.async</id><published></published><updated>2013-08-11T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;We&amp;rsquo;re going to build an equivalent of the &lt;a href=&#34;http://angularjs.org/#add-some-control&#34; title=&#34;Angular TODO example&#34;&gt;AngularJS TODO example&lt;/a&gt;
+using core.async, and a templating library, &lt;a href=&#34;https://github.com/hugoduncan/papadom&#34; title=&#34;Papadom templating library&#34;&gt;papadom&lt;/a&gt;, that I&amp;rsquo;ve
+written to help in this.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;https://github.com/clojure/clojurescript&#34; title=&#34;Clojurescript&#34;&gt;Clojurescript&lt;/a&gt; recently gained a &lt;a href=&#34;http://en.wikipedia.org/wiki/Communicating_sequential_processes&#34; title=&#34;Communicating Sequential Processes&#34;&gt;CSP&lt;/a&gt; implemetation via
+&lt;a href=&#34;http://clojure.com/blog/2013/06/28/clojure-core-async-channels.html&#34; title=&#34;Clojure core.async Channels&#34;&gt;core.async&lt;/a&gt;, similar to &lt;a href=&#34;http://golang.org/ref/spec#Channel_types&#34; title=&#34;Go Channels&#34;&gt;Go&amp;rsquo;s channels&lt;/a&gt;, or
+&lt;a href=&#34;http://www.cs.cornell.edu/Courses/cs312/2006fa/recitations/rec24.html&#34; title=&#34;CML Channels&#34;&gt;CML&amp;rsquo;s channels&lt;/a&gt; (CML also has a nice select).  Bruce Haumann
+started exploring this with &lt;a href=&#34;http://rigsomelight.com/2013/07/18/clojurescript-core-async-todos.html&#34; title=&#34;Bruce Haumann&#39;s &#39;ClojureScript Core.Async Todos&#39;&#34;&gt;ClojureScript Core.Async Todos&lt;/a&gt;, and
+David Nolen has been looking at how to use core.async for
+&lt;a href=&#34;http://swannodette.github.io/2013/07/31/extracting-processes/&#34; title=&#34;David Nolan&#39;s &#39;CSP is Responsive Design&#39;&#34;&gt;responsive design&lt;/a&gt;.  In this post, we&amp;rsquo;ll take the TODO example,
+and take it a little further.&lt;/p&gt;
+
+&lt;h2&gt;Basic Display&lt;/h2&gt;
+
+&lt;p&gt;We&amp;rsquo;ll start with just displaying a list of todo items.  For this we&amp;rsquo;ll need a
+template, so we&amp;rsquo;ll just write this in HTML, and add a &lt;code&gt;t-template&lt;/code&gt; attribute,
+which enables us to use mustache style templating of values to display.  This
+doesn&amp;rsquo;t use mustache sections for looping, in order to preserve valid HTML
+markup.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;html&#34;&gt;&amp;lt;h1&amp;gt;TODOS&amp;lt;/h1&amp;gt;
+&amp;lt;ul class=&amp;quot;unstyled&amp;quot;&amp;gt;
+  &amp;lt;li t-template=&amp;quot;todos&amp;quot;&amp;gt;{{text}}&amp;lt;/li&amp;gt;
+&amp;lt;/ul&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;To get this to show something we&amp;rsquo;ll need some code:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;clj&#34;&gt;(ns app
+  (:require
+   [papadom.template :refer [compile-templates render]]))
+
+(defn start []
+  (compile-templates)
+  (render {:todos [{:text &amp;quot;learn papadom&amp;quot; :done false}
+                   {:text &amp;quot;write a papadom app&amp;quot; :done false}]}))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;When you call &lt;code&gt;app.start()&lt;/code&gt; from the page containing the above template, you&amp;rsquo;ll
+see a list of two todo entries.&lt;/p&gt;
+
+&lt;h2&gt;Adding an event&lt;/h2&gt;
+
+&lt;p&gt;Now we have something displayed, lets add a checkbox to mark todo items as done:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;html&#34;&gt;&amp;lt;ul class=&amp;quot;unstyled&amp;quot;&amp;gt;
+  &amp;lt;li t-template=&amp;quot;todos&amp;quot;&amp;gt;
+    &amp;lt;input type=&amp;quot;checkbox&amp;quot; t-prop=&amp;quot;done&amp;quot; t-event=&amp;quot;done&amp;quot;
+           t-id=&amp;quot;index&amp;quot; index=&amp;quot;{{@index}}&amp;quot;&amp;gt;
+    &amp;lt;span&amp;gt;{{text}}&amp;lt;/span&amp;gt;
+  &amp;lt;/li&amp;gt;
+&amp;lt;/ul&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;code&gt;t-prop&lt;/code&gt; attribute tells the template to which data value to display as the
+checkbox.&lt;/p&gt;
+
+&lt;p&gt;The &lt;code&gt;t-event&lt;/code&gt; attribute specifies that we want an event.  When the checkbox is
+clicked, we will get a core.async message with a &lt;code&gt;:done&lt;/code&gt; event type.  We need to
+know which todo was clicked, so we use the &lt;code&gt;t-id&lt;/code&gt; attribute to list the
+attributes whose values should be sent as the event data &amp;ndash; in this case the
+index, which has a value based on handlebars style &lt;code&gt;@index&lt;/code&gt; property.&lt;/p&gt;
+
+&lt;p&gt;Now we need some code to process the events.  To do this we&amp;rsquo;ll define an
+&lt;code&gt;app&lt;/code&gt; function that will be passed a state atom containing a map with our todos
+state, and a core.async channel from which to read events.  The function will
+loop over events, and dispatch them as required.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;clj&#34;&gt;(defn app
+  [state event-chan]
+  (go
+   (loop [[event event-data] (&amp;lt;! event-chan)]
+     (case event
+       :done
+       (let [nv (boolean (:checked event-data))]
+         (swap! state assoc-in [:todos (:index event-data) :done] nv)))
+     (recur (&amp;lt;! event-chan)))))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;When the &lt;code&gt;app&lt;/code&gt; function receives a &lt;code&gt;:done&lt;/code&gt; event, it will update the state atom
+appropriately.  Now we have our state updating, we&amp;rsquo;ll need to display it, which
+we can again do with the &lt;code&gt;render&lt;/code&gt; function.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;clj&#34;&gt;(defn show-state [state]
+  (render &amp;quot;state&amp;quot; state))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We still need to get &lt;code&gt;show-state&lt;/code&gt; called, and we&amp;rsquo;ll arrange this in a modified
+&lt;code&gt;start&lt;/code&gt; function.  This will create an atom for the state, and add a watch on
+the atom that will call &lt;code&gt;show-state&lt;/code&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;clj&#34;&gt;(defn start
+  []
+  (let [event-chan (chan)
+        state (atom nil)]
+    (compile-templates)
+    (template-events event-chan)
+    (add-watch state :state (fn [key ref old new] (show-state new)))
+    (reset! state {:todos [{:text &amp;quot;Learn papadom&amp;quot; :done false}
+                           {:text &amp;quot;Build a papadom app&amp;quot; :done false}]})
+    (app state event-chan))))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We&amp;rsquo;ve also added a core.async channel, &lt;code&gt;event-chan&lt;/code&gt;, which we&amp;rsquo;ve passed to
+&lt;code&gt;template-events&lt;/code&gt; to arrange delivery of the events defined in our template.  We
+pass this channel to the &lt;code&gt;app&lt;/code&gt; function to start processing the events.&lt;/p&gt;
+
+&lt;p&gt;This shows the basic structure of the application.&lt;/p&gt;
+
+&lt;h2&gt;Adding New Todo Elements&lt;/h2&gt;
+
+&lt;p&gt;To allow you to add new todo items, we&amp;rsquo;ll add a form to our template,
+specifying a &lt;code&gt;t-event&lt;/code&gt; attribute, which will cause an event to be sent when the
+form is submitted, with the form&amp;rsquo;s input values as the event data.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;html&#34;&gt;&amp;lt;form t-event=&amp;quot;add-todo&amp;quot;&amp;gt;
+  &amp;lt;input type=&amp;quot;text&amp;quot; t-prop=&amp;quot;text&amp;quot; size=&amp;quot;30&amp;quot; placeholder=&amp;quot;add new todo here&amp;quot;&amp;gt;
+  &amp;lt;input class=&amp;quot;btn btn-primary&amp;quot; type=&amp;quot;submit&amp;quot; value=&amp;quot;add&amp;quot;&amp;gt;
+&amp;lt;/form&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;To process this new event, we&amp;rsquo;ll add a case to the &lt;code&gt;app&lt;/code&gt; function loop&amp;rsquo;s &lt;code&gt;case&lt;/code&gt;
+form.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;clj&#34;&gt;:add-todo
+(swap! state update-in [:todos]
+       conj {:text (:text (input-seq-&amp;gt;map event-data))
+             :done false})
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This uses the &lt;code&gt;input-seq-&amp;gt;map&lt;/code&gt; helper to convert the data from the form into a
+map, and we extract the &lt;code&gt;:text&lt;/code&gt; value (defined by &lt;code&gt;t-prop&lt;/code&gt; in the &lt;code&gt;input&lt;/code&gt;
+element).&lt;/p&gt;
+
+&lt;p&gt;And we&amp;rsquo;re done.  To see a full working example have a look at the
+&lt;a href=&#34;https://github.com/hugoduncan/papadom/blob/master/examples/todo/resources/public/index.html&#34; title=&#34;TODO HTML Template&#34;&gt;template&lt;/a&gt; and &lt;a href=&#34;https://github.com/hugoduncan/papadom/blob/master/examples/todo/src/papadom/example/todo.cljs&#34; title=&#34;TODO Clojurescript Code&#34;&gt;code&lt;/a&gt; in the todo example of papadom.
+To run the example:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;shell&#34;&gt;git clone https://github.com/hugoduncan/papadom.git
+cd papadom/examples/todo
+lein ring server
+&lt;/code&gt;&lt;/pre&gt;
+</content></entry>
+
+<entry xml:base="http://hugoduncan.github.com/meta/contact"><title>Contact</title><link href="http://hugoduncan.github.com/meta/contact"/><id>http://hugoduncan.github.com/meta/contact</id><published></published><updated>2013-07-01T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;&lt;a href=&#34;https://github.com/hugoduncan&#34;&gt;Github&lt;/a&gt;&lt;/p&gt;
+</content></entry>
+
+</feed>
