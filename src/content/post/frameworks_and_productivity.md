@@ -1,6 +1,6 @@
 ---
 title: "Frameworks and Productivity"
-Pubdate: "2009-"
+Pubdate: "2009-03-20"
 tags: [ "ruby", "rails", "productivity", "complexity"]
 Description: "Yesterday was frustrating; I spent far too long trying to debug some problems in a Rails application I am writing.  Rails, and frameworks in general, are supposed to give us improved productivity by hiding the complexity and mechanics of the task at hand.  This is great as long as the framework behaves as expected, but invariably causes problems when things go wrong."
 aliases: ["/post/2009/frameworks_and_productivity.xhtml"]
