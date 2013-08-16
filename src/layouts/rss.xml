@@ -1,0 +1,16 @@
+<feed xmlns='http://www.w3.org/2005/Atom' xml:lang='en-us'>
+ <title>pelure</title>
+ <id>http://hugoduncan.github.com/</id>
+ <link href='./' />
+ <link rel='self' href='' />
+ <logo>rsslogo.jpg</logo>
+ <icon>/favicon.ico</icon>
+ <author><name>Hugo Duncan</name></author>
+ <subtitle>Pelure </subtitle>
+ <rights>All content written by Hugo Duncan and photos by Hugo Duncan Copyright Hugo Duncan, all rights reserved.</rights> 
+ <updated>{{ with .Site.LastChange }}{{ .Format "2006-01-02T15:04:05Z07:00"  }}{{ end }}</updated>
+
+{{ range .Site.Recent }}
+<entry xml:base="{{ .Permalink }}"><title>{{ .Title }}</title><link href="{{ .Permalink }}"/><id>{{ .Permalink }}</id><published>{{ with .Params.Pubdate  }}{{ .Format "2006-01-02T15:04:05Z07:00" }}{{ end }}</published><updated>{{with .Date }}{{ .Format "2006-01-02T15:04:05Z07:00" }}{{ end }}</updated><summary type="html">{{ .Params.Description }} </summary><content type="html">{{ html .Content }}</content></entry>
+{{ end }}
+</feed>

@@ -20,6 +20,9 @@
             &nbsp;<a href="{{ .Permalink }}">{{ .Title }}</a></li>
         {{ end }}
       </ul>
+      <span class="post-date">
+        <a href="{{.Permalink}}/index.xml"><img src="/images/feed_mini.gif"></a>
+      </span>
 
       {{ template "chrome/end-content.html" . }}
     </div>

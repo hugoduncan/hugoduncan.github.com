@@ -8,13 +8,16 @@
   <body>
     <div class="container">
       {{ template "chrome/topnav.html" . }}
-      {{ template "chrome/start-content.html" . }}     
+      {{ template "chrome/start-content.html" . }}
       {{ range .Data.Pages }}
         <li class="list-unstyled">
            <span class="post-date">{{ .Date.Day }} {{ .Date.Month }} {{ .Date.Year }}</span>
             &nbsp;<a href="{{ .Permalink }}">{{ .Title }}</a>
         </li>
       {{ end }}
+      <span class="post-date">
+        <a href="{{.Permalink}}/index.xml"><img src="/images/feed_mini.gif"></a>
+      </span>
       {{ template "chrome/end-content.html" . }}     
     </div>
     {{ template "chrome/footer.html" . }}
