@@ -1,0 +1,12 @@
+---
+title: "Rails Environments For Lisp"
+pubdate: "2009-04-07"
+tags: [ "rails", "ruby", "lisp", "cl-blog-generator", "advogato"]
+description: "The facility of Ruby on Rails' test, development and production environments is one of those features that goes almost unremarked, but which makes using rails more pleasant.  No doubt everyone has their own solution for this in other environments, and while I am sure Common Lisp is not lacking in examples, I have not seen an idiomatic implementation.  In developing cl-blog-generator I came up with the following solution."
+aliases: ["/post/2009/rails_environments_for_lisp.xhtml"]
+---
+<p>The facility of Ruby on Rails' test, development and production environments is one of those features that goes almost unremarked, but which makes using rails more pleasant.  No doubt everyone has their own solution for this in other environments, and while I am sure Common Lisp is not lacking in examples, I have not seen an idiomatic implementation.  In developing <a href="http://github.com/hugoduncan/cl-blog-generator">cl-blog-generator</a> I came up with the following solution.</p>
+<p>Configuration in Common Lisp usually depends on using special variables, which can be rebound across any block of code.  I started by putting the configuration of my blog into s-expressions in files, but got tired of specifying the file names for different blogs.  Instead, I created an association list for each configuration, and registered each using a symbol as key.  I can now switch to a given environment by specifying the symbol for the environment.
+</p>
+<p>The implementation (in <code>src/configure.lisp</code> under the <a href="http://github.com/hugoduncan/cl-blog-generator">GitHub repository</a>) consists of two functions and a special variable.  <code>SET-ENVIRONMENT</code> is used to register an environment, and <code>CONFIGURE</code> is used to make an environment active.  The environments are stored in <code>*ENVIRONMENTS*</code> special as an association list.  An example of setting up the configurations can be seen in the <code>config.lisp</code> file.  In creating the configurations I drop the '*' from the special names.</p>
+<p>I'm relatively new to CL, so let me now if I have overlooked anything.  Writing this post makes me think I am missing a <code>WITH-ENVIRONMENT</code> macro ...</p>
