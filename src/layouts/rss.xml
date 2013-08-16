@@ -10,7 +10,7 @@
  <rights>All content written by Hugo Duncan and photos by Hugo Duncan Copyright Hugo Duncan, all rights reserved.</rights> 
  <updated>{{ with .Site.LastChange }}{{ .Format "2006-01-02T15:04:05Z07:00"  }}{{ end }}</updated>
 
-{{ range .Site.Recent }}
+{{ range .Data.Pages }}
 <entry xml:base="{{ .Permalink }}"><title>{{ .Title }}</title><link href="{{ .Permalink }}"/><id>{{ .Permalink }}</id><published>{{ with .Date  }}{{ .Format "2006-01-02T15:04:05Z07:00" }}{{ end }}</published><updated>{{with .Date }}{{ .Format "2006-01-02T15:04:05Z07:00" }}{{ end }}</updated><summary type="html">{{ .Params.Description }} </summary><content type="html">{{ html .Content }}</content></entry>
 {{ end }}
 </feed>
