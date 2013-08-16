@@ -1,0 +1,150 @@
+<!doctype html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <title>Pelure - How to Build Clojurescript Libs with JavaScript Dependencies</title>
+<meta name="keywords" content="clojurescript,javascript,packaging">
+<meta name="description" content="A summary of different strategies for packaging JavaScipt dependencies in a Clojurescript library">
+
+
+
+
+    <link rel="stylesheet" 
+      href="//netdna.bootstrapcdn.com/bootstrap/3.0.0-rc1/css/bootstrap.min.css"
+      media="screen">
+<link rel="stylesheet" href="/css/pelure.css">
+
+    <link rel="stylesheet" href="/css/googlecode.css">
+  </head>
+  <body>
+    <div class="container">
+      <div class="row">
+  <div class="col-0 col-sm-2 col-lg-2"></div>
+  <div class="col-12 col-sm-8 col-lg-8">
+    <div class="navbar">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+    <a class="navbar-brand" href="/">Pelure</a>
+    <div class="nav-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li><a href="/post">Posts</a></li>
+        <li><a href="/tags">Tags</a></li>
+      </ul>
+      <ul class="nav navbar-nav pull-right">
+        <li><a href="/meta/contact">Contact</a></li>
+      </ul>
+    </div>
+    </div>
+  </div>
+</div>
+
+      <div class="row"> 
+  <div class="col-0 col-sm-2 col-lg-2"></div>
+  <div id="top" class="col-12 col-sm-8 col-lg-8">
+
+      <h1>How to Build Clojurescript Libs with JavaScript Dependencies</h1>
+      <p>Using JavaScript dependencies in a Clojurescript library seems to be hard.  It
+took me many hours to understand how it should work.  A big thanks to
+<a href="http://cemerick.com" title="Chas Emerick">Chas Emerick</a> for setting me straight on most of this.</p>
+
+<p>Luke Vanderhart <a href="http://lukevanderhart.com/2011/09/30/using-javascript-and-clojurescript.html" title="Luke Vanderhart's post on JavaScript libs">posted</a> a general introduction to using Javascript
+libraries in Clojurescript.  Go read it if you haven&rsquo;t already - this post
+assumes you have.</p>
+
+<p>While that post is an excellent description of using JavaScript in
+a Clojurescript application, it doesn&rsquo;t really address JavaScript in
+Clojurescript libraries, which has the additional problem of how to ensure the
+JavaScript dependency is available in the consumer of the library.  A
+Clojurescript library should definitely be capable of providing it&rsquo;s
+dependencies, but should also allow the consumer to override the version of
+these dependencies.</p>
+
+<h2>Don&rsquo;t package the JavaScript</h2>
+
+<p>The first approach is to simply not provide the JavaScript at all.  This is the
+approach taken by <a href="https://github.com/ibdknox/jayq" title="jayq">jayq</a> for example.  The consumer of jayq, or any
+library that uses jayq, is required to provide jQuery through the JavaScript
+runtime.  This can take the form of a <code>&amp;lt;script&amp;gt;</code> link in the browser page,
+or a call to <code>webPage#injectJs</code> in phantomJS.  The compile <code>:libs</code> or
+<code>:foreign-libs</code> options can not be used to provide the dependency, as there is
+no way for the compiler to know that jayq depends on the namespace provided by
+these options.</p>
+
+<p>For the consumer of the library to use compiler<code>:optimizations</code> other than
+<code>:whitespace</code>, they will need to provide an <code>:externs</code> file.</p>
+
+<h2>Package JavaScript</h2>
+
+<p>The second approach is to package the JavaScript via a Clojurescript namespace.
+This involves adding a <code>require</code> on a namespace to the code that directly
+depends on the JavaScript, and arranging for that Clojurescript namespace to
+load the JavaScript, using either of the compiler<code>:libs</code> or <code>:foreign-libs</code>
+options.</p>
+
+<p>The Clojurescript library can make the JavaScript library available in its
+resources.  The library consumer can then use resource via the <code>:libs</code> or
+<code>:foreign-libs</code> options, depending on whether or not the JavaScript contains a
+<code>goog.provides</code> call.</p>
+
+<p>If the library is packaged with a <code>goog.provides</code> call, then the consumer can
+not replace the version using <code>:libs [&quot;&quot;]</code> - the use of an explicit prefix in
+<code>:libs</code> is needed to prevent more than one JavaScript implementation trying to
+provide the clojure namespace, or the use of <code>:foreign-libs</code> where the namespace
+is explicitly mapped.</p>
+
+<p>For examples, the <a href="https://github.com/cemerick/pprng" title="pprng">pprng</a> library packages its dependency with a
+<code>goog.provides</code> call, allowing the use of <code>:libs [&quot;&quot;]</code> to pull in the
+dependency.  The <a href="https://github.com/hugoduncan/papadom" title="papadom">papadom</a> library on the other hand provides vanilla
+javascript dependencies, and requires the use of the more verbose
+<code>:foreign-libs</code> option.</p>
+
+<p>If the JavaScript is to be provided in the runtime, then the consumer will have
+to provide an empty namespace definition to satisfy the require in the
+Clojurescript library, and the<code>:externs</code> file as in the first case.</p>
+
+<h2>Postscript</h2>
+
+<p>There are several assumptions in much of the documentation that I didn&rsquo;t see
+explicitly explained.  I&rsquo;ll record these here for posterity.</p>
+
+<p>A clojurescript library is always a source code library.  There is no such thing
+as the linking of compiled clojurescript artifacts.</p>
+
+<p>Neither<code>:libs</code> nor<code>:foreign-libs</code> actually changes how the JavaScript is
+accessed within the clojurescript code.  If you include jQuery via a <code>:libs</code>,
+and a <code>require</code>, you still access it through <code>js/jQuery</code>.  The <code>require</code> of the
+namespace specified by <code>goog.provide</code>, or the namespace specified in the
+<code>:foreign-libs</code>&rsquo; <code>:provides</code> key, simply ensures the JavaScript is loaded.</p>
+
+<p>The choice of compiler <code>:optimizations</code> affects what information you need to
+provide, and this differs depending on whether you are providing javascript
+libraries through the runtime (e.g. $lt;script&gt; tags in the browser), or
+through <code>:libs</code> or <code>:foreign-libs</code> compiler options.  The simplest here is to
+use the compiler options.  When providing the JavaScript via the runtime, then
+everything should also just work if you are using no optimisation, or
+just <code>:whitespace</code>, but as soon as you try anything else, you will need to
+provide an :externs definition for the JavaScript libraries.</p>
+
+        </div>
+</div>
+
+    </div>
+    <div class="row"> 
+  <div class="col-0 col-sm-2 col-lg-2"></div>
+  <div id="top" class="col-12 col-sm-8 col-lg-8">
+     
+<footer id="footer">
+  <p class="pull-right"><a href="#top">Back to top</a></p>
+</footer>
+  </div>
+</div>
+     
+
+    <script type="text/javascript" src="/js/highlight.pack.js"></script>
+    <script type="text/javascript">hljs.initHighlightingOnLoad();</script>
+  </body>
+</html>

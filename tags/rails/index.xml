@@ -9,8 +9,91 @@
  <author><name>Hugo Duncan</name></author>
  <subtitle>Pelure </subtitle>
  <rights>All content written by Hugo Duncan and photos by Hugo Duncan Copyright Hugo Duncan, all rights reserved.</rights> 
- <updated>2013-08-11T00:00:00Z</updated>
+ <updated>2013-08-16T00:00:00Z</updated>
 
+
+<entry xml:base="http://hugoduncan.github.com/post/clojurescript-libs-with-js-dependencies"><title>How to Build Clojurescript Libs with JavaScript Dependencies</title><link href="http://hugoduncan.github.com/post/clojurescript-libs-with-js-dependencies"/><id>http://hugoduncan.github.com/post/clojurescript-libs-with-js-dependencies</id><published></published><updated>2013-08-16T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;Using JavaScript dependencies in a Clojurescript library seems to be hard.  It
+took me many hours to understand how it should work.  A big thanks to
+&lt;a href=&#34;http://cemerick.com&#34; title=&#34;Chas Emerick&#34;&gt;Chas Emerick&lt;/a&gt; for setting me straight on most of this.&lt;/p&gt;
+
+&lt;p&gt;Luke Vanderhart &lt;a href=&#34;http://lukevanderhart.com/2011/09/30/using-javascript-and-clojurescript.html&#34; title=&#34;Luke Vanderhart&#39;s post on JavaScript libs&#34;&gt;posted&lt;/a&gt; a general introduction to using Javascript
+libraries in Clojurescript.  Go read it if you haven&amp;rsquo;t already - this post
+assumes you have.&lt;/p&gt;
+
+&lt;p&gt;While that post is an excellent description of using JavaScript in
+a Clojurescript application, it doesn&amp;rsquo;t really address JavaScript in
+Clojurescript libraries, which has the additional problem of how to ensure the
+JavaScript dependency is available in the consumer of the library.  A
+Clojurescript library should definitely be capable of providing it&amp;rsquo;s
+dependencies, but should also allow the consumer to override the version of
+these dependencies.&lt;/p&gt;
+
+&lt;h2&gt;Don&amp;rsquo;t package the JavaScript&lt;/h2&gt;
+
+&lt;p&gt;The first approach is to simply not provide the JavaScript at all.  This is the
+approach taken by &lt;a href=&#34;https://github.com/ibdknox/jayq&#34; title=&#34;jayq&#34;&gt;jayq&lt;/a&gt; for example.  The consumer of jayq, or any
+library that uses jayq, is required to provide jQuery through the JavaScript
+runtime.  This can take the form of a &lt;code&gt;&amp;amp;lt;script&amp;amp;gt;&lt;/code&gt; link in the browser page,
+or a call to &lt;code&gt;webPage#injectJs&lt;/code&gt; in phantomJS.  The compile &lt;code&gt;:libs&lt;/code&gt; or
+&lt;code&gt;:foreign-libs&lt;/code&gt; options can not be used to provide the dependency, as there is
+no way for the compiler to know that jayq depends on the namespace provided by
+these options.&lt;/p&gt;
+
+&lt;p&gt;For the consumer of the library to use compiler&lt;code&gt;:optimizations&lt;/code&gt; other than
+&lt;code&gt;:whitespace&lt;/code&gt;, they will need to provide an &lt;code&gt;:externs&lt;/code&gt; file.&lt;/p&gt;
+
+&lt;h2&gt;Package JavaScript&lt;/h2&gt;
+
+&lt;p&gt;The second approach is to package the JavaScript via a Clojurescript namespace.
+This involves adding a &lt;code&gt;require&lt;/code&gt; on a namespace to the code that directly
+depends on the JavaScript, and arranging for that Clojurescript namespace to
+load the JavaScript, using either of the compiler&lt;code&gt;:libs&lt;/code&gt; or &lt;code&gt;:foreign-libs&lt;/code&gt;
+options.&lt;/p&gt;
+
+&lt;p&gt;The Clojurescript library can make the JavaScript library available in its
+resources.  The library consumer can then use resource via the &lt;code&gt;:libs&lt;/code&gt; or
+&lt;code&gt;:foreign-libs&lt;/code&gt; options, depending on whether or not the JavaScript contains a
+&lt;code&gt;goog.provides&lt;/code&gt; call.&lt;/p&gt;
+
+&lt;p&gt;If the library is packaged with a &lt;code&gt;goog.provides&lt;/code&gt; call, then the consumer can
+not replace the version using &lt;code&gt;:libs [&amp;quot;&amp;quot;]&lt;/code&gt; - the use of an explicit prefix in
+&lt;code&gt;:libs&lt;/code&gt; is needed to prevent more than one JavaScript implementation trying to
+provide the clojure namespace, or the use of &lt;code&gt;:foreign-libs&lt;/code&gt; where the namespace
+is explicitly mapped.&lt;/p&gt;
+
+&lt;p&gt;For examples, the &lt;a href=&#34;https://github.com/cemerick/pprng&#34; title=&#34;pprng&#34;&gt;pprng&lt;/a&gt; library packages its dependency with a
+&lt;code&gt;goog.provides&lt;/code&gt; call, allowing the use of &lt;code&gt;:libs [&amp;quot;&amp;quot;]&lt;/code&gt; to pull in the
+dependency.  The &lt;a href=&#34;https://github.com/hugoduncan/papadom&#34; title=&#34;papadom&#34;&gt;papadom&lt;/a&gt; library on the other hand provides vanilla
+javascript dependencies, and requires the use of the more verbose
+&lt;code&gt;:foreign-libs&lt;/code&gt; option.&lt;/p&gt;
+
+&lt;p&gt;If the JavaScript is to be provided in the runtime, then the consumer will have
+to provide an empty namespace definition to satisfy the require in the
+Clojurescript library, and the&lt;code&gt;:externs&lt;/code&gt; file as in the first case.&lt;/p&gt;
+
+&lt;h2&gt;Postscript&lt;/h2&gt;
+
+&lt;p&gt;There are several assumptions in much of the documentation that I didn&amp;rsquo;t see
+explicitly explained.  I&amp;rsquo;ll record these here for posterity.&lt;/p&gt;
+
+&lt;p&gt;A clojurescript library is always a source code library.  There is no such thing
+as the linking of compiled clojurescript artifacts.&lt;/p&gt;
+
+&lt;p&gt;Neither&lt;code&gt;:libs&lt;/code&gt; nor&lt;code&gt;:foreign-libs&lt;/code&gt; actually changes how the JavaScript is
+accessed within the clojurescript code.  If you include jQuery via a &lt;code&gt;:libs&lt;/code&gt;,
+and a &lt;code&gt;require&lt;/code&gt;, you still access it through &lt;code&gt;js/jQuery&lt;/code&gt;.  The &lt;code&gt;require&lt;/code&gt; of the
+namespace specified by &lt;code&gt;goog.provide&lt;/code&gt;, or the namespace specified in the
+&lt;code&gt;:foreign-libs&lt;/code&gt;&amp;rsquo; &lt;code&gt;:provides&lt;/code&gt; key, simply ensures the JavaScript is loaded.&lt;/p&gt;
+
+&lt;p&gt;The choice of compiler &lt;code&gt;:optimizations&lt;/code&gt; affects what information you need to
+provide, and this differs depending on whether you are providing javascript
+libraries through the runtime (e.g. $lt;script&amp;gt; tags in the browser), or
+through &lt;code&gt;:libs&lt;/code&gt; or &lt;code&gt;:foreign-libs&lt;/code&gt; compiler options.  The simplest here is to
+use the compiler options.  When providing the JavaScript via the runtime, then
+everything should also just work if you are using no optimisation, or
+just &lt;code&gt;:whitespace&lt;/code&gt;, but as soon as you try anything else, you will need to
+provide an :externs definition for the JavaScript libraries.&lt;/p&gt;
+</content></entry>
 
 <entry xml:base="http://hugoduncan.github.com/post/webapp_with_core.async"><title>Exploring a todo app with core.async</title><link href="http://hugoduncan.github.com/post/webapp_with_core.async"/><id>http://hugoduncan.github.com/post/webapp_with_core.async</id><published></published><updated>2013-08-11T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;We&amp;rsquo;re going to build an equivalent of the &lt;a href=&#34;http://angularjs.org/#add-some-control&#34; title=&#34;Angular TODO example&#34;&gt;AngularJS TODO example&lt;/a&gt;
 using core.async, and a templating library, &lt;a href=&#34;https://github.com/hugoduncan/papadom&#34; title=&#34;Papadom templating library&#34;&gt;papadom&lt;/a&gt;, that I&amp;rsquo;ve
@@ -751,11 +834,6 @@ However, having &lt;a href=&#34;http://common-lisp.net/project/elephant/&#34;&gt
 <entry xml:base="http://hugoduncan.github.com/post/parsing_yaml_dates_in_rails_gives_surprising_results"><title>Parsing YAML Dates in Rails Gives Surprising Results</title><link href="http://hugoduncan.github.com/post/parsing_yaml_dates_in_rails_gives_surprising_results"/><id>http://hugoduncan.github.com/post/parsing_yaml_dates_in_rails_gives_surprising_results</id><published></published><updated>2009-03-07T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;Today&#39;s surprise was that &#34;2009-01-01&#34; and &#34;2009-1-1&#34; get parsed differently by the &lt;a href=&#34;http://www.yaml.org/&#34;&gt;YAML&lt;/a&gt; parser in &lt;a href=&#34;http://rubyonrails.org/&#34;&gt;Rails&lt;/a&gt;.  The former gets converted to a &lt;code&gt;Date&lt;/code&gt;, while the latter becomes a &lt;code&gt;String&lt;/code&gt;.  It confused me for a while, as the problem only showed up when I wanted to send the dates to a &lt;a href=&#34;http://code.google.com/p/flot/&#34;&gt;Flot&lt;/a&gt; chart.  Looking at the standard, it&#39;s conforming behaviour.   Must be me that is non-conforming then...&lt;/p&gt;
 </content></entry>
 
-<entry xml:base="http://hugoduncan.github.com/post/search_across_open_browser_tabs"><title>Search Across Open Browser Tabs</title><link href="http://hugoduncan.github.com/post/search_across_open_browser_tabs"/><id>http://hugoduncan.github.com/post/search_across_open_browser_tabs</id><published></published><updated>1969-12-31T19:00:00-05:00</updated><summary type="html"> </summary><content type="html">&lt;p&gt;I am an &lt;a href=&#34;http://www.opera.com/&#34;&gt;Opera&lt;/a&gt; user, these days mainly because it gives me integrated mail, feed and news reading, so that everything that comes from the web appears in one place.  The last significant innovation I remember was the introduction of tabs, and that was some time ago (long before it made its way into IE, for example).  I am a heavy user of tabs - it is not unusual for me to have over fifty pages open, as I tend to just open pages and rarely close them again.  This means that the tab icons are unreadable, and Alt+Tab (I&#39;m on a mac) produces three or four columns to scroll through to select the tab I&#39;m after.  I dream of a better tab navigation model, and would love to be able to search across all the open tabs.  Surely it wouldn&#39;t be that hard to implement.&lt;/p&gt;
-&lt;p&gt;Maybe I&#39;m being a little harsh as there have been some other innovations.  &lt;a href=&#34;http://www.mozilla.com/firefox/&#34;&gt;Firefox&#39;s&lt;/a&gt; add-ons work seamlessly, we can use arbitrary search engines thanks to &lt;a href=&#34;http://www.opensearch.org/&#34;&gt;OpenSearch&lt;/a&gt;, and &lt;a href=&#34;http://conkeror.org/&#34;&gt;Conkeror&lt;/a&gt; gives full screen browsing with emacs key bindings, but for the most part it has been better support for standards that has dominated the release notes.&lt;/p&gt;
-&lt;p&gt;In preparing this post, I found that Google&#39;s &lt;a href=&#34;http://www.google.com/chrome&#34;&gt;Chrome&lt;/a&gt; has search over your page history.  Sounds like that might fulfill my wish, though I wonder how its process per tab model will scale to lots of tabs.  I just have to wait for its release on mac OS X.&lt;/p&gt;
-</content></entry>
-
 <entry xml:base="http://hugoduncan.github.com/post/frameworks_and_productivity"><title>Frameworks and Productivity</title><link href="http://hugoduncan.github.com/post/frameworks_and_productivity"/><id>http://hugoduncan.github.com/post/frameworks_and_productivity</id><published></published><updated>1969-12-31T19:00:00-05:00</updated><summary type="html"> </summary><content type="html">&lt;p&gt;&lt;p&gt;Yesterday was frustrating; I spent far too long trying to debug some problems in a Rails application I am writing.  Rails, and frameworks in general, are supposed to give us improved productivity by hiding the complexity and mechanics of the task at hand.  This is great as long as the framework behaves as expected, but invariably causes problems when things go wrong.&lt;/p&gt;
 &lt;h2&gt;The missing field&lt;/h2&gt;
 My application uses associations, and I had a &lt;code&gt;belongs_to&lt;/code&gt; association that was supposed to be populated in a &lt;code&gt;before_validation_on_create&lt;/code&gt; callback.  In my tests I noticed that the linked model was not being instantiated.  After much searching, it turns out I had forgotten to create the foreign key field.  Unfortunately Rails was silent on this issue and the &lt;code&gt;belongs_to&lt;/code&gt; association code seemed to execute quite happily without the field.
@@ -767,6 +845,11 @@ My models also use &lt;code&gt;has_many&lt;/code&gt; associations, which I could
 Rails heavily promotes testing and Test Driven Development (TDD), which is linked to the &amp;ldquo;fail early, fail fast&amp;rdquo; paradigm.  It seems strange that known issues (as partially documented) are allowed to persist and cause silent failures.  All the issues above could have been flagged by Rails.
 &lt;h2&gt;Conclusion&lt;/h2&gt;
 I am not picking on Rails, however, as these type of issues seem to occur in many frameworks.  No software is bug free, and a framework has to work hard to hide the complexity and mechanics of its domain.  When things go wrong, we are always left questioning whether the issue is in the framework or in our application and we invariably end up getting to know the implementation details of the framework, which does little for our productivity.&lt;/p&gt;
+</content></entry>
+
+<entry xml:base="http://hugoduncan.github.com/post/search_across_open_browser_tabs"><title>Search Across Open Browser Tabs</title><link href="http://hugoduncan.github.com/post/search_across_open_browser_tabs"/><id>http://hugoduncan.github.com/post/search_across_open_browser_tabs</id><published></published><updated>1969-12-31T19:00:00-05:00</updated><summary type="html"> </summary><content type="html">&lt;p&gt;I am an &lt;a href=&#34;http://www.opera.com/&#34;&gt;Opera&lt;/a&gt; user, these days mainly because it gives me integrated mail, feed and news reading, so that everything that comes from the web appears in one place.  The last significant innovation I remember was the introduction of tabs, and that was some time ago (long before it made its way into IE, for example).  I am a heavy user of tabs - it is not unusual for me to have over fifty pages open, as I tend to just open pages and rarely close them again.  This means that the tab icons are unreadable, and Alt+Tab (I&#39;m on a mac) produces three or four columns to scroll through to select the tab I&#39;m after.  I dream of a better tab navigation model, and would love to be able to search across all the open tabs.  Surely it wouldn&#39;t be that hard to implement.&lt;/p&gt;
+&lt;p&gt;Maybe I&#39;m being a little harsh as there have been some other innovations.  &lt;a href=&#34;http://www.mozilla.com/firefox/&#34;&gt;Firefox&#39;s&lt;/a&gt; add-ons work seamlessly, we can use arbitrary search engines thanks to &lt;a href=&#34;http://www.opensearch.org/&#34;&gt;OpenSearch&lt;/a&gt;, and &lt;a href=&#34;http://conkeror.org/&#34;&gt;Conkeror&lt;/a&gt; gives full screen browsing with emacs key bindings, but for the most part it has been better support for standards that has dominated the release notes.&lt;/p&gt;
+&lt;p&gt;In preparing this post, I found that Google&#39;s &lt;a href=&#34;http://www.google.com/chrome&#34;&gt;Chrome&lt;/a&gt; has search over your page history.  Sounds like that might fulfill my wish, though I wonder how its process per tab model will scale to lots of tabs.  I just have to wait for its release on mac OS X.&lt;/p&gt;
 </content></entry>
 
 </feed>
