@@ -2,7 +2,7 @@
 title: "Swank Clojure gets a Break with the Local Environment"
 Pubdate: "2010-03-31"
 tags: [ "lisp", "clojure", "slime", "swank", "break" ]
-Description: Recently I got fed up with a couple of warts in swank-clojure, so I made a couple of small fixes, and that lead to a couple of new features.  Using SLIME with Clojure has never been as smooth as using it with Common Lisp, and the lack of debug functionality beyond the display of stack traces is particularly onerous.  Recently, George Jahad's debug-repl showed the possibility of adding a break macro to enter the debugger with the call stack intact and local variables visible.  This functionality is now in swank-clojure."
+Description: "Recently I got fed up with a couple of warts in swank-clojure, so I made a couple of small fixes, and that lead to a couple of new features.  Using SLIME with Clojure has never been as smooth as using it with Common Lisp, and the lack of debug functionality beyond the display of stack traces is particularly onerous.  Recently, George Jahad's debug-repl showed the possibility of adding a break macro to enter the debugger with the call stack intact and local variables visible.  This functionality is now in swank-clojure."
 aliases: ["/post/2010/swank_clojure_gets_a_break_with_the_local_environment.xhtml"]
 ---
 
@@ -98,6 +98,3 @@ Backtrace:
 </pre>
 
 <p>The break functionality is known only to work from the REPL thread at the moment.  With that small proviso, I hope you enjoy the new functionality - at least it provides a basic debug functionality until full JPDA/JDI integration is tackled.</p>
-
-</body>
-</html>
