@@ -239,9 +239,6 @@ lein ring server
 &lt;/code&gt;&lt;/pre&gt;
 </content></entry>
 
-<entry xml:base="http://hugoduncan.github.com/meta/contact"><title>Contact</title><link href="http://hugoduncan.github.com/meta/contact"/><id>http://hugoduncan.github.com/meta/contact</id><published>2013-07-01T00:00:00Z</published><updated>2013-07-01T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;&lt;a href=&#34;https://github.com/hugoduncan&#34;&gt;Github&lt;/a&gt;&lt;/p&gt;
-</content></entry>
-
 <entry xml:base="http://hugoduncan.github.com/post/configuration_in_templates_is_not_configuration_as_code"><title>Configuration in Templates is not Configuration as Code</title><link href="http://hugoduncan.github.com/post/configuration_in_templates_is_not_configuration_as_code"/><id>http://hugoduncan.github.com/post/configuration_in_templates_is_not_configuration_as_code</id><published>2010-10-04T00:00:00Z</published><updated>2010-10-04T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;If you have configuration that uses template configuration files, you are practising neither configuration as code nor configuration as data.  Having configuration locked away in template files reduces its visibility, and makes it hard for you to query it. It might be easier to write configuration code to use templates, but it will come back to bite you.&lt;/p&gt;
 
 &lt;p&gt;One of the first things I implemented in &lt;a href=&#34;http://github.com/hugoduncan/pallet&#34;&gt;pallet&lt;/a&gt; was a templating mechanism, because configuration management tools use templates, right?  I even built a template selection mechanism, just like &lt;a href=&#34;http://wiki.opscode.com/display/chef/Templates&#34;&gt;Chef&#39;s&lt;/a&gt;.&lt;/p&gt;
