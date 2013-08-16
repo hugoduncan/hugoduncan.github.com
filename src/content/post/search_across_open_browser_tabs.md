@@ -1,6 +1,6 @@
 ---
 title: "Search Across Open Browser Tabs"
-pubdate: "2009-"
+pubdate: "2009-03-28"
 tags: [ "browser", "search", "ui"]
 description: "I am an Opera user, these days mainly because it gives me integrated mail, feed and news reading, so that everything that comes from the web appears in one place.  The last significant innovation I remember was the introduction of tabs, and that was some time ago (long before it made its way into IE, for example).  I am a heavy user of tabs - it is not unusual for me to have over fifty pages open, as I tend to just open pages and rarely close them again.  This means that the tab icons are unreadable, and Alt+Tab (I'm on a mac) produces three or four columns to scroll through to select the tab I'm after.  I dream of a better tab navigation model, and would love to be able to search across all the open tabs.  Surely it wouldn't be that hard to implement."
 aliases: ["/post/2009/search_across_open_browser_tabs.xhtml"]
