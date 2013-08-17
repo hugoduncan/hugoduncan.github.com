@@ -9,7 +9,7 @@
     <div class="container">
       {{ template "chrome/topnav.html" . }}
       {{ template "chrome/start-content.html" . }}     
-      <h1>{{ .Title }}<a href="{{.Permalink}}/index.xml"><img src="/images/feed_mini.gif"></a></h1>
+      <h1>{{ .Title }}<a href="{{.Permalink}}/index.xml">&nbsp;<img src="/images/feed_mini.gif"></a></h1>
       {{ range .Data.Pages }}
         <li class="list-unstyled">
            <span class="post-date">{{ .Date.Day }} {{ .Date.Month }} {{ .Date.Year }}</span>
