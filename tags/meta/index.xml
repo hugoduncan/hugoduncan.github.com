@@ -12,7 +12,10 @@
  <updated>2013-08-16T00:00:00Z</updated>
 
 
-<entry xml:base="http://hugoduncan.github.com/meta/contact"><title>Contact</title><link href="http://hugoduncan.github.com/meta/contact"/><id>http://hugoduncan.github.com/meta/contact</id><published>2013-07-01T00:00:00Z</published><updated>2013-07-01T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;&lt;a href=&#34;https://github.com/hugoduncan&#34;&gt;Github&lt;/a&gt;&lt;/p&gt;
+<entry xml:base="http://hugoduncan.github.com/meta/contact"><title>Contact</title><link href="http://hugoduncan.github.com/meta/contact"/><id>http://hugoduncan.github.com/meta/contact</id><published>2000-01-01T00:00:00Z</published><updated>2000-01-01T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;ul class=&#34;list-unstyled&#34;&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/hugoduncan&#34;&gt;Github&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://twitter.com/hugoduncan&#34;&gt;&lt;img src=&#34;http://hugoduncan.github.com/images/twitter.png&#34;&gt; @hugoduncan&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
 </content></entry>
 
 </feed>
