@@ -1,7 +1,10 @@
 ---
 Title: "Contact"
-Pubdate: "2013-07-01"
+Pubdate: "2000-01-01"
 tags: [ meta" ]
 ---
 
-[Github](https://github.com/hugoduncan)
+<ul class="list-unstyled">
+<li><a href="https://github.com/hugoduncan">Github</a></li>
+<li><a href="http://twitter.com/hugoduncan"><img src="/images/twitter.png"> @hugoduncan</a></li>
+</ul>
