@@ -9,8 +9,55 @@
  <author><name>Hugo Duncan</name></author>
  <subtitle>Pelure </subtitle>
  <rights>All content written by Hugo Duncan and photos by Hugo Duncan Copyright Hugo Duncan, all rights reserved.</rights> 
- <updated>2013-08-16T00:00:00Z</updated>
+ <updated>2013-08-25T00:00:00Z</updated>
 
+
+<entry xml:base="http://hugoduncan.github.com/post/snarf-pgp-keys-in-emacs-mu4e"><title>Snarf PGP Keys from Signed Messages in Emacs mu4e</title><link href="http://hugoduncan.github.com/post/snarf-pgp-keys-in-emacs-mu4e"/><id>http://hugoduncan.github.com/post/snarf-pgp-keys-in-emacs-mu4e</id><published>2013-08-25T00:00:00Z</published><updated>2013-08-25T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;I just moved to &lt;a href=&#34;http://www.djcbsoftware.nl/code/mu/&#34; title=&#34;mu mail reader&#34;&gt;mu&lt;/a&gt; for reading my email.  One feature I was
+missing was the ability to receive &lt;a href=&#34;http://en.wikipedia.org/wiki/Pretty_Good_Privacy&#34; title=&#34;Pretty Good Privacy&#34;&gt;PGP&lt;/a&gt; keys for signed
+messages.&lt;/p&gt;
+
+&lt;p&gt;When you receive a signed message, &lt;code&gt;mu&lt;/code&gt; shows the verification status
+in the &lt;code&gt;Signature&lt;/code&gt; field in the message view (see
+&lt;a href=&#34;http://www.djcbsoftware.nl/code/mu/mu4e/MSGV-Crypto.html#MSGV-Crypto&#34; title=&#34;mu message cryptography&#34;&gt;MSGV-Crypto&lt;/a&gt;).  If you don&amp;rsquo;t have the sender&amp;rsquo;s PGP key on
+your keyring, this will show &lt;code&gt;unverified&lt;/code&gt;.  Click on the &lt;code&gt;Details&lt;/code&gt;
+link within field will show the sender&amp;rsquo;s key id.  To manually import
+the key you can use &lt;a href=&#34;http://www.gnupg.org/&#34; title=&#34;GNU Privacy Guard&#34;&gt;&lt;code&gt;gpg&lt;/code&gt;&lt;/a&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ gpg --recv &amp;lt;the-key-id&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This seemed a little labourious, so some automation was in order.
+&lt;code&gt;mu4e&lt;/code&gt; allows you to define actions that can be run on messages (or
+attachments), so I just wrote an action to do this.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;lisp&#34;&gt;(defun mu4e-view-snarf-pgp-key (&amp;amp;optional msg)
+  &amp;quot;Snarf the pgp key for the specified message.&amp;quot;
+  (interactive)
+  (let* ((msg (or msg (mu4e-message-at-point)))
+          (path (mu4e-message-field msg :path))
+          (cmd (format &amp;quot;%s verify --verbose %s&amp;quot;
+                 mu4e-mu-binary
+                 (shell-quote-argument path)))
+          (output (shell-command-to-string cmd)))
+    (let ((case-fold-search nil))
+      (when (string-match &amp;quot;key:\\([A-F0-9]+\\)&amp;quot; output)
+        (let* ((cmd (format &amp;quot;%s --recv %s&amp;quot;
+                            epg-gpg-program (match-string 1 output)))
+               (output (shell-command-to-string cmd)))
+          (message output))))))
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This works by parsing the output of the &lt;code&gt;mu&lt;/code&gt; program itself, as
+displayed in the &lt;code&gt;Details&lt;/code&gt; window, to obtain the PGP key id.  It then
+executes the &lt;code&gt;gpg --recv&lt;/code&gt; command, parsing in the parsed key id.&lt;/p&gt;
+
+&lt;p&gt;To install the action, we simply add it to &lt;code&gt;mu4e-view-actions&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;lisp&#34;&gt;(add-to-list &#39;mu4e-view-actions
+             &#39;(&amp;quot;Snarf PGP keys&amp;quot; . mu4e-view-snarf-pgp-key) t)
+&lt;/code&gt;&lt;/pre&gt;
+</content></entry>
 
 <entry xml:base="http://hugoduncan.github.com/post/clojurescript-libs-with-js-dependencies"><title>How to Build Clojurescript Libs with JavaScript Dependencies</title><link href="http://hugoduncan.github.com/post/clojurescript-libs-with-js-dependencies"/><id>http://hugoduncan.github.com/post/clojurescript-libs-with-js-dependencies</id><published>2013-08-16T00:00:00Z</published><updated>2013-08-16T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;Using JavaScript dependencies in a Clojurescript library seems to be hard.  It
 took me many hours to understand how it should work.  A big thanks to
@@ -722,13 +769,6 @@ Backtrace:
 &lt;/pre&gt;
 
 &lt;p&gt;The break functionality is known only to work from the REPL thread at the moment.  With that small proviso, I hope you enjoy the new functionality - at least it provides a basic debug functionality until full JPDA/JDI integration is tackled.&lt;/p&gt;
-</content></entry>
-
-<entry xml:base="http://hugoduncan.github.com/post/benchmarking_clojure_code_with_criterium"><title>Benchmarking Clojure Code with Criterium</title><link href="http://hugoduncan.github.com/post/benchmarking_clojure_code_with_criterium"/><id>http://hugoduncan.github.com/post/benchmarking_clojure_code_with_criterium</id><published>2010-02-19T00:00:00Z</published><updated>2010-02-19T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;I have released &lt;a href=&#34;http://github.com/hugoduncan/criterium&#34;&gt;Criterium&lt;/a&gt;, a new project for benchmarking code in &lt;a href=&#34;http://clojure.org&#34;&gt;Clojure&lt;/a&gt;.  I found Brent Broyer&#39;s &lt;a href=&#34;http://www.ibm.com/developerworks/java/library/j-benchmark1.html&#34;&gt;article on Java benchmarking&lt;/a&gt; which explains many of the pitfalls of benchmarking on the JVM, and &lt;a href=&#34;http://www.serpentine.com/blog/2009/09/29/criterion-a-new-benchmarking-library-for-haskell&#34;&gt;Criterion&lt;/a&gt;, a benchmarking library in Haskell.&lt;/p&gt;
-
-&lt;p&gt;The main issues with benchmarking on the JVM are associated with garbage collection, and with JIT compilation.  It seems from Broyer&#39;s articles that we can mitigate the effects but not completely eliminate them, and Criterium follows his advice.  Both of the above libraries use the &lt;a href=&#34;http://en.wikipedia.org/wiki/Bootstrapping_(statistics)&#34;&gt;bootstrap&lt;/a&gt; technique to estimate mean execution time and provide a confidence interval, and Criterium does likewise.  At the moment the confidence intervals are biased and I still need to implement BCa or ABC to improve these.&lt;/p&gt;
-
-&lt;p&gt;One of the functions that I wanted to benchmark originally involved reading a file.  Criterium does not yet address clearing I/O buffer cache, and I am not sure on the best way forward on this.  On Mac OS X, the &lt;code&gt;purge&lt;/code&gt; command can be used to clear the caches, and on Linux this can be achieved by writing to /proc/sys/vm/drop_caches.  On the Mac at least, this causes everything to grind to halt for about five seconds, and there are then some file reads as whatever processes are running read things in again. This sort of behaviour doesn&#39;t lend itself to inclusion in a timing loop... Any suggestions?&lt;/p&gt;
 </content></entry>
 
 </feed>

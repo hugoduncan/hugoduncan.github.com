@@ -1,0 +1,128 @@
+<!doctype html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <title>Pelure - Snarf PGP Keys from Signed Messages in Emacs mu4e</title>
+<meta name="keywords" content="emacs,email,mu,mu4e,pgp">
+<meta name="description" content="Snarf PGP Keys from Signed Messages in the mu4e message view.">
+
+
+
+
+    <link rel="stylesheet" 
+      href="//netdna.bootstrapcdn.com/bootstrap/3.0.0-rc1/css/bootstrap.min.css"
+      media="screen">
+<link rel="stylesheet" href="/css/pelure.css">
+
+    <link rel="stylesheet" href="/css/googlecode.css">
+  </head>
+  <body>
+    <div class="container">
+      <div class="row">
+  <div class="col-0 col-sm-2 col-lg-2"></div>
+  <div class="col-12 col-sm-8 col-lg-8">
+    <div class="navbar">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+    <a class="navbar-brand" href="/meta/pelure">Pelure</a>
+    <div class="nav-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li><a href="/post">Posts</a></li>
+        <li><a href="/tags">Tags</a></li>
+      </ul>
+      <ul class="nav navbar-nav pull-right">
+        <li><a href="/meta/contact">Contact</a></li>
+      </ul>
+    </div>
+    </div>
+  </div>
+</div>
+
+      <div class="row"> 
+  <div class="col-0 col-sm-2 col-lg-2"></div>
+  <div id="top" class="col-12 col-sm-8 col-lg-8">
+
+      <h1>Snarf PGP Keys from Signed Messages in Emacs mu4e</h1>
+      <p>I just moved to <a href="http://www.djcbsoftware.nl/code/mu/" title="mu mail reader">mu</a> for reading my email.  One feature I was
+missing was the ability to receive <a href="http://en.wikipedia.org/wiki/Pretty_Good_Privacy" title="Pretty Good Privacy">PGP</a> keys for signed
+messages.</p>
+
+<p>When you receive a signed message, <code>mu</code> shows the verification status
+in the <code>Signature</code> field in the message view (see
+<a href="http://www.djcbsoftware.nl/code/mu/mu4e/MSGV-Crypto.html#MSGV-Crypto" title="mu message cryptography">MSGV-Crypto</a>).  If you don&rsquo;t have the sender&rsquo;s PGP key on
+your keyring, this will show <code>unverified</code>.  Click on the <code>Details</code>
+link within field will show the sender&rsquo;s key id.  To manually import
+the key you can use <a href="http://www.gnupg.org/" title="GNU Privacy Guard"><code>gpg</code></a>:</p>
+
+<pre><code>$ gpg --recv &lt;the-key-id&gt;
+</code></pre>
+
+<p>This seemed a little labourious, so some automation was in order.
+<code>mu4e</code> allows you to define actions that can be run on messages (or
+attachments), so I just wrote an action to do this.</p>
+
+<pre><code class="lisp">(defun mu4e-view-snarf-pgp-key (&amp;optional msg)
+  &quot;Snarf the pgp key for the specified message.&quot;
+  (interactive)
+  (let* ((msg (or msg (mu4e-message-at-point)))
+          (path (mu4e-message-field msg :path))
+          (cmd (format &quot;%s verify --verbose %s&quot;
+                 mu4e-mu-binary
+                 (shell-quote-argument path)))
+          (output (shell-command-to-string cmd)))
+    (let ((case-fold-search nil))
+      (when (string-match &quot;key:\\([A-F0-9]+\\)&quot; output)
+        (let* ((cmd (format &quot;%s --recv %s&quot;
+                            epg-gpg-program (match-string 1 output)))
+               (output (shell-command-to-string cmd)))
+          (message output))))))
+
+</code></pre>
+
+<p>This works by parsing the output of the <code>mu</code> program itself, as
+displayed in the <code>Details</code> window, to obtain the PGP key id.  It then
+executes the <code>gpg --recv</code> command, parsing in the parsed key id.</p>
+
+<p>To install the action, we simply add it to <code>mu4e-view-actions</code>:</p>
+
+<pre><code class="lisp">(add-to-list 'mu4e-view-actions
+             '(&quot;Snarf PGP keys&quot; . mu4e-view-snarf-pgp-key) t)
+</code></pre>
+
+        </div>
+</div>
+<script src='http://www.google-analytics.com/ga.js' type='text/javascript'>
+</script>
+<script type="text/javascript">
+try {
+var pageTracker = _gat._getTracker("UA-3688366-1");
+pageTracker._trackPageview();
+} catch(err) {}</script>
+
+    </div>
+    <div class="row"> 
+  <div class="col-0 col-sm-2 col-lg-2"></div>
+  <div id="top" class="col-12 col-sm-8 col-lg-8">
+     
+<footer id="footer">
+  <p class="pull-right"><a href="#top">Back to top</a></p>
+</footer>
+  </div>
+</div>
+<script src='http://www.google-analytics.com/ga.js' type='text/javascript'>
+</script>
+<script type="text/javascript">
+try {
+var pageTracker = _gat._getTracker("UA-3688366-1");
+pageTracker._trackPageview();
+} catch(err) {}</script>
+     
+
+    <script type="text/javascript" src="/js/highlight.pack.js"></script>
+    <script type="text/javascript">hljs.initHighlightingOnLoad();</script>
+  </body>
+</html>

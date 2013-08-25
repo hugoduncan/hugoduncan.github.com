@@ -9,7 +9,7 @@
  <author><name>Hugo Duncan</name></author>
  <subtitle>Pelure </subtitle>
  <rights>All content written by Hugo Duncan and photos by Hugo Duncan Copyright Hugo Duncan, all rights reserved.</rights> 
- <updated>2013-08-16T00:00:00Z</updated>
+ <updated>2013-08-25T00:00:00Z</updated>
 
 
 <entry xml:base="http://hugoduncan.github.com/post/rails_environments_for_lisp"><title>Rails Environments For Lisp</title><link href="http://hugoduncan.github.com/post/rails_environments_for_lisp"/><id>http://hugoduncan.github.com/post/rails_environments_for_lisp</id><published>2009-04-07T00:00:00Z</published><updated>2009-04-07T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;The facility of Ruby on Rails&#39; test, development and production environments is one of those features that goes almost unremarked, but which makes using rails more pleasant.  No doubt everyone has their own solution for this in other environments, and while I am sure Common Lisp is not lacking in examples, I have not seen an idiomatic implementation.  In developing &lt;a href=&#34;http://github.com/hugoduncan/cl-blog-generator&#34;&gt;cl-blog-generator&lt;/a&gt; I came up with the following solution.&lt;/p&gt;
