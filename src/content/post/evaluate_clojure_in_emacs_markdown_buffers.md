@@ -1,8 +1,8 @@
 ---
-title: "Clojure Evaluate and Formatting in Emacs Markdown Buffers"
+title: "Evaluate and Format Clojure in Emacs Markdown Buffers"
 Pubdate: "2013-08-26"
 tags: [ "emacs", "markdown", "nrepl", "clojure" ]
-Description: "When editing Clojure blocks in mardown documents, allow formating and evaluation of code blocks with clojure-mode."
+Description: "When editing Clojure blocks in mardown or asciidoc documents, allow formating and evaluation of code blocks with clojure-mode.  Using mmm-mode, you can mix whichever major modes you want."
 ---
 
 When writing documentation or blog posts about Clojure code, it is
@@ -17,10 +17,11 @@ or using `M-x el-get-install mmm-mode` from the excellent
 [`el-get`][el-get], or by checking the project from github and
 installing manually.
 
-To configure this for clojure and markdown, you'll
-need something like this in your `init.el` or `.emacs` file.
+To configure this for clojure and markdown, add this in your `init.el`
+or `.emacs` file.
 
 ```lisp
+(require 'mmm-auto)
 (mmm-add-classes
  '((markdown-clojure
     :submode clojure-mode
@@ -46,10 +47,11 @@ one, and adding a clojure source block, e.g.:
 </pre>
 
 Inside the code block you can format and evaluate your code as in any
-`clojure-mode` buffer, and the code will display exactly as in amy `.clj`
-file.  By default the evaluation uses a running inferior lisp process, which
-you must start yourself.  To use a running [nrepl][nrepl] session instead,
-use `M-x nrepl-interaction-mode` inside the code block.
+`clojure-mode` buffer, and the code will display exactly as in a
+`.clj` file.  By default the evaluation uses a running inferior lisp
+process, which you must start yourself.  To use a running
+[nrepl][nrepl] session instead, use `M-x nrepl-interaction-mode`
+inside the code block.
 
 ## Using with AsciiDoc
 

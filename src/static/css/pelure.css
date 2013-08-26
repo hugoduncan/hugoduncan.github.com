@@ -26,3 +26,20 @@ pre {
     display: inline-block;
     font-size: smaller;
 }
+
+a code {
+  color: #428bca;
+  text-decoration: none;
+}
+
+a:hover code,
+a:focus code {
+  color: #2a6496;
+  text-decoration: underline;
+}
+
+a:focus code {
+  outline: thin dotted #333;
+  outline: 5px auto -webkit-focus-ring-color;
+  outline-offset: -2px;
+}
