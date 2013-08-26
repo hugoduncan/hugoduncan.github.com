@@ -9,7 +9,7 @@
  <author><name>Hugo Duncan</name></author>
  <subtitle>Pelure </subtitle>
  <rights>All content written by Hugo Duncan and photos by Hugo Duncan Copyright Hugo Duncan, all rights reserved.</rights> 
- <updated>2013-08-25T00:00:00Z</updated>
+ <updated>2013-08-26T00:00:00Z</updated>
 
 
 <entry xml:base="http://hugoduncan.github.com/post/a_clojure_library_for_fluiddb"><title>A Clojure library for FluidDB</title><link href="http://hugoduncan.github.com/post/a_clojure_library_for_fluiddb"/><id>http://hugoduncan.github.com/post/a_clojure_library_for_fluiddb</id><published>2009-09-13T00:00:00Z</published><updated>2009-09-13T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;&lt;a href=&#34;http://fluidinfo.com/&#34;&gt;FluidDB&lt;/a&gt;, a &#34;cloud&#34; based triple-store, where the objects are immutable and can be tagged by anyone, launched about a month ago. As a another step to getting up to speed with &lt;a href=&#34;http://clojure.org&#34;&gt;Clojure&lt;/a&gt;, I decided to write a client library, and &lt;a href=&#34;http://github.com/hugoduncan/clj-fluiddb&#34;&gt;clj-fluiddb&lt;/a&gt; was born.  The code was very simple, especially as I could base the library on &lt;a href=&#34;http://github.com/hdurer/cl-fluiddb&#34;&gt;cl-fluiddb&lt;/a&gt;, a Common-Lisp library.&lt;/p&gt;

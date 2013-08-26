@@ -9,7 +9,7 @@
  <author><name>Hugo Duncan</name></author>
  <subtitle>Pelure </subtitle>
  <rights>All content written by Hugo Duncan and photos by Hugo Duncan Copyright Hugo Duncan, all rights reserved.</rights> 
- <updated>2013-08-25T00:00:00Z</updated>
+ <updated>2013-08-26T00:00:00Z</updated>
 
 
 <entry xml:base="http://hugoduncan.github.com/post/clojurescript-libs-with-js-dependencies"><title>How to Build Clojurescript Libs with JavaScript Dependencies</title><link href="http://hugoduncan.github.com/post/clojurescript-libs-with-js-dependencies"/><id>http://hugoduncan.github.com/post/clojurescript-libs-with-js-dependencies</id><published>2013-08-16T00:00:00Z</published><updated>2013-08-16T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;Using JavaScript dependencies in a Clojurescript library seems to be hard.  It

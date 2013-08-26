@@ -9,8 +9,86 @@
  <author><name>Hugo Duncan</name></author>
  <subtitle>Pelure </subtitle>
  <rights>All content written by Hugo Duncan and photos by Hugo Duncan Copyright Hugo Duncan, all rights reserved.</rights> 
- <updated>2013-08-25T00:00:00Z</updated>
+ <updated>2013-08-26T00:00:00Z</updated>
 
+
+<entry xml:base="http://hugoduncan.github.com/post/evaluate_clojure_in_emacs_markdown_buffers"><title>Evaluate and Format Clojure in Emacs Markdown Buffers</title><link href="http://hugoduncan.github.com/post/evaluate_clojure_in_emacs_markdown_buffers"/><id>http://hugoduncan.github.com/post/evaluate_clojure_in_emacs_markdown_buffers</id><published>2013-08-26T00:00:00Z</published><updated>2013-08-26T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;When writing documentation or blog posts about Clojure code, it is
+very useful to be able to format Clojure code blocks using
+&lt;a href=&#34;https://github.com/clojure-emacs/clojure-mode&#34; title=&#34;clojure-mode&#34;&gt;&lt;code&gt;clojure-mode&lt;/code&gt;&lt;/a&gt; and evaluate code with &lt;a href=&#34;https://github.com/clojure-emacs/nrepl.el&#34; title=&#34;nrepl.el&#34;&gt;&lt;code&gt;nrepl.el&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;This can be enabled using &lt;a href=&#34;https://github.com/purcell/mmm-mode/&#34; title=&#34;mmm-mode&#34;&gt;&lt;code&gt;mmm-mode&lt;/code&gt;&lt;/a&gt;, which
+allows a single buffer to use different major modes for different
+sections of the buffer (and is not limited to just web modes).
+Install &lt;code&gt;mmm-mode&lt;/code&gt; using &lt;code&gt;M-x package-install mmm-mode&lt;/code&gt;,
+or using &lt;code&gt;M-x el-get-install mmm-mode&lt;/code&gt; from the excellent
+&lt;a href=&#34;http://tapoueh.org/emacs/el-get.html&#34; title=&#34;el-get&#34;&gt;&lt;code&gt;el-get&lt;/code&gt;&lt;/a&gt;, or by checking the project from github and
+installing manually.&lt;/p&gt;
+
+&lt;p&gt;To configure this for clojure and markdown, add this in your &lt;code&gt;init.el&lt;/code&gt;
+or &lt;code&gt;.emacs&lt;/code&gt; file.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;lisp&#34;&gt;(require &#39;mmm-auto)
+(mmm-add-classes
+ &#39;((markdown-clojure
+    :submode clojure-mode
+    :face mmm-declaration-submode-face
+    :front &amp;quot;^```clj[\n\r]+&amp;quot;
+    :back &amp;quot;^```$&amp;quot;)))
+
+(setq mmm-global-mode &#39;maybe)
+(mmm-add-mode-ext-class &#39;markdown-mode nil &#39;markdown-clojure)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;After evaluating the above, or restarting emacs, you can test
+multi-mode support by opening a markdown document, or creating a new
+one, and adding a clojure source block, e.g.:&lt;/p&gt;
+
+&lt;pre&gt;
+```clj
+(defn my-fn [x]
+  (inc x))
+
+(my-fn 1)
+```
+&lt;/pre&gt;
+
+&lt;p&gt;Inside the code block you can format and evaluate your code as in any
+&lt;code&gt;clojure-mode&lt;/code&gt; buffer, and the code will display exactly as in a
+&lt;code&gt;.clj&lt;/code&gt; file.  By default the evaluation uses a running inferior lisp
+process, which you must start yourself.  To use a running
+&lt;a href=&#34;https://github.com/clojure-emacs/nrepl.el&#34; title=&#34;nrepl.el&#34;&gt;nrepl&lt;/a&gt; session instead, use &lt;code&gt;M-x nrepl-interaction-mode&lt;/code&gt;
+inside the code block.&lt;/p&gt;
+
+&lt;h2&gt;Using with AsciiDoc&lt;/h2&gt;
+
+&lt;p&gt;This technique is not limited to clojure and markdown, but could be
+made to work whenever you would like differing major modes in distinct
+parts of your Emacs buffers.  You can add class to &lt;code&gt;mmm-mode&lt;/code&gt;
+appropriately, for as many major mode combinations as you need.  The
+regions for each major mode are detected using regular expressions (or
+by some function).&lt;/p&gt;
+
+&lt;p&gt;For example, if you&amp;rsquo;re writing asciidoc, you might use:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;lisp&#34;&gt;(mmm-add-classes
+ &#39;((asciidoc-clojure
+    :submode clojure
+    :face mmm-declaration-submode-face
+    :front &amp;quot;\\[source, clojure\\][\n\r]+----[\n\r]+&amp;quot;
+    :back &amp;quot;^----$&amp;quot;)))
+(mmm-add-mode-ext-class &#39;adoc-mode nil &#39;asciidoc-clojure)
+(mmm-add-mode-ext-class &#39;doc-mode nil &#39;asciidoc-clojure)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2&gt;Summary&lt;/h2&gt;
+
+&lt;p&gt;&lt;code&gt;mmm-mode&lt;/code&gt; allows you to flexibly use multiple major modes in
+different parts of a single emacs buffer.  Here we have shown how to
+use it for &lt;code&gt;clojure-mode&lt;/code&gt; code blocks in markdown or asciidoc, but it
+is in no way limited to this, and it allows some fine grained
+customisation to the appearance and behaviour of each major mode
+block. I&amp;rsquo;m sure you&amp;rsquo;ll find your own uses for &lt;code&gt;mmm-mode&lt;/code&gt;.&lt;/p&gt;
+</content></entry>
 
 <entry xml:base="http://hugoduncan.github.com/post/snarf-pgp-keys-in-emacs-mu4e"><title>Snarf PGP Keys from Signed Messages in Emacs mu4e</title><link href="http://hugoduncan.github.com/post/snarf-pgp-keys-in-emacs-mu4e"/><id>http://hugoduncan.github.com/post/snarf-pgp-keys-in-emacs-mu4e</id><published>2013-08-25T00:00:00Z</published><updated>2013-08-25T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;I just moved to &lt;a href=&#34;http://www.djcbsoftware.nl/code/mu/&#34; title=&#34;mu mail reader&#34;&gt;mu&lt;/a&gt; for reading my email.  One feature I was
 missing was the ability to receive &lt;a href=&#34;http://en.wikipedia.org/wiki/Pretty_Good_Privacy&#34; title=&#34;Pretty Good Privacy&#34;&gt;PGP&lt;/a&gt; keys for signed
