@@ -9,7 +9,7 @@
  <author><name>Hugo Duncan</name></author>
  <subtitle>Pelure </subtitle>
  <rights>All content written by Hugo Duncan and photos by Hugo Duncan Copyright Hugo Duncan, all rights reserved.</rights> 
- <updated>2013-08-26T00:00:00Z</updated>
+ <updated>2013-08-29T00:00:00Z</updated>
 
 
 <entry xml:base="http://hugoduncan.github.com/post/twitter_is_more_secure_than_my_credit_card"><title>Twitter is More Secure than My Credit Card</title><link href="http://hugoduncan.github.com/post/twitter_is_more_secure_than_my_credit_card"/><id>http://hugoduncan.github.com/post/twitter_is_more_secure_than_my_credit_card</id><published>2009-04-02T00:00:00Z</published><updated>2009-04-02T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;Twitter now &lt;a href=&#34;http://apiwiki.twitter.com/OAuth-FAQ&#34;&gt;lets developers build applications&lt;/a&gt; that take actions on your behalf without you ever having to divulge your password. Instead of asking you for your password, these applications ask Twitter to ask you for permission, and you give permission to the application while logged in to Twitter. What&#39;s even better is that you can revoke the application&#39;s permissions, from within Twitter, at any time, without having to change your password. The &lt;a href=&#34;http://oauth.net/&#34;&gt;OAuth&lt;/a&gt; protocol makes this possible, and does so in a very secure manner.

@@ -9,7 +9,7 @@
  <author><name>Hugo Duncan</name></author>
  <subtitle>Pelure </subtitle>
  <rights>All content written by Hugo Duncan and photos by Hugo Duncan Copyright Hugo Duncan, all rights reserved.</rights> 
- <updated>2013-08-26T00:00:00Z</updated>
+ <updated>2013-08-29T00:00:00Z</updated>
 
 
 <entry xml:base="http://hugoduncan.github.com/post/shell_scripting_in_clojure_with_pallet"><title>Shell Scripting in Clojure with Pallet</title><link href="http://hugoduncan.github.com/post/shell_scripting_in_clojure_with_pallet"/><id>http://hugoduncan.github.com/post/shell_scripting_in_clojure_with_pallet</id><published>2010-05-03T00:00:00Z</published><updated>2010-05-03T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;Let&#39;s face it, many of us hate writing shell scripts, and with good

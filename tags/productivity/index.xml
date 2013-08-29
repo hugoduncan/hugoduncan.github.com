@@ -9,7 +9,7 @@
  <author><name>Hugo Duncan</name></author>
  <subtitle>Pelure </subtitle>
  <rights>All content written by Hugo Duncan and photos by Hugo Duncan Copyright Hugo Duncan, all rights reserved.</rights> 
- <updated>2013-08-26T00:00:00Z</updated>
+ <updated>2013-08-29T00:00:00Z</updated>
 
 
 <entry xml:base="http://hugoduncan.github.com/post/frameworks_and_productivity"><title>Frameworks and Productivity</title><link href="http://hugoduncan.github.com/post/frameworks_and_productivity"/><id>http://hugoduncan.github.com/post/frameworks_and_productivity</id><published>2009-03-20T00:00:00Z</published><updated>2009-03-20T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;&lt;p&gt;Yesterday was frustrating; I spent far too long trying to debug some problems in a Rails application I am writing.  Rails, and frameworks in general, are supposed to give us improved productivity by hiding the complexity and mechanics of the task at hand.  This is great as long as the framework behaves as expected, but invariably causes problems when things go wrong.&lt;/p&gt;

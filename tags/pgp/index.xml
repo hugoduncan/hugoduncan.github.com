@@ -9,7 +9,7 @@
  <author><name>Hugo Duncan</name></author>
  <subtitle>Pelure </subtitle>
  <rights>All content written by Hugo Duncan and photos by Hugo Duncan Copyright Hugo Duncan, all rights reserved.</rights> 
- <updated>2013-08-26T00:00:00Z</updated>
+ <updated>2013-08-29T00:00:00Z</updated>
 
 
 <entry xml:base="http://hugoduncan.github.com/post/snarf-pgp-keys-in-emacs-mu4e"><title>Snarf PGP Keys from Signed Messages in Emacs mu4e</title><link href="http://hugoduncan.github.com/post/snarf-pgp-keys-in-emacs-mu4e"/><id>http://hugoduncan.github.com/post/snarf-pgp-keys-in-emacs-mu4e</id><published>2013-08-25T00:00:00Z</published><updated>2013-08-25T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;I just moved to &lt;a href=&#34;http://www.djcbsoftware.nl/code/mu/&#34; title=&#34;mu mail reader&#34;&gt;mu&lt;/a&gt; for reading my email.  One feature I was
