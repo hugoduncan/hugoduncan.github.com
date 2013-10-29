@@ -15,7 +15,7 @@ To get this to work required using quite a few of
 features.
 
 This post will explain how to use lein to customise you build to
-generates a source file, but many of the pieces are useful to
+generates a source file, but many of the steps are useful to
 implement any form of lein build customisation.
 
 ### The Generator
@@ -35,11 +35,14 @@ declaration for the `my.gen` namespace under
     (spit "(ns my.gen)")))
 ```
 
+### Development only code
+
 The source generation code should not be packaged in the jar, so we
 place it in `dev-src/my/src_generator.clj`, and add `dev-src` and the
 generated source directories to the `:dev` profile's `:source-paths`.
 The `:dev` profile is automatically used by leiningen unless it is
-producing a jar file.
+producing a jar file.  When producing the jar, the `dev` profile will
+not be used, so `dev-src` will not be on the `:source-path`.
 
 ```clj
 :profiles {:dev {:source-paths ["src" "dev-src" "target/generated"]}}
