@@ -42,7 +42,8 @@ place it in `dev-src/my/src_generator.clj`, and add `dev-src` and the
 generated source directories to the `:dev` profile's `:source-paths`.
 The `:dev` profile is automatically used by leiningen unless it is
 producing a jar file.  When producing the jar, the `dev` profile will
-not be used, so `dev-src` will not be on the `:source-path`.
+not be used, so `dev-src` will not be on the `:source-path` (we add
+the generated directory to the base `:source-path` below).
 
 ```clj
 :profiles {:dev {:source-paths ["src" "dev-src" "target/generated"]}}
