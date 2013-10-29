@@ -11,7 +11,14 @@ Recently, we needed to include some generated source files in a
 project.  The source code generation was project specific, so we
 didn't want to have to create a leiningen plugin specifically for it.
 To get this to work required using quite a few of
-[leiningen's](https://github.com/technomancy/leiningen) features.
+[leiningen's](https://github.com/technomancy/leiningen#leiningen)
+features.
+
+This post will explain how to use lein to customise you build to
+generates a source file, but many of the pieces are useful to
+implement any form of lein build customisation.
+
+### The Generator
 
 The source code generator is going to live in the `my.src-generator`
 namespace.  Here's an example, that just generates a namespace
@@ -38,7 +45,10 @@ producing a jar file.
 :profiles {:dev {:source-paths ["src" "dev-src" "target/generated"]}}
 ```
 
-To use lein's `run` task we need to add a `-main` function to the
+### Running project specific code with leininingen
+
+The `run` task can be used to invoke code in your project.  To use
+lein's `run` task we need to add a `-main` function to the
 `my.src-generator` namespace.
 
 ```clj
@@ -54,17 +64,26 @@ with `:skip-aot` metadata.
 :main ^:skip-aot my.src-generator
 ```
 
-The generated files need to end up in the jar (and possibly be compiled),
-so we put them on the `:source-paths` in the project.
+### Customising the jar contents
+
+The generated files need to end up in the jar (and possibly be
+compiled), so we put them on the `:source-paths` in the project.  If
+we had wanted to include the sources without further processing, we
+could have added the generated directory to `:resource-paths` instead.
 
 ```clj
 :source-paths ["src" "target/generated"]
 ```
 
+### Extending the build process
+
 Now we can tell lein to generate the source files whenever we use the
 project.  We do this by adding the `run` task to the `:prep-tasks`
-key.  The tricky bit here is that the `run` task will itself invoke
-the `:prep-tasks`, so we want to make sure we don't end up calling the
+key.  Leiningen runs all the tasks in `:prep-tasks` before any task
+invoked by the lein command line.
+
+The tricky bit here is that the `run` task will itself invoke the
+`:prep-tasks`, so we want to make sure we don't end up calling the
 task recursively and generating a stack overflow.  To solve this, add
 a `gen` profile, and disable the prep tasks in it.  We use the
 `:replace` metadata to ensure this definition takes precedence.  See
@@ -84,6 +103,8 @@ Then use this profile when setting the `:prep-tasks` key in the project.
 
 Now when we run any command, the sources are generated.
 
+### Adding an alias
+
 Finally we may want to just invoke the source generation, so let's
 create an alias to make `lein gen` run the generator.  We need the
 `gen` profile for this, or otherwise the generator will run twice.
@@ -91,6 +112,8 @@ create an alias to make `lein gen` run the generator.  We need the
 ```clj
 :aliases {"gen" ["with-profile" "+gen,+dev" "run"]}
 ```
+
+### The final project.clj
 
 For reference, the final project.clj looks like this:
 
@@ -104,6 +127,8 @@ For reference, the final project.clj looks like this:
              :gen {:prep-tasks ^:replace []}}
   :aliases {"gen" ["with-profile" "+gen,+dev" "run"]})
 ```
+
+### Conclusion
 
 This required using many of lein's features to get working - hopefully
 you'll find a use for some of them.
