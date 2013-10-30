@@ -9,8 +9,130 @@
  <author><name>Hugo Duncan</name></author>
  <subtitle>Pelure </subtitle>
  <rights>All content written by Hugo Duncan and photos by Hugo Duncan Copyright Hugo Duncan, all rights reserved.</rights> 
- <updated>2013-08-29T00:00:00Z</updated>
+ <updated>2013-10-28T00:00:00Z</updated>
 
+
+<entry xml:base="http://hugoduncan.github.com/post/generating_source_with_leiningen"><title>Generating Source Files with Leiningen</title><link href="http://hugoduncan.github.com/post/generating_source_with_leiningen"/><id>http://hugoduncan.github.com/post/generating_source_with_leiningen</id><published>2013-10-28T00:00:00Z</published><updated>2013-10-28T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;Recently, we needed to include some generated source files in a
+project.  The source code generation was project specific, so we
+didn&amp;rsquo;t want to have to create a leiningen plugin specifically for it.
+To get this to work required using quite a few of
+&lt;a href=&#34;https://github.com/technomancy/leiningen#leiningen&#34;&gt;leiningen&amp;rsquo;s&lt;/a&gt;
+features.&lt;/p&gt;
+
+&lt;p&gt;This post will explain how to use lein to customise you build to
+generates a source file, but many of the steps are useful to
+implement any form of lein build customisation.&lt;/p&gt;
+
+&lt;h3&gt;The Generator&lt;/h3&gt;
+
+&lt;p&gt;The source code generator is going to live in the &lt;code&gt;my.src-generator&lt;/code&gt;
+namespace.  Here&amp;rsquo;s an example, that just generates a namespace
+declaration for the &lt;code&gt;my.gen&lt;/code&gt; namespace under
+&lt;code&gt;target/generated/my/gen.clj&lt;/code&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;clj&#34;&gt;(ns my.src-generator
+  (:require [clojure.java.io :refer [file]]))
+
+(defn generate []
+  (doto (file &amp;quot;target&amp;quot; &amp;quot;generated&amp;quot; &amp;quot;my&amp;quot; &amp;quot;gen.clj&amp;quot;)
+    (-&amp;gt; #(.getParentFile) #(.mkdirs))
+    (spit &amp;quot;(ns my.gen)&amp;quot;)))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3&gt;Development only code&lt;/h3&gt;
+
+&lt;p&gt;The source generation code should not be packaged in the jar, so we
+place it in &lt;code&gt;dev-src/my/src_generator.clj&lt;/code&gt;, and add &lt;code&gt;dev-src&lt;/code&gt; and the
+generated source directories to the &lt;code&gt;:dev&lt;/code&gt; profile&amp;rsquo;s &lt;code&gt;:source-paths&lt;/code&gt;.
+The &lt;code&gt;:dev&lt;/code&gt; profile is automatically used by leiningen unless it is
+producing a jar file.  When producing the jar, the &lt;code&gt;dev&lt;/code&gt; profile will
+not be used, so &lt;code&gt;dev-src&lt;/code&gt; will not be on the &lt;code&gt;:source-path&lt;/code&gt; (we add
+the generated directory to the base &lt;code&gt;:source-path&lt;/code&gt; below).&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;clj&#34;&gt;:profiles {:dev {:source-paths [&amp;quot;src&amp;quot; &amp;quot;dev-src&amp;quot; &amp;quot;target/generated&amp;quot;]}}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3&gt;Running project specific code with leininingen&lt;/h3&gt;
+
+&lt;p&gt;The &lt;code&gt;run&lt;/code&gt; task can be used to invoke code in your project.  To use
+lein&amp;rsquo;s &lt;code&gt;run&lt;/code&gt; task we need to add a &lt;code&gt;-main&lt;/code&gt; function to the
+&lt;code&gt;my.src-generator&lt;/code&gt; namespace.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;clj&#34;&gt;(defn -main [&amp;amp; args]
+  (generate))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In the &lt;code&gt;project.clj&lt;/code&gt; file we also tell lein about the main namespace.
+In order to avoid AOT compilation of the main namespace, we mark it
+with &lt;code&gt;:skip-aot&lt;/code&gt; metadata.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;clj&#34;&gt;:main ^:skip-aot my.src-generator
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3&gt;Customising the jar contents&lt;/h3&gt;
+
+&lt;p&gt;The generated files need to end up in the jar (and possibly be
+compiled), so we put them on the &lt;code&gt;:source-paths&lt;/code&gt; in the project.  If
+we had wanted to include the sources without further processing, we
+could have added the generated directory to &lt;code&gt;:resource-paths&lt;/code&gt; instead.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;clj&#34;&gt;:source-paths [&amp;quot;src&amp;quot; &amp;quot;target/generated&amp;quot;]
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3&gt;Extending the build process&lt;/h3&gt;
+
+&lt;p&gt;Now we can tell lein to generate the source files whenever we use the
+project.  We do this by adding the &lt;code&gt;run&lt;/code&gt; task to the &lt;code&gt;:prep-tasks&lt;/code&gt;
+key.  Leiningen runs all the tasks in &lt;code&gt;:prep-tasks&lt;/code&gt; before any task
+invoked by the lein command line.&lt;/p&gt;
+
+&lt;p&gt;The tricky bit here is that the &lt;code&gt;run&lt;/code&gt; task will itself invoke the
+&lt;code&gt;:prep-tasks&lt;/code&gt;, so we want to make sure we don&amp;rsquo;t end up calling the
+task recursively and generating a stack overflow.  To solve this, add
+a &lt;code&gt;gen&lt;/code&gt; profile, and disable the prep tasks in it.  We use the
+&lt;code&gt;:replace&lt;/code&gt; metadata to ensure this definition takes precedence.  See
+the
+&lt;a href=&#34;https://github.com/technomancy/leiningen/blob/master/doc/PROFILES.md#merging&#34;&gt;leiningen profile documentation&lt;/a&gt;
+for more information on &lt;code&gt;:replace&lt;/code&gt; and it&amp;rsquo;s sibling &lt;code&gt;:displace&lt;/code&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;clj&#34;&gt;:gen {:prep-tasks ^:replace []}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Then use this profile when setting the &lt;code&gt;:prep-tasks&lt;/code&gt; key in the project.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;clj&#34;&gt;:prep-tasks [[&amp;quot;with-profile&amp;quot; &amp;quot;+gen,+dev&amp;quot; &amp;quot;run&amp;quot;]  &amp;quot;compile&amp;quot;]
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now when we run any command, the sources are generated.&lt;/p&gt;
+
+&lt;h3&gt;Adding an alias&lt;/h3&gt;
+
+&lt;p&gt;Finally we may want to just invoke the source generation, so let&amp;rsquo;s
+create an alias to make &lt;code&gt;lein gen&lt;/code&gt; run the generator.  We need the
+&lt;code&gt;gen&lt;/code&gt; profile for this, or otherwise the generator will run twice.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;clj&#34;&gt;:aliases {&amp;quot;gen&amp;quot; [&amp;quot;with-profile&amp;quot; &amp;quot;+gen,+dev&amp;quot; &amp;quot;run&amp;quot;]}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3&gt;The final project.clj&lt;/h3&gt;
+
+&lt;p&gt;For reference, the final project.clj looks like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;clj&#34;&gt;(defproject my-proj &amp;quot;0.1.0-SNAPSHOT&amp;quot;
+  :dependencies [[org.clojure/clojure &amp;quot;1.4.0&amp;quot;]]
+  :source-paths [&amp;quot;src&amp;quot; &amp;quot;target/generated&amp;quot;]
+  :main ^:skip-aot my.src-generator
+  :prep-tasks [[&amp;quot;with-profile&amp;quot; &amp;quot;+gen,+dev&amp;quot; &amp;quot;run&amp;quot;]  &amp;quot;compile&amp;quot;]
+  :profiles {:dev {:source-paths [&amp;quot;src&amp;quot; &amp;quot;dev-src&amp;quot; &amp;quot;target/generated&amp;quot;]}
+             :gen {:prep-tasks ^:replace []}}
+  :aliases {&amp;quot;gen&amp;quot; [&amp;quot;with-profile&amp;quot; &amp;quot;+gen,+dev&amp;quot; &amp;quot;run&amp;quot;]})
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3&gt;Conclusion&lt;/h3&gt;
+
+&lt;p&gt;This required using many of lein&amp;rsquo;s features to get working - hopefully
+you&amp;rsquo;ll find a use for some of them.&lt;/p&gt;
+</content></entry>
 
 <entry xml:base="http://hugoduncan.github.com/post/alembic_reloads_your_project_clj_dependencies"><title>Alembic Reloads your Leiningen project.clj Dependencies</title><link href="http://hugoduncan.github.com/post/alembic_reloads_your_project_clj_dependencies"/><id>http://hugoduncan.github.com/post/alembic_reloads_your_project_clj_dependencies</id><published>2013-08-29T00:00:00Z</published><updated>2013-08-29T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;You&amp;rsquo;re working away in a Clojure REPL, when you realise you need to
 add a dependency.  You add the dependency to your &lt;a href=&#34;http://leiningen.org&#34; title=&#34;Leiningen&#34;&gt;leiningen&lt;/a&gt;

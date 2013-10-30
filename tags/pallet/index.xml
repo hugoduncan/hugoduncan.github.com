@@ -9,7 +9,7 @@
  <author><name>Hugo Duncan</name></author>
  <subtitle>Pelure </subtitle>
  <rights>All content written by Hugo Duncan and photos by Hugo Duncan Copyright Hugo Duncan, all rights reserved.</rights> 
- <updated>2013-08-29T00:00:00Z</updated>
+ <updated>2013-10-28T00:00:00Z</updated>
 
 
 <entry xml:base="http://hugoduncan.github.com/post/configuration_in_templates_is_not_configuration_as_code"><title>Configuration in Templates is not Configuration as Code</title><link href="http://hugoduncan.github.com/post/configuration_in_templates_is_not_configuration_as_code"/><id>http://hugoduncan.github.com/post/configuration_in_templates_is_not_configuration_as_code</id><published>2010-10-04T00:00:00Z</published><updated>2010-10-04T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;If you have configuration that uses template configuration files, you are practising neither configuration as code nor configuration as data.  Having configuration locked away in template files reduces its visibility, and makes it hard for you to query it. It might be easier to write configuration code to use templates, but it will come back to bite you.&lt;/p&gt;
