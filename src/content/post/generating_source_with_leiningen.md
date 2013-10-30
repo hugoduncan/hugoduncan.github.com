@@ -4,7 +4,6 @@ Pubdate: "2013-10-28"
 tags: [ "leiningen", "clojure" ]
 Description: "Generating source files with the leiningen run task.  Adds project
               specific source generation to prep-tasks."
-draft: true
 ---
 
 Recently, we needed to include some generated source files in a
