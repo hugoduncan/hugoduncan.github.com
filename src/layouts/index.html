@@ -14,7 +14,7 @@
       {{ template "chrome/start-content.html" . }}
 
       <ul class="list-unstyled">
-        {{ range .Site.Recent }}
+        {{ range .Site.RegularPages.ByPublishDate.Reverse }}
           <li>
            <span class="post-date">{{ .Date.Day }} {{ .Date.Month }} {{ .Date.Year }}</span>
             &nbsp;<a href="{{ .Permalink }}">{{ .Title }}</a></li>
