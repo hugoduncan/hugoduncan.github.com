@@ -1,0 +1,27 @@
+{:paths ["blog-code"]
+ :deps  {babashka/fs {:mvn/version "0.1.0"}}
+ :tasks
+ {-load-pods {:requires [[babashka.pods :as pods]]
+              :task
+              (do
+                (pods/load-pod 'retrogradeorbit/bootleg "0.1.9")
+                (require '[pod.retrogradeorbit.bootleg.markdown :as md])
+                (require '[pod.retrogradeorbit.bootleg.utils :as utils]))}
+  new        {:doc      "Create new blog article"
+              :requires ([tasks-helper :as th])
+              :task     (th/new)}
+  render     {:depends  [-load-pods]
+              :doc      "Render blog"
+              :requires ([render])
+              :task     (render/render)}
+  watch      {:doc      "Watch posts and templates, and render file changes"
+              :depends  [render]
+              :requires ([watch])
+              :task     (watch/watch)}
+  publish    {:doc      "Publish to blog"
+              :depends  [render]
+              :requires ([tasks-helper :as th])
+              :task     (th/publish)}
+  clean      {:doc      "Remove .work and public directory"
+              :requires ([tasks-helper :as th])
+              :task     (th/clean)}}}

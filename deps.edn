@@ -1,0 +1,2 @@
+{:deps {babashka/fs          {:mvn/version "0.1.0"}
+        clj-commons/clj-yaml {:mvn/version "0.7.0"}}}
