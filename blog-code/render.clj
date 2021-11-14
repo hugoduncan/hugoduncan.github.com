@@ -78,7 +78,7 @@
         markdown (str/replace markdown #"\[[^\]]+\n"
                               (fn [match]
                                 (str/replace match "\n" "$$RET$$")))
-        html     (md/markdown markdown :data :html)
+        html     (md/markdown markdown :data :html :reference-links? true)
         html     (str/replace html "$$RET$$" "\n")]
     html))
 

@@ -167,3 +167,9 @@
  :aliases     #{"/post/2010/configure_nagios_using_pallet.xhtml"},
  :file        "configure_nagios_using_pallet.md",
  :legacy      true}
+{:title      "Back to blogging"
+ :file       "back_to_blogging.md"
+ :categories #{"clojure"}
+ :date       "2021-11-14"
+ :discuss    "https://github.com/hugoduncan/hugoduncan.github.com/discussions/4"
+ :preview    true}

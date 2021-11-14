@@ -35,9 +35,9 @@
             (java.time.format.DateTimeFormatter/ofPattern "yyyy-MM-dd"))))
 
 (defn new []
-  (let [{:keys [file title]} opts]
-    (assert file "Must give title")
-    (assert title "Must give filename")
+  (let [{:keys [file title categories]} opts]
+    (assert file "Must provide a path-less file name with :file <file.md>")
+    (assert title "Must provide a title with :title <title>")
     (let [post-file (fs/file "posts" file)]
       (when-not (fs/exists? post-file)
         (spit (fs/file "posts" file) "TODO: write blog post")
@@ -46,8 +46,11 @@
                              {:title      (pr-str title)
                               :file       (pr-str file)
                               :date       (now)
-                              :categories #{"clojure"}})
-              :append true)))))
+                              :categories (or (some-> categories set)
+                                              #{"clojure"})
+                              :preview    true})
+              :append true)
+        (p/process [(System/getenv "EDITOR") (str (fs/file "posts" file))])))))
 
 (defn publish []
   @(p/process ["git" "add" "-A"] {:dir "public" :inherit true})
