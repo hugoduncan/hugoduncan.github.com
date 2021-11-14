@@ -99,7 +99,7 @@
            src-posts-dir]
     :as   structure}
    bodies
-   {:keys [file title date legacy discuss]
+   {:keys [description file title date legacy discuss]
     :or   {discuss discuss-fallback}}]
   (let [cache-file    (fs/file ".work" (html-file file))
         markdown-file (fs/file src-posts-dir file)
@@ -127,9 +127,10 @@
                         :discuss discuss})
         html          (selmer/render
                        base-html
-                       {:title title
-                        :body  body
-                        :base  "../"})
+                       {:title       title
+                        :body        body
+                        :description description
+                        :base        "../"})
         html-file     (html-file file)
         base-filename (base-filename file)]
     (spit (out-path structure :post-dir html-file) html)
@@ -153,7 +154,7 @@
            src-meta-dir]
     :as   structure}
    bodies
-   {:keys [file title]}]
+   {:keys [description file title]}]
   (let [cache-file    (fs/file ".work" (html-file file))
         markdown-file (fs/file src-meta-dir file)
         stale?        (seq (fs/modified-since
@@ -181,6 +182,7 @@
                        {:title        title
                         :body         body
                         :base         "../"
+                        :description  description
                         :skip-archive true})
         html-file     (html-file file)]
     (spit (out-path structure :meta-dir html-file) html)))

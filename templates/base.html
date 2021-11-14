@@ -4,7 +4,8 @@
     <title>{{title}}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <meta charset="utf-8"/>
-    <meta name="description" content="Pelure - ephemeral writing surface?"/>
+    <meta name="description"
+          content="{% if description %}{{description}}{% else %}Pelure - ephemeral writing surface?{% endif %}"/>
     <meta name="author" content="Hugo Duncan"/>
     <link type="application/atom+xml" rel="alternate" href="{{base}}index.xml" title="Pelure">
     <link rel="stylesheet" href="{{base}}style.css">
