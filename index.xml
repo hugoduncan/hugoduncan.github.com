@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>Pelure</title>
-  <link href="https://hugoduncan.org/index.xml" rel="self"/>
-  <link href="https://hugoduncan.org/"/>
-  <updated>2021-11-14T23:04:41+00:00</updated>
-  <id>https://hugoduncan.org/</id>
+  <link href="http://hugoduncan.org/index.xml" rel="self"/>
+  <link href="http://hugoduncan.org/"/>
+  <updated>2021-11-14T23:07:30+00:00</updated>
+  <id>http://hugoduncan.org/</id>
   <author>
     <name>Hugo Duncan</name>
   </author>
   <entry>
-    <id>https:/hugoduncan.org/post/back_to_blogging.html</id>
-    <link href="https:/hugoduncan.org/post/back_to_blogging.html"/>
+    <id>http:/hugoduncan.org/post/back_to_blogging.html</id>
+    <link href="http:/hugoduncan.org/post/back_to_blogging.html"/>
     <title>Back to blogging</title>
     <updated>2021-11-14T23:59:59+00:00</updated>
     <content type="html">
@@ -18,8 +18,8 @@
     </content>
   </entry>
   <entry>
-    <id>https:/hugoduncan.org/post/generating_source_with_leiningen.html</id>
-    <link href="https:/hugoduncan.org/post/generating_source_with_leiningen.html"/>
+    <id>http:/hugoduncan.org/post/generating_source_with_leiningen.html</id>
+    <link href="http:/hugoduncan.org/post/generating_source_with_leiningen.html"/>
     <title>Generating Source Files with Leiningen</title>
     <updated>2013-10-28T23:59:59+00:00</updated>
     <content type="html">
@@ -27,8 +27,8 @@
     </content>
   </entry>
   <entry>
-    <id>https:/hugoduncan.org/post/alembic_reloads_your_project_clj_dependencies.html</id>
-    <link href="https:/hugoduncan.org/post/alembic_reloads_your_project_clj_dependencies.html"/>
+    <id>http:/hugoduncan.org/post/alembic_reloads_your_project_clj_dependencies.html</id>
+    <link href="http:/hugoduncan.org/post/alembic_reloads_your_project_clj_dependencies.html"/>
     <title>Alembic Reloads your Leiningen project.clj Dependencies</title>
     <updated>2013-08-29T23:59:59+00:00</updated>
     <content type="html">
@@ -38,8 +38,8 @@
     </content>
   </entry>
   <entry>
-    <id>https:/hugoduncan.org/post/evaluate_clojure_in_emacs_markdown_buffers.html</id>
-    <link href="https:/hugoduncan.org/post/evaluate_clojure_in_emacs_markdown_buffers.html"/>
+    <id>http:/hugoduncan.org/post/evaluate_clojure_in_emacs_markdown_buffers.html</id>
+    <link href="http:/hugoduncan.org/post/evaluate_clojure_in_emacs_markdown_buffers.html"/>
     <title>Evaluate and Format Clojure in Emacs Markdown Buffers</title>
     <updated>2013-08-26T23:59:59+00:00</updated>
     <content type="html">
@@ -69,8 +69,8 @@
     </content>
   </entry>
   <entry>
-    <id>https:/hugoduncan.org/post/snarf-pgp-keys-in-emacs-mu4e.html</id>
-    <link href="https:/hugoduncan.org/post/snarf-pgp-keys-in-emacs-mu4e.html"/>
+    <id>http:/hugoduncan.org/post/snarf-pgp-keys-in-emacs-mu4e.html</id>
+    <link href="http:/hugoduncan.org/post/snarf-pgp-keys-in-emacs-mu4e.html"/>
     <title>Snarf PGP Keys from Signed Messages in Emacs mu4e</title>
     <updated>2013-08-25T23:59:59+00:00</updated>
     <content type="html">
@@ -97,8 +97,8 @@
     </content>
   </entry>
   <entry>
-    <id>https:/hugoduncan.org/post/clojurescript-libs-with-js-dependencies.html</id>
-    <link href="https:/hugoduncan.org/post/clojurescript-libs-with-js-dependencies.html"/>
+    <id>http:/hugoduncan.org/post/clojurescript-libs-with-js-dependencies.html</id>
+    <link href="http:/hugoduncan.org/post/clojurescript-libs-with-js-dependencies.html"/>
     <title>How to Build Clojurescript Libs with JavaScript Dependencies</title>
     <updated>2013-08-16T23:59:59+00:00</updated>
     <content type="html">
@@ -106,8 +106,8 @@
     </content>
   </entry>
   <entry>
-    <id>https:/hugoduncan.org/post/webapp_with_core.async.html</id>
-    <link href="https:/hugoduncan.org/post/webapp_with_core.async.html"/>
+    <id>http:/hugoduncan.org/post/webapp_with_core.async.html</id>
+    <link href="http:/hugoduncan.org/post/webapp_with_core.async.html"/>
     <title>Exploring a todo app with core.async</title>
     <updated>2013-08-15T23:59:59+00:00</updated>
     <content type="html">
@@ -166,8 +166,8 @@ lein ring server
     </content>
   </entry>
   <entry>
-    <id>https:/hugoduncan.org/post/configuration_in_templates_is_not_configuration_as_code.html</id>
-    <link href="https:/hugoduncan.org/post/configuration_in_templates_is_not_configuration_as_code.html"/>
+    <id>http:/hugoduncan.org/post/configuration_in_templates_is_not_configuration_as_code.html</id>
+    <link href="http:/hugoduncan.org/post/configuration_in_templates_is_not_configuration_as_code.html"/>
     <title>Configuration in Templates is not Configuration as Code</title>
     <updated>2010-10-04T23:59:59+00:00</updated>
     <content type="html">
@@ -175,8 +175,8 @@ lein ring server
     </content>
   </entry>
   <entry>
-    <id>https:/hugoduncan.org/post/configure_nagios_using_pallet.html</id>
-    <link href="https:/hugoduncan.org/post/configure_nagios_using_pallet.html"/>
+    <id>http:/hugoduncan.org/post/configure_nagios_using_pallet.html</id>
+    <link href="http:/hugoduncan.org/post/configure_nagios_using_pallet.html"/>
     <title>Configure Nagios using Pallet</title>
     <updated>2010-08-18T23:59:59+00:00</updated>
     <content type="html">
@@ -237,8 +237,8 @@ lein ring server
     </content>
   </entry>
   <entry>
-    <id>https:/hugoduncan.org/post/mocking_clojure_functions_with_atticus.html</id>
-    <link href="https:/hugoduncan.org/post/mocking_clojure_functions_with_atticus.html"/>
+    <id>http:/hugoduncan.org/post/mocking_clojure_functions_with_atticus.html</id>
+    <link href="http:/hugoduncan.org/post/mocking_clojure_functions_with_atticus.html"/>
     <title>Mocking Clojure Functions with Atticus</title>
     <updated>2010-05-18T23:59:59+00:00</updated>
     <content type="html">
@@ -260,8 +260,8 @@ lein ring server
     </content>
   </entry>
   <entry>
-    <id>https:/hugoduncan.org/post/provisioning_cloud_nodes_with_pallet.html</id>
-    <link href="https:/hugoduncan.org/post/provisioning_cloud_nodes_with_pallet.html"/>
+    <id>http:/hugoduncan.org/post/provisioning_cloud_nodes_with_pallet.html</id>
+    <link href="http:/hugoduncan.org/post/provisioning_cloud_nodes_with_pallet.html"/>
     <title>Provisioning Cloud Nodes with Pallet</title>
     <updated>2010-05-12T23:59:59+00:00</updated>
     <content type="html">
@@ -273,8 +273,8 @@ lein ring server
     </content>
   </entry>
   <entry>
-    <id>https:/hugoduncan.org/post/shell_scripting_in_clojure_with_pallet.html</id>
-    <link href="https:/hugoduncan.org/post/shell_scripting_in_clojure_with_pallet.html"/>
+    <id>http:/hugoduncan.org/post/shell_scripting_in_clojure_with_pallet.html</id>
+    <link href="http:/hugoduncan.org/post/shell_scripting_in_clojure_with_pallet.html"/>
     <title>Shell Scripting in Clojure with Pallet</title>
     <updated>2010-05-03T23:59:59+00:00</updated>
     <content type="html">
@@ -285,8 +285,8 @@ lein ring server
     </content>
   </entry>
   <entry>
-    <id>https:/hugoduncan.org/post/swank_clojure_gets_a_break_with_the_local_environment.html</id>
-    <link href="https:/hugoduncan.org/post/swank_clojure_gets_a_break_with_the_local_environment.html"/>
+    <id>http:/hugoduncan.org/post/swank_clojure_gets_a_break_with_the_local_environment.html</id>
+    <link href="http:/hugoduncan.org/post/swank_clojure_gets_a_break_with_the_local_environment.html"/>
     <title>Swank Clojure gets a Break with the Local Environment</title>
     <updated>2010-03-31T23:59:59+00:00</updated>
     <content type="html">
@@ -303,8 +303,8 @@ lein ring server
     </content>
   </entry>
   <entry>
-    <id>https:/hugoduncan.org/post/benchmarking_clojure_code_with_criterium.html</id>
-    <link href="https:/hugoduncan.org/post/benchmarking_clojure_code_with_criterium.html"/>
+    <id>http:/hugoduncan.org/post/benchmarking_clojure_code_with_criterium.html</id>
+    <link href="http:/hugoduncan.org/post/benchmarking_clojure_code_with_criterium.html"/>
     <title>Benchmarking Clojure Code with Criterium</title>
     <updated>2010-02-19T23:59:59+00:00</updated>
     <content type="html">
@@ -312,8 +312,8 @@ lein ring server
     </content>
   </entry>
   <entry>
-    <id>https:/hugoduncan.org/post/a_clojure_library_for_fluiddb.html</id>
-    <link href="https:/hugoduncan.org/post/a_clojure_library_for_fluiddb.html"/>
+    <id>http:/hugoduncan.org/post/a_clojure_library_for_fluiddb.html</id>
+    <link href="http:/hugoduncan.org/post/a_clojure_library_for_fluiddb.html"/>
     <title>A Clojure library for FluidDB</title>
     <updated>2009-09-13T23:59:59+00:00</updated>
     <content type="html">
@@ -321,8 +321,8 @@ lein ring server
     </content>
   </entry>
   <entry>
-    <id>https:/hugoduncan.org/post/setting_up_clojure_and_compojure_with_maven.html</id>
-    <link href="https:/hugoduncan.org/post/setting_up_clojure_and_compojure_with_maven.html"/>
+    <id>http:/hugoduncan.org/post/setting_up_clojure_and_compojure_with_maven.html</id>
+    <link href="http:/hugoduncan.org/post/setting_up_clojure_and_compojure_with_maven.html"/>
     <title>Setting up clojure and compojure with maven</title>
     <updated>2009-09-06T23:59:59+00:00</updated>
     <content type="html">
@@ -330,8 +330,8 @@ lein ring server
     </content>
   </entry>
   <entry>
-    <id>https:/hugoduncan.org/post/product_development_flow.html</id>
-    <link href="https:/hugoduncan.org/post/product_development_flow.html"/>
+    <id>http:/hugoduncan.org/post/product_development_flow.html</id>
+    <link href="http:/hugoduncan.org/post/product_development_flow.html"/>
     <title>Product Development Flow</title>
     <updated>2009-08-30T23:59:59+00:00</updated>
     <content type="html">
@@ -339,8 +339,8 @@ lein ring server
     </content>
   </entry>
   <entry>
-    <id>https:/hugoduncan.org/post/rails_environments_for_lisp.html</id>
-    <link href="https:/hugoduncan.org/post/rails_environments_for_lisp.html"/>
+    <id>http:/hugoduncan.org/post/rails_environments_for_lisp.html</id>
+    <link href="http:/hugoduncan.org/post/rails_environments_for_lisp.html"/>
     <title>Rails Environments For Lisp</title>
     <updated>2009-04-07T23:59:59+00:00</updated>
     <content type="html">
@@ -348,8 +348,8 @@ lein ring server
     </content>
   </entry>
   <entry>
-    <id>https:/hugoduncan.org/post/twitter_is_more_secure_than_my_credit_card.html</id>
-    <link href="https:/hugoduncan.org/post/twitter_is_more_secure_than_my_credit_card.html"/>
+    <id>http:/hugoduncan.org/post/twitter_is_more_secure_than_my_credit_card.html</id>
+    <link href="http:/hugoduncan.org/post/twitter_is_more_secure_than_my_credit_card.html"/>
     <title>Twitter is More Secure than My Credit Card</title>
     <updated>2009-04-02T23:59:59+00:00</updated>
     <content type="html">
@@ -357,8 +357,8 @@ lein ring server
     </content>
   </entry>
   <entry>
-    <id>https:/hugoduncan.org/post/cl_blog_generator_gets_comments.html</id>
-    <link href="https:/hugoduncan.org/post/cl_blog_generator_gets_comments.html"/>
+    <id>http:/hugoduncan.org/post/cl_blog_generator_gets_comments.html</id>
+    <link href="http:/hugoduncan.org/post/cl_blog_generator_gets_comments.html"/>
     <title>cl-blog-generator Gets Comments</title>
     <updated>2009-03-31T23:59:59+00:00</updated>
     <content type="html">
@@ -366,8 +366,8 @@ lein ring server
     </content>
   </entry>
   <entry>
-    <id>https:/hugoduncan.org/post/search_across_open_browser_tabs.html</id>
-    <link href="https:/hugoduncan.org/post/search_across_open_browser_tabs.html"/>
+    <id>http:/hugoduncan.org/post/search_across_open_browser_tabs.html</id>
+    <link href="http:/hugoduncan.org/post/search_across_open_browser_tabs.html"/>
     <title>Search Across Open Browser Tabs</title>
     <updated>2009-03-28T23:59:59+00:00</updated>
     <content type="html">
@@ -375,8 +375,8 @@ lein ring server
     </content>
   </entry>
   <entry>
-    <id>https:/hugoduncan.org/post/blog_site_generators.html</id>
-    <link href="https:/hugoduncan.org/post/blog_site_generators.html"/>
+    <id>http:/hugoduncan.org/post/blog_site_generators.html</id>
+    <link href="http:/hugoduncan.org/post/blog_site_generators.html"/>
     <title>Blog Site Generators</title>
     <updated>2009-03-27T23:59:59+00:00</updated>
     <content type="html">
@@ -384,8 +384,8 @@ lein ring server
     </content>
   </entry>
   <entry>
-    <id>https:/hugoduncan.org/post/frameworks_and_productivity.html</id>
-    <link href="https:/hugoduncan.org/post/frameworks_and_productivity.html"/>
+    <id>http:/hugoduncan.org/post/frameworks_and_productivity.html</id>
+    <link href="http:/hugoduncan.org/post/frameworks_and_productivity.html"/>
     <title>Frameworks and Productivity</title>
     <updated>2009-03-20T23:59:59+00:00</updated>
     <content type="html">
@@ -393,8 +393,8 @@ lein ring server
     </content>
   </entry>
   <entry>
-    <id>https:/hugoduncan.org/post/create_a_catalog_for_xhtml_on_os_x.html</id>
-    <link href="https:/hugoduncan.org/post/create_a_catalog_for_xhtml_on_os_x.html"/>
+    <id>http:/hugoduncan.org/post/create_a_catalog_for_xhtml_on_os_x.html</id>
+    <link href="http:/hugoduncan.org/post/create_a_catalog_for_xhtml_on_os_x.html"/>
     <title>Create a Catalog for XHTML on OS X</title>
     <updated>2009-03-11T23:59:59+00:00</updated>
     <content type="html">
@@ -402,8 +402,8 @@ lein ring server
     </content>
   </entry>
   <entry>
-    <id>https:/hugoduncan.org/post/parsing_yaml_dates_in_rails_gives_surprising_results.html</id>
-    <link href="https:/hugoduncan.org/post/parsing_yaml_dates_in_rails_gives_surprising_results.html"/>
+    <id>http:/hugoduncan.org/post/parsing_yaml_dates_in_rails_gives_surprising_results.html</id>
+    <link href="http:/hugoduncan.org/post/parsing_yaml_dates_in_rails_gives_surprising_results.html"/>
     <title>Parsing YAML Dates in Rails Gives Surprising Results</title>
     <updated>2009-03-07T23:59:59+00:00</updated>
     <content type="html">
