@@ -170,7 +170,6 @@
 {:title       "Back to blogging"
  :description "My road back to a working blogging environment, thoughts on comments and blogging framworks"
  :file        "back_to_blogging.md"
- :categories  #{"clojure"}
+ :categories  #{"clojure" "blog"}
  :date        "2021-11-14"
- :discuss     "https://github.com/hugoduncan/hugoduncan.github.com/discussions/4"
- :preview     true}
+ :discuss     "https://github.com/hugoduncan/hugoduncan.github.com/discussions/4"}

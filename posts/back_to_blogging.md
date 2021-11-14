@@ -58,6 +58,8 @@ Maybe there is an opportunity to take the same approach for building a
 blog or static site. If we could pick from a selection of configurable
 tasks, maybe we wouldn't need to write our own.
 
+Speaking of which, I have tried writing my own before, in common-lisp:
+[cl-blog-generator](http://github.com/hugoduncan/cl-blog-generator).
 
 ## And…
 
