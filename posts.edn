@@ -51,7 +51,7 @@
 {:title "Mocking Clojure Functions with Atticus",
  :date "2010-05-18",
  :categories #{"clojure" "atticus" "lisp" "mock" "test"},
- :description "I dislike most mocking, and try and avoid it as much as possible. Sometimes it is however the only realistic way of testing.  I did a quick survey of mocking tools in clojure, and found them very much reflecting the Java mocking&#10;libraries. Clojure has a few more dynamic capabilities than Java, so I thought a little about how these could be used to make a simple mocking facility, and atticus is what I came up with.",
+ :description "I dislike most mocking, and try and avoid it as much as possible. Sometimes it is however the only realistic way of testing.  I did a quick survey of mocking tools in clojure, and found them very much reflecting the Java mocking libraries. Clojure has a few more dynamic capabilities than Java, so I thought a little about how these could be used to make a simple mocking facility, and atticus is what I came up with.",
  :aliases #{"/post/2010/mocking_clojure_functions_with_atticus.xhtml"},
  :file "mocking_clojure_functions_with_atticus.md",
  :legacy true}
