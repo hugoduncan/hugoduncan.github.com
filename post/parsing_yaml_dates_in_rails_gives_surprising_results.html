@@ -4,7 +4,8 @@
     <title>Parsing YAML Dates in Rails Gives Surprising Results</title>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <meta charset="utf-8"/>
-    <meta name="description" content="Pelure - ephemeral writing surface?"/>
+    <meta name="description"
+          content="Today&#39;s surprise was that &quot;2009-01-01&quot; and &quot;2009-1-1&quot; get parsed differently by the YAML parser in Rails.  The former gets converted to a Date&gt;, while the latter becomes a String.  It confused me for a while, as the problem only showed up when I wanted to send the dates to a Flot chart.  Looking at the standard, it&#39;s conforming behaviour.   Must be me that is non-conforming then..."/>
     <meta name="author" content="Hugo Duncan"/>
     <link type="application/atom+xml" rel="alternate" href="../index.xml" title="Pelure">
     <link rel="stylesheet" href="../style.css">

@@ -4,7 +4,8 @@
     <title>Create a Catalog for XHTML on OS X</title>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <meta charset="utf-8"/>
-    <meta name="description" content="Pelure - ephemeral writing surface?"/>
+    <meta name="description"
+          content="While trying to validate the output of cl-blog-generator I needed a local DTD for XHTML.  The textproc/xmlcatmgr package in Darwin Ports creates a catalog at /opt/local/etc/xml/catalog, but it does not include XHTML.  A flattened XHTML DTD can be found in the w3 validator library and installed the DTD&#39;s under /opt/local/share/xml/, but I couldn&#39;t find a catalog file for it.  It turns out it is pretty simple to write the catalog file; the Wikipedia XML Catalog entry has an example that contains what is needed.  Save the example next to the XHTML DTD&#39;s as catalog.xml and adjust the paths, then add a &#39;nextCatalog&#39; entry in /opt/local/etc/xml/catalog pointing at the catalog.xml file."/>
     <meta name="author" content="Hugo Duncan"/>
     <link type="application/atom+xml" rel="alternate" href="../index.xml" title="Pelure">
     <link rel="stylesheet" href="../style.css">
