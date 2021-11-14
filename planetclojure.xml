@@ -3,7 +3,7 @@
   <title>Pelure</title>
   <link href="http://hugoduncan.org/index.xml" rel="self"/>
   <link href="http://hugoduncan.org/"/>
-  <updated>2021-11-14T23:15:09+00:00</updated>
+  <updated>2021-11-14T23:20:03+00:00</updated>
   <id>http://hugoduncan.org/</id>
   <author>
     <name>Hugo Duncan</name>
@@ -210,7 +210,7 @@ lein ring server
     <id>http://hugoduncan.org/post/mocking_clojure_functions_with_atticus.html</id>
     <link href="http://hugoduncan.org/post/mocking_clojure_functions_with_atticus.html"/>
     <title>Mocking Clojure Functions with Atticus</title>
-    <summary>I dislike most mocking, and try and avoid it as much as possible. Sometimes it is however the only realistic way of testing.  I did a quick survey of mocking tools in clojure, and found them very much reflecting the Java mocking&amp;#10;libraries. Clojure has a few more dynamic capabilities than Java, so I thought a little about how these could be used to make a simple mocking facility, and atticus is what I came up with.</summary>
+    <summary>I dislike most mocking, and try and avoid it as much as possible. Sometimes it is however the only realistic way of testing.  I did a quick survey of mocking tools in clojure, and found them very much reflecting the Java mocking libraries. Clojure has a few more dynamic capabilities than Java, so I thought a little about how these could be used to make a simple mocking facility, and atticus is what I came up with.</summary>
     <updated>2010-05-18T23:59:59+00:00</updated>
     <content type="html">
       <![CDATA[<p><p>I dislike most mocking, and try and avoid it as much as possible. Sometimes it is however the only realistic way of testing.  I did a quick survey of mocking tools in clojure, and found them very much reflecting the Java mocking libraries. Clojure has a few more dynamic capabilities than Java, so I thought a little about how these could be used to make a simple mocking facility, and <a href="http://github.com/hugoduncan/atticus">atticus</a> is what I came up with.</p> <p>There is a consensus that mocking should be implemented by binding a function's var to a new function for the duration of a test, and atticus does this too. Atticus' premise is that we can do simple mocking by declaring the mock function as a local function definition, and have the local function do the argument checking, return value setting, etc.  The simplest case would be something like below, which checks the value of its argument and specifies a return value:</p> <pre class="clojure"> ;; pull in namespaces (use 'clojure.test) (require 'atticus.mock)</p><p>;; define test which mocks f (deftest mock-test   (atticus.mock/expects<pre><code>&#91;&#40;f &#91;arg&#93;
