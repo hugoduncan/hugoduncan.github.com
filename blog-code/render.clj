@@ -49,6 +49,12 @@
     (fs/create-dirs (out-path s :post-dir))
     s))
 
+(defn html-file [file]
+  (str/replace file ".md" ".html"))
+
+(defn base-filename [file]
+  (str/replace file ".md" ""))
+
 ;;;; Images and CSS
 
 (defn copy-assets [structure]
@@ -81,12 +87,6 @@
         html     (md/markdown markdown :data :html :reference-links? true)
         html     (str/replace html "$$RET$$" "\n")]
     html))
-
-(defn html-file [file]
-  (str/replace file ".md" ".html"))
-
-(defn base-filename [file]
-  (str/replace file ".md" ""))
 
 (def discuss-fallback
   "https://github.com/hugoduncan/hugoduncan.github.com/discussions/categories/posts")
@@ -244,29 +244,32 @@
        [::atom/feed
         {:xmlns "http://www.w3.org/2005/Atom"}
         [::atom/title "Pelure"]
-        [::atom/link {:href (str blog-root "atom.xml") :rel "self"}]
+        [::atom/link {:href (str blog-root "index.xml") :rel "self"}]
         [::atom/link {:href blog-root}]
         [::atom/updated (rfc-3339-now)]
         [::atom/id blog-root]
         [::atom/author
          [::atom/name "Hugo Duncan"]]
         (for [{:keys [date
+                      description
                       file
                       preview
                       title]} posts
               :when           (not preview)
-              :let            [html (str/replace file ".md" ".html")
-                               link (str blog-root html)]]
+              :let            [html (html-file file)
+                               link (str blog-root "post/" html)]]
           [::atom/entry
            [::atom/id link]
-           [::atom/link link]
+           [::atom/link {:href link}]
            [::atom/title title]
+           (when description
+             [::atom/summary description])
            [::atom/updated (rfc-3339 date)]
            [::atom/content {:type "html"}
             [:-cdata (get @bodies file)]]])])
       xml/indent-str))
 
-(def blog-root "https://hugoduncan.org/")
+(def blog-root "http://hugoduncan.org/")
 
 (defn posts []
   (->> "posts.edn"
@@ -309,17 +312,8 @@
           :base ""})))
 
 (defn render-atom [{:keys [out-dir]} feed-name posts bodies]
+  (println "Rendering atom to :" feed-name)
   (spit (fs/file out-dir feed-name) (atom-feed blog-root posts bodies)))
-
-(defn render-planet-clojure [{:keys [out-dir]} posts bodies]
-  (spit (fs/file out-dir "planetclojure.xml")
-        (atom-feed
-         (filter
-          (fn [post]
-            (some (:categories post) ["clojure" "clojurescript"]))
-          posts)
-         posts
-         bodies)))
 
 (defn render []
   (let [structure    (structure "public")
