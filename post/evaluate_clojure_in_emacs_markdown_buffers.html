@@ -41,7 +41,6 @@
     <div class="wrapper">
 
       <h1>Evaluate and Format Clojure in Emacs Markdown Buffers</h1>
-<p>Discuss this post <a href="https://github.com/hugoduncan/hugoduncan.github.com/discussions/categories/posts">here</a>.</p>
 <p>When writing documentation or blog posts about Clojure code, it is very useful to be able to format Clojure code blocks using [<code>clojure-mode</code>][clojure-mode] and evaluate code with [<code>nrepl.el</code>][nrepl].</p><p>This can be enabled using [<code>mmm-mode</code>][mmm-mode], which allows a single buffer to use different major modes for different sections of the buffer (and is not limited to just web modes). Install <code>mmm-mode</code> using <code>M-x package-install mmm-mode</code>, or using <code>M-x el-get-install mmm-mode</code> from the excellent [<code>el-get</code>][el-get], or by checking the project from github and installing manually.</p><p>To configure this for clojure and markdown, add this in your <code>init.el</code> or <code>.emacs</code> file.</p><pre><code class="lisp">&#40;require 'mmm-auto&#41;
 &#40;mmm-add-classes
  '&#40;&#40;markdown-clojure

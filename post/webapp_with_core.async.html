@@ -41,7 +41,6 @@
     <div class="wrapper">
 
       <h1>Exploring a todo app with core.async</h1>
-<p>Discuss this post <a href="https://github.com/hugoduncan/hugoduncan.github.com/discussions/categories/posts">here</a>.</p>
 <p>We're going to build an equivalent of the [AngularJS TODO example][angulartodo] using core.async, and a templating library, [papadom][papadom], that I've written to help in this.</p><p>[Clojurescript][clojurescript] recently gained a [CSP][csp] implemetation via [core.async][core.async], similar to [Go's channels][golangchannel], or [CML's channels][cmlchannel] (CML also has a nice select).  Bruce Haumann started exploring this with [ClojureScript Core.Async Todos][brucetodo], and David Nolen has been looking at how to use core.async for [responsive design][cspresponsive].  In this post, we'll take the TODO example, and take it a little further.</p><h2>Basic Display</h2><p>We'll start with just displaying a list of todo items.  For this we'll need a template, so we'll just write this in HTML, and add a <code>t-template</code> attribute, which enables us to use mustache style templating of values to display.  This doesn't use mustache sections for looping, in order to preserve valid HTML markup.</p><pre><code class="html">&lt;h1&gt;TODOS&lt;/h1&gt;
 &lt;ul class=&quot;unstyled&quot;&gt;
   &lt;li t-template=&quot;todos&quot;&gt;{{text}}&lt;/li&gt;

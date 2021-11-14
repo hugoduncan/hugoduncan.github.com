@@ -41,7 +41,6 @@
     <div class="wrapper">
 
       <h1>Snarf PGP Keys from Signed Messages in Emacs mu4e</h1>
-<p>Discuss this post <a href="https://github.com/hugoduncan/hugoduncan.github.com/discussions/categories/posts">here</a>.</p>
 <p>I just moved to [mu][mu] for reading my email.  One feature I was missing was the ability to receive [PGP][pgp] keys for signed messages.</p><p>When you receive a signed message, <code>mu</code> shows the verification status in the <code>Signature</code> field in the message view (see [MSGV-Crypto][mucrypto]).  If you don't have the sender's PGP key on your keyring, this will show <code>unverified</code>.  Click on the <code>Details</code> link within field will show the sender's key id.  To manually import the key you can use [<code>gpg</code>][gpg]:</p><pre><code>$ gpg --recv &lt;the-key-id&gt;
 </code></pre><p>This seemed a little labourious, so some automation was in order. <code>mu4e</code> allows you to define actions that can be run on messages (or attachments), so I just wrote an action to do this.</p><pre><code class="lisp">&#40;defun mu4e-view-snarf-pgp-key &#40;&amp;optional msg&#41;
   &quot;Snarf the pgp key for the specified message.&quot;

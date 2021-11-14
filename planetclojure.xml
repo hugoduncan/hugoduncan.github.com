@@ -3,20 +3,11 @@
   <title>Pelure</title>
   <link href="https://hugoduncan.org/atom.xml" rel="self"/>
   <link href="https://hugoduncan.org/"/>
-  <updated>2021-11-14T21:43:08+00:00</updated>
+  <updated>2021-11-14T22:11:15+00:00</updated>
   <id>https://hugoduncan.org/</id>
   <author>
     <name>Hugo Duncan</name>
   </author>
-  <entry>
-    <id>https://hugoduncan.org/back_to_blogging.html</id>
-    <link>https://hugoduncan.org/back_to_blogging.html</link>
-    <title>Back to blogging</title>
-    <updated>2021-11-14T23:59:59+00:00</updated>
-    <content type="html">
-      <![CDATA[<blockquote><p> “My mind turned by anxiety, or other cause, from its scrutiny of blank  paper, is like a lost child–wandering the house, sitting on the bottom  step to cry.”  — Virginia Woolf </p></blockquote><p>I was inspired to write some blog posts, which led me to realise my current blog and blogging setup were completely broken.</p><p>Michiel Borkent (<a href='https://twitter.com/borkdude'>@borkdude</a>) recently wrote about his migration from Octopress [borkdude-octopress][borkdude-octopress].  His requirements were very similar to mine, so I copied and modified.  Thank you Michiel!</p><p>His blog, [REPL adventures][borkdude-blog], is well worth the read.</p><h2>Blog Post Discussions</h2><p>With a static web site, the perennial problem is how to enable discussions.  Some people just punt pn this, and point to reddit, but Michiel's solution is to use github discussions.  As a way of owning the discussion, this has a lot of appeal.</p><p>I think it could be taken further.  It would be great if we could automate the creation of a blog post topic when creating a blog post.  Unfortunately the [<code>gh</code>][gh] command line client doesn't support discussions yet, so that would require using Github's GraphQL API - more work than I wanted to do for now.</p><p>One downside though, is that the discussions are not visible on the blog pages, where discussion could easily engender more discussion. I wonder if a Github Action could be triggered by conversation activity, and automatically republish the post with the discussion to date at the end of the post.</p><h2>Blogging Frameworks vs Tasks</h2><p>There are many blog site generators (I used [Hugo][Hugo], of course), even if we limit ourselves to clojure:- [nota][nota], [cryogen][cryogen), [static][static] to name a few.</p><p>These are usually feature rich.  The price for those features though, is extra complexity.</p><p>Michiel's blog uses [babashka][babashka] tasks to add a post, render posts, etc. These are extremely quick to run and make maintaining the blog simple.  it does just what he needs, and no more.</p><p>This reminds me of project automation, and the [<code>tools.build</code>][tools.build] approach of using composable code tasks to build just what is needed.</p><p>Maybe there is an opportunity to take the same approach for building a blog or static site. If we could pick from a selection of configurable tasks, maybe we wouldn't need to write our own.</p><h2>And…</h2><p>So I have a blogging setup.  Now I just need to write something.</p><p>[borkdude-octopress][https://blog.michielborkent.nl/migrating-octopress-to-babashka.html] [borkdude-blog][https://blog.michielborkent.nl/] [cryogen][https://github.com/cryogen-project/cryogen] [static][https://github.com/nakkaya/static] [nota][https://github.com/rafaeldelboni/nota] [hugo][https://gohugo.io/] [babashka][https://book.babashka.org/] [tools.build][https://clojure.org/guides/tools_build] [gh][https://cli.github.com/]</p>]]>
-    </content>
-  </entry>
   <entry>
     <id>https://hugoduncan.org/generating_source_with_leiningen.html</id>
     <link>https://hugoduncan.org/generating_source_with_leiningen.html</link>

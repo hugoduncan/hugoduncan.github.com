@@ -41,7 +41,6 @@
     <div class="wrapper">
 
       <h1>Mocking Clojure Functions with Atticus</h1>
-<p>Discuss this post <a href="https://github.com/hugoduncan/hugoduncan.github.com/discussions/categories/posts">here</a>.</p>
 <p><p>I dislike most mocking, and try and avoid it as much as possible. Sometimes it is however the only realistic way of testing.  I did a quick survey of mocking tools in clojure, and found them very much reflecting the Java mocking libraries. Clojure has a few more dynamic capabilities than Java, so I thought a little about how these could be used to make a simple mocking facility, and <a href="http://github.com/hugoduncan/atticus">atticus</a> is what I came up with.</p> <p>There is a consensus that mocking should be implemented by binding a function's var to a new function for the duration of a test, and atticus does this too. Atticus' premise is that we can do simple mocking by declaring the mock function as a local function definition, and have the local function do the argument checking, return value setting, etc.  The simplest case would be something like below, which checks the value of its argument and specifies a return value:</p> <pre class="clojure"> ;; pull in namespaces (use 'clojure.test) (require 'atticus.mock)</p><p>;; define test which mocks f (deftest mock-test   (atticus.mock/expects<pre><code>&#91;&#40;f &#91;arg&#93;
    &#40;is &#40;= arg 1&#41; &quot;Check argument&quot;&#41;
    arg&#41;&#93; ; set the return value
