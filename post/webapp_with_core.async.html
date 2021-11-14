@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Exploring a todo app with core.async</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta charset="utf-8"/>
+    <meta name="description" content="Pelure - ephemeral writing surface?"/>
+    <meta name="author" content="Hugo Duncan"/>
+    <link type="application/atom+xml" rel="alternate" href="../index.xml" title="Pelure">
+    <link rel="stylesheet" href="../style.css">
+  </head>
+  <body>
+
+    <div class="site-header">
+      <div class="wrapper">
+        <div class="site-nav">
+          <a class="page-link" href="../archive.html">All Posts</a>
+          <a class="page-link" href="https://github.com/hugoduncan/hugoduncan.github.com/discussions/categories/posts">Discuss</a>
+          <a class="page-link" href="../meta/pelure.html">About</a>
+          <a class="page-link" href="../meta/contact.html">Contact</a>
+          <a class="page-link" href="index.xml">
+            <img class="page-icon"
+                 src="https://www.svgrepo.com/show/362316/feed.svg"
+                 width="30px"/>
+          </a>
+          <a class="page-link" href="https://twitter.com/hugoduncan">
+            <img class="page-icon"
+                 src="https://www.svgrepo.com/show/11841/twitter.svg"
+                 width="30px"/>
+          </a>
+        </div>
+        <div>
+          <h1 class="site-title">
+            <a class="page-link" href="../index.html">Pelure</a>
+          </h1>
+          <p>Ephemeral musings, often about Clojure</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="wrapper">
+
+      <h1>Exploring a todo app with core.async</h1>
+<p>Discuss this post <a href="https://github.com/hugoduncan/hugoduncan.github.com/discussions/categories/posts">here</a>.</p>
+<p>We're going to build an equivalent of the [AngularJS TODO example][angulartodo] using core.async, and a templating library, [papadom][papadom], that I've written to help in this.</p><p>[Clojurescript][clojurescript] recently gained a [CSP][csp] implemetation via [core.async][core.async], similar to [Go's channels][golangchannel], or [CML's channels][cmlchannel] (CML also has a nice select).  Bruce Haumann started exploring this with [ClojureScript Core.Async Todos][brucetodo], and David Nolen has been looking at how to use core.async for [responsive design][cspresponsive].  In this post, we'll take the TODO example, and take it a little further.</p><h2>Basic Display</h2><p>We'll start with just displaying a list of todo items.  For this we'll need a template, so we'll just write this in HTML, and add a <code>t-template</code> attribute, which enables us to use mustache style templating of values to display.  This doesn't use mustache sections for looping, in order to preserve valid HTML markup.</p><pre><code class="html">&lt;h1&gt;TODOS&lt;/h1&gt;
+&lt;ul class=&quot;unstyled&quot;&gt;
+  &lt;li t-template=&quot;todos&quot;&gt;{{text}}&lt;/li&gt;
+&lt;/ul&gt;
+</code></pre><p>To get this to show something we'll need some code:</p><pre><code class="clj">&#40;ns app
+  &#40;:require
+   &#91;papadom.template :refer &#91;compile-templates render&#93;&#93;&#41;&#41;
+
+&#40;defn start &#91;&#93;
+  &#40;compile-templates&#41;
+  &#40;render {:todos &#91;{:text &quot;learn papadom&quot; :done false}
+                   {:text &quot;write a papadom app&quot; :done false}&#93;}&#41;&#41;
+</code></pre><p>When you call <code>app.start&#40;&#41;</code> from the page containing the above template, you'll see a list of two todo entries.</p><h2>Adding an event</h2><p>Now we have something displayed, lets add a checkbox to mark todo items as done:</p><pre><code class="html">&lt;ul class=&quot;unstyled&quot;&gt;
+  &lt;li t-template=&quot;todos&quot;&gt;
+    &lt;input type=&quot;checkbox&quot; t-prop=&quot;done&quot; t-event=&quot;done&quot;
+           t-id=&quot;index&quot; index=&quot;{{@index}}&quot;&gt;
+    &lt;span&gt;{{text}}&lt;/span&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+</code></pre><p>The <code>t-prop</code> attribute tells the template to which data value to display as the checkbox.</p><p>The <code>t-event</code> attribute specifies that we want an event.  When the checkbox is clicked, we will get a core.async message with a <code>:done</code> event type.  We need to know which todo was clicked, so we use the <code>t-id</code> attribute to list the attributes whose values should be sent as the event data &ndash; in this case the index, which has a value based on handlebars style <code>@index</code> property.</p><p>Now we need some code to process the events.  To do this we'll define an <code>app</code> function that will be passed a state atom containing a map with our todos state, and a core.async channel from which to read events.  The function will loop over events, and dispatch them as required.</p><pre><code class="clj">&#40;defn app
+  &#91;state event-chan&#93;
+  &#40;go
+   &#40;loop &#91;&#91;event event-data&#93; &#40;&lt;! event-chan&#41;&#93;
+     &#40;case event
+       :done
+       &#40;let &#91;nv &#40;boolean &#40;:checked event-data&#41;&#41;&#93;
+         &#40;swap! state assoc-in &#91;:todos &#40;:index event-data&#41; :done&#93; nv&#41;&#41;&#41;
+     &#40;recur &#40;&lt;! event-chan&#41;&#41;&#41;&#41;&#41;
+</code></pre><p>When the <code>app</code> function receives a <code>:done</code> event, it will update the state atom appropriately.  Now we have our state updating, we'll need to display it, which we can again do with the <code>render</code> function.</p><pre><code class="clj">&#40;defn show-state &#91;state&#93;
+  &#40;render &quot;state&quot; state&#41;&#41;
+</code></pre><p>We still need to get <code>show-state</code> called, and we'll arrange this in a modified <code>start</code> function.  This will create an atom for the state, and add a watch on the atom that will call <code>show-state</code>.</p><pre><code class="clj">&#40;defn start
+  &#91;&#93;
+  &#40;let &#91;event-chan &#40;chan&#41;
+        state &#40;atom nil&#41;&#93;
+    &#40;compile-templates&#41;
+    &#40;template-events event-chan&#41;
+    &#40;add-watch state :state &#40;fn &#91;key ref old new&#93; &#40;show-state new&#41;&#41;&#41;
+    &#40;reset! state {:todos &#91;{:text &quot;Learn papadom&quot; :done false}
+                           {:text &quot;Build a papadom app&quot; :done false}&#93;}&#41;
+    &#40;app state event-chan&#41;&#41;&#41;&#41;
+</code></pre><p>We've also added a core.async channel, <code>event-chan</code>, which we've passed to <code>template-events</code> to arrange delivery of the events defined in our template.  We pass this channel to the <code>app</code> function to start processing the events.</p><p>This shows the basic structure of the application.</p><h2>Adding New Todo Elements</h2><p>To allow you to add new todo items, we'll add a form to our template, specifying a <code>t-event</code> attribute, which will cause an event to be sent when the form is submitted, with the form's input values as the event data.</p><pre><code class="html">&lt;form t-event=&quot;add-todo&quot;&gt;
+  &lt;input type=&quot;text&quot; t-prop=&quot;text&quot; size=&quot;30&quot; placeholder=&quot;add new todo here&quot;&gt;
+  &lt;input class=&quot;btn btn-primary&quot; type=&quot;submit&quot; value=&quot;add&quot;&gt;
+&lt;/form&gt;
+</code></pre><p>To process this new event, we'll add a case to the <code>app</code> function loop's <code>case</code> form.</p><pre><code class="clj">:add-todo
+&#40;swap! state update-in &#91;:todos&#93;
+       conj {:text &#40;:text &#40;input-seq-&gt;map event-data&#41;&#41;
+             :done false}&#41;
+</code></pre><p>This uses the <code>input-seq-&gt;map</code> helper to convert the data from the form into a map, and we extract the <code>:text</code> value (defined by <code>t-prop</code> in the <code>input</code> element).</p><p>And we're done.  To see a full working example have a look at the [template][todotemplate] and [code][todocode] in the todo example of papadom. To run the example:</p><pre><code class="shell">git clone &#91;https://github.com/hugoduncan/papadom.git&#93;&#40;https://github.com/hugoduncan/papadom.git&#41;
+cd papadom/examples/todo
+lein ring server
+</code></pre><p>[angulartodo]: <a href='http://angularjs.org/#add-some-control'>http://angularjs.org/#add-some-control</a> "Angular TODO example"</p><p>[brucetodo]: <a href='http://rigsomelight.com/2013/07/18/clojurescript-core-async-todos.html'>http://rigsomelight.com/2013/07/18/clojurescript-core-async-todos.html</a> "Bruce Haumann's 'ClojureScript Core.Async Todos'"</p><p>[clojurescript]: <a href='https://github.com/clojure/clojurescript'>https://github.com/clojure/clojurescript</a> "Clojurescript"</p><p>[cmlchannel]: <a href='http://www.cs.cornell.edu/Courses/cs312/2006fa/recitations/rec24.html'>http://www.cs.cornell.edu/Courses/cs312/2006fa/recitations/rec24.html</a> "CML Channels"</p><p>[core.async]:  <a href='http://clojure.com/blog/2013/06/28/clojure-core-async-channels.html'>http://clojure.com/blog/2013/06/28/clojure-core-async-channels.html</a> "Clojure core.async Channels"</p><p>[csp]: <a href='http://en.wikipedia.org/wiki/Communicating_sequential_processes'>http://en.wikipedia.org/wiki/Communicating<i>sequential</i>processes</a> "Communicating Sequential Processes"</p><p>[cspresponsive]: <a href='http://swannodette.github.io/2013/07/31/extracting-processes/'>http://swannodette.github.io/2013/07/31/extracting-processes/</a> "David Nolan's 'CSP is Responsive Design'"</p><p>[golangchannel]: <a href='http://golang.org/ref/spec#Channel_types'>http://golang.org/ref/spec#Channel_types</a> "Go Channels"</p><p>[kemingweather]: <a href='http://keminglabs.com/blog/angular-cljs-weather-app/'>http://keminglabs.com/blog/angular-cljs-weather-app/</a> "Kevin Lynagh's 'Building an iOS weather app with Angular and ClojureScript'"</p><p>[purnam]: <a href='https://github.com/zcaudate/purnam'>https://github.com/zcaudate/purnam</a> "purnam" [clang]: <a href='https://github.com/pangloss/clang/'>https://github.com/pangloss/clang/</a> "clang"</p><p>[todotemplate]: <a href='https://github.com/hugoduncan/papadom/blob/master/examples/todo/resources/public/index.html'>https://github.com/hugoduncan/papadom/blob/master/examples/todo/resources/public/index.html</a> "TODO HTML Template" [todocode]: <a href='https://github.com/hugoduncan/papadom/blob/master/examples/todo/src/papadom/example/todo.cljs'>https://github.com/hugoduncan/papadom/blob/master/examples/todo/src/papadom/example/todo.cljs</a> "TODO Clojurescript Code"</p><p>[papadom]: <a href='https://github.com/hugoduncan/papadom'>https://github.com/hugoduncan/papadom</a> "Papadom templating library"</p>
+<p>Discuss this post <a href="https://github.com/hugoduncan/hugoduncan.github.com/discussions/categories/posts">here</a>.</p>
+<p><i>Published: 2013-08-15</i></p>
+
+
+      
+      <div style="margin-bottom: 20px; float: right;">
+        <a class="page-link" href="archive.html">Archive</a>
+      </div>
+      
+    </div>
+    <script>
+      document.addEventListener('DOMContentLoaded', (event) => {
+        document.querySelectorAll('pre code').forEach((el) => {
+          if (!el.classList.contains('clojure')) {
+            hljs.highlightElement(el);
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

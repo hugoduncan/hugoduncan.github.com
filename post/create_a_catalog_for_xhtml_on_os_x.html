@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Create a Catalog for XHTML on OS X</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta charset="utf-8"/>
+    <meta name="description" content="Pelure - ephemeral writing surface?"/>
+    <meta name="author" content="Hugo Duncan"/>
+    <link type="application/atom+xml" rel="alternate" href="../index.xml" title="Pelure">
+    <link rel="stylesheet" href="../style.css">
+  </head>
+  <body>
+
+    <div class="site-header">
+      <div class="wrapper">
+        <div class="site-nav">
+          <a class="page-link" href="../archive.html">All Posts</a>
+          <a class="page-link" href="https://github.com/hugoduncan/hugoduncan.github.com/discussions/categories/posts">Discuss</a>
+          <a class="page-link" href="../meta/pelure.html">About</a>
+          <a class="page-link" href="../meta/contact.html">Contact</a>
+          <a class="page-link" href="index.xml">
+            <img class="page-icon"
+                 src="https://www.svgrepo.com/show/362316/feed.svg"
+                 width="30px"/>
+          </a>
+          <a class="page-link" href="https://twitter.com/hugoduncan">
+            <img class="page-icon"
+                 src="https://www.svgrepo.com/show/11841/twitter.svg"
+                 width="30px"/>
+          </a>
+        </div>
+        <div>
+          <h1 class="site-title">
+            <a class="page-link" href="../index.html">Pelure</a>
+          </h1>
+          <p>Ephemeral musings, often about Clojure</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="wrapper">
+
+      <h1>Create a Catalog for XHTML on OS X</h1>
+<p>Discuss this post <a href="https://github.com/hugoduncan/hugoduncan.github.com/discussions/categories/posts">here</a>.</p>
+<p><p>While trying to validate the output of <a href="http://hugoduncan.github.com/cl-blog-generator/content/site/index.xhtml">cl-blog-generator</a> I needed a local DTD for XHTML.  The textproc/xmlcatmgr package in Darwin Ports creates a catalog at <code>/opt/local/etc/xml/catalog</code>, but it does not include XHTML.  A flattened XHTML DTD can be found in <a href="http://validator.w3.org/sgml-lib.tar.gz">the w3 validator library</a> and installed the DTD's under <code>/opt/local/share/xml/</code>, but I couldn't find a catalog file for it.  It turns out it is pretty simple to write the catalog file; the Wikipedia <a href="http://en.wikipedia.org/wiki/XML_Catalog">XML Catalog</a> entry has an example that contains what is needed.  Save the example next to the XHTML DTD's as <code>catalog.xml</code> and adjust the paths, then add a "nextCatalog" entry in <code>/opt/local/etc/xml/catalog</code> pointing at the <code>catalog.xml</code> file.</p> <p>Now I can use <code>(setf cxml:<em>catalog</em> (cxml:make-catalog '("/opt/local/etc/xml/catalog")))</code> and <a href="http://common-lisp.net/project/cxml/">CXML</a> will use the local DTD specified in the catalog.</p></p>
+<p>Discuss this post <a href="https://github.com/hugoduncan/hugoduncan.github.com/discussions/categories/posts">here</a>.</p>
+<p><i>Published: 2009-03-11</i></p>
+
+
+      
+      <div style="margin-bottom: 20px; float: right;">
+        <a class="page-link" href="archive.html">Archive</a>
+      </div>
+      
+    </div>
+    <script>
+      document.addEventListener('DOMContentLoaded', (event) => {
+        document.querySelectorAll('pre code').forEach((el) => {
+          if (!el.classList.contains('clojure')) {
+            hljs.highlightElement(el);
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

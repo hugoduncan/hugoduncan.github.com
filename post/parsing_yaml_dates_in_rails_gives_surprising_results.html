@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Parsing YAML Dates in Rails Gives Surprising Results</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta charset="utf-8"/>
+    <meta name="description" content="Pelure - ephemeral writing surface?"/>
+    <meta name="author" content="Hugo Duncan"/>
+    <link type="application/atom+xml" rel="alternate" href="../index.xml" title="Pelure">
+    <link rel="stylesheet" href="../style.css">
+  </head>
+  <body>
+
+    <div class="site-header">
+      <div class="wrapper">
+        <div class="site-nav">
+          <a class="page-link" href="../archive.html">All Posts</a>
+          <a class="page-link" href="https://github.com/hugoduncan/hugoduncan.github.com/discussions/categories/posts">Discuss</a>
+          <a class="page-link" href="../meta/pelure.html">About</a>
+          <a class="page-link" href="../meta/contact.html">Contact</a>
+          <a class="page-link" href="index.xml">
+            <img class="page-icon"
+                 src="https://www.svgrepo.com/show/362316/feed.svg"
+                 width="30px"/>
+          </a>
+          <a class="page-link" href="https://twitter.com/hugoduncan">
+            <img class="page-icon"
+                 src="https://www.svgrepo.com/show/11841/twitter.svg"
+                 width="30px"/>
+          </a>
+        </div>
+        <div>
+          <h1 class="site-title">
+            <a class="page-link" href="../index.html">Pelure</a>
+          </h1>
+          <p>Ephemeral musings, often about Clojure</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="wrapper">
+
+      <h1>Parsing YAML Dates in Rails Gives Surprising Results</h1>
+<p>Discuss this post <a href="https://github.com/hugoduncan/hugoduncan.github.com/discussions/categories/posts">here</a>.</p>
+<p><p>Today's surprise was that "2009-01-01" and "2009-1-1" get parsed differently by the <a href="http://www.yaml.org/">YAML</a> parser in <a href="http://rubyonrails.org/">Rails</a>.  The former gets converted to a <code>Date</code>, while the latter becomes a <code>String</code>.  It confused me for a while, as the problem only showed up when I wanted to send the dates to a <a href="http://code.google.com/p/flot/">Flot</a> chart.  Looking at the standard, it's conforming behaviour.   Must be me that is non-conforming then...</p></p>
+<p>Discuss this post <a href="https://github.com/hugoduncan/hugoduncan.github.com/discussions/categories/posts">here</a>.</p>
+<p><i>Published: 2009-03-07</i></p>
+
+
+      
+      <div style="margin-bottom: 20px; float: right;">
+        <a class="page-link" href="archive.html">Archive</a>
+      </div>
+      
+    </div>
+    <script>
+      document.addEventListener('DOMContentLoaded', (event) => {
+        document.querySelectorAll('pre code').forEach((el) => {
+          if (!el.classList.contains('clojure')) {
+            hljs.highlightElement(el);
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

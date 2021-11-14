@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Alembic Reloads your Leiningen project.clj Dependencies</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta charset="utf-8"/>
+    <meta name="description" content="Pelure - ephemeral writing surface?"/>
+    <meta name="author" content="Hugo Duncan"/>
+    <link type="application/atom+xml" rel="alternate" href="../index.xml" title="Pelure">
+    <link rel="stylesheet" href="../style.css">
+  </head>
+  <body>
+
+    <div class="site-header">
+      <div class="wrapper">
+        <div class="site-nav">
+          <a class="page-link" href="../archive.html">All Posts</a>
+          <a class="page-link" href="https://github.com/hugoduncan/hugoduncan.github.com/discussions/categories/posts">Discuss</a>
+          <a class="page-link" href="../meta/pelure.html">About</a>
+          <a class="page-link" href="../meta/contact.html">Contact</a>
+          <a class="page-link" href="index.xml">
+            <img class="page-icon"
+                 src="https://www.svgrepo.com/show/362316/feed.svg"
+                 width="30px"/>
+          </a>
+          <a class="page-link" href="https://twitter.com/hugoduncan">
+            <img class="page-icon"
+                 src="https://www.svgrepo.com/show/11841/twitter.svg"
+                 width="30px"/>
+          </a>
+        </div>
+        <div>
+          <h1 class="site-title">
+            <a class="page-link" href="../index.html">Pelure</a>
+          </h1>
+          <p>Ephemeral musings, often about Clojure</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="wrapper">
+
+      <h1>Alembic Reloads your Leiningen project.clj Dependencies</h1>
+<p>Discuss this post <a href="https://github.com/hugoduncan/hugoduncan.github.com/discussions/categories/posts">here</a>.</p>
+<p>You're working away in a Clojure REPL, when you realise you need to add a dependency.  You add the dependency to your [leiningen][lein] <code>project.clj</code> file and then?  Instead of shutting down your REPL, loosing whatever state you have built up, you can use [Alembic][alembic] to load the new dependencies.  Simply call <code>&#40;alembic.still/load-project&#41;</code>.</p><p>Of course, it still has to work within the confines of the JVM's classloaders, so you can only add dependencies, and not modify versions or remove dependencies, but this should still cover a lot of use cases.</p><p>To use alembic on a single project, simply add it as a dependency in your <code>:dev</code> profile in <code>project.clj</code>:</p><pre><code class="clj">:profiles {:dev {:dependencies &#91;&#91;alembic &quot;0.2.0&quot;&#93;&#93;}}
+</code></pre><p>To make alembic available in all your projects, and it to the <code>:user</code> profile in <code>&#126;/.lein/profiles.clj</code> instead:</p><pre><code class="clj">{:user {:dependencies &#91;&#91;alembic &quot;0.2.0&quot;&#93;&#93;}}
+</code></pre><p>Alembic also allows you to directly add dependencies without editing your <code>project.clj</code> file, using the <code>distill</code> function.  Use this if you are just exploring libraries, for example.</p><p>Finally a big thank you to [Anthony Grimes][raynes] and the other [flatland][flatland] developers for removing classlojure's dependency on <code>useful</code>, which should make this all much more robust.</p><p>[alembic]: <a href='https://github.com/pallet/alembic#alembic'>https://github.com/pallet/alembic#alembic</a> "Alembic" [lein]: <a href='http://leiningen.org'>http://leiningen.org</a> "Leiningen" [raynes]: <a href='http://blog.raynes.me/'>http://blog.raynes.me/</a> "Raynes" [flatland]: <a href='https://github.com/flatland/'>https://github.com/flatland/</a> "flatland"</p>
+<p>Discuss this post <a href="https://github.com/hugoduncan/hugoduncan.github.com/discussions/categories/posts">here</a>.</p>
+<p><i>Published: 2013-08-29</i></p>
+
+
+      
+      <div style="margin-bottom: 20px; float: right;">
+        <a class="page-link" href="archive.html">Archive</a>
+      </div>
+      
+    </div>
+    <script>
+      document.addEventListener('DOMContentLoaded', (event) => {
+        document.querySelectorAll('pre code').forEach((el) => {
+          if (!el.classList.contains('clojure')) {
+            hljs.highlightElement(el);
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

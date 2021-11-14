@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Benchmarking Clojure Code with Criterium</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta charset="utf-8"/>
+    <meta name="description" content="Pelure - ephemeral writing surface?"/>
+    <meta name="author" content="Hugo Duncan"/>
+    <link type="application/atom+xml" rel="alternate" href="../index.xml" title="Pelure">
+    <link rel="stylesheet" href="../style.css">
+  </head>
+  <body>
+
+    <div class="site-header">
+      <div class="wrapper">
+        <div class="site-nav">
+          <a class="page-link" href="../archive.html">All Posts</a>
+          <a class="page-link" href="https://github.com/hugoduncan/hugoduncan.github.com/discussions/categories/posts">Discuss</a>
+          <a class="page-link" href="../meta/pelure.html">About</a>
+          <a class="page-link" href="../meta/contact.html">Contact</a>
+          <a class="page-link" href="index.xml">
+            <img class="page-icon"
+                 src="https://www.svgrepo.com/show/362316/feed.svg"
+                 width="30px"/>
+          </a>
+          <a class="page-link" href="https://twitter.com/hugoduncan">
+            <img class="page-icon"
+                 src="https://www.svgrepo.com/show/11841/twitter.svg"
+                 width="30px"/>
+          </a>
+        </div>
+        <div>
+          <h1 class="site-title">
+            <a class="page-link" href="../index.html">Pelure</a>
+          </h1>
+          <p>Ephemeral musings, often about Clojure</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="wrapper">
+
+      <h1>Benchmarking Clojure Code with Criterium</h1>
+<p>Discuss this post <a href="https://github.com/hugoduncan/hugoduncan.github.com/discussions/categories/posts">here</a>.</p>
+<p><p>I have released <a href="http://github.com/hugoduncan/criterium">Criterium</a>, a new project for benchmarking code in <a href="http://clojure.org">Clojure</a>.  I found Brent Broyer's <a href="http://www.ibm.com/developerworks/java/library/j-benchmark1.html">article on Java benchmarking</a> which explains many of the pitfalls of benchmarking on the JVM, and <a href="http://www.serpentine.com/blog/2009/09/29/criterion-a-new-benchmarking-library-for-haskell">Criterion</a>, a benchmarking library in Haskell.</p></p><p><p>The main issues with benchmarking on the JVM are associated with garbage collection, and with JIT compilation.  It seems from Broyer's articles that we can mitigate the effects but not completely eliminate them, and Criterium follows his advice.  Both of the above libraries use the <a href="http://en.wikipedia.org/wiki/Bootstrapping_(statistics)">bootstrap</a> technique to estimate mean execution time and provide a confidence interval, and Criterium does likewise.  At the moment the confidence intervals are biased and I still need to implement BCa or ABC to improve these.</p></p><p><p>One of the functions that I wanted to benchmark originally involved reading a file.  Criterium does not yet address clearing I/O buffer cache, and I am not sure on the best way forward on this.  On Mac OS X, the <code>purge</code> command can be used to clear the caches, and on Linux this can be achieved by writing to /proc/sys/vm/drop_caches.  On the Mac at least, this causes everything to grind to halt for about five seconds, and there are then some file reads as whatever processes are running read things in again. This sort of behaviour doesn't lend itself to inclusion in a timing loop... Any suggestions?</p></p>
+<p>Discuss this post <a href="https://github.com/hugoduncan/hugoduncan.github.com/discussions/categories/posts">here</a>.</p>
+<p><i>Published: 2010-02-19</i></p>
+
+
+      
+      <div style="margin-bottom: 20px; float: right;">
+        <a class="page-link" href="archive.html">Archive</a>
+      </div>
+      
+    </div>
+    <script>
+      document.addEventListener('DOMContentLoaded', (event) => {
+        document.querySelectorAll('pre code').forEach((el) => {
+          if (!el.classList.contains('clojure')) {
+            hljs.highlightElement(el);
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
