@@ -1,78 +1,62 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
   <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
-    <link rel="stylesheet" 
-      href="//netdna.bootstrapcdn.com/bootstrap/3.0.0-rc1/css/bootstrap.min.css"
-      media="screen">
-<link rel="stylesheet" href="/css/pelure.css">
-
+    <title>complexity</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta charset="utf-8"/>
+    <meta name="description"
+          content="Pelure - ephemeral writing surface?"/>
+    <meta name="author" content="Hugo Duncan"/>
+    <link type="application/atom+xml" rel="alternate" href="../../index.xml" title="Pelure">
+    <link rel="stylesheet" href="../../style.css">
   </head>
   <body>
-    <div class="container">
-      <div class="row">
-  <div class="col-0 col-sm-2 col-lg-2"></div>
-  <div class="col-12 col-sm-8 col-lg-8">
-    <div class="navbar">
-      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
-      <span class="icon-bar"></span>
-      <span class="icon-bar"></span>
-      <span class="icon-bar"></span>
-    </button>
-    <a class="navbar-brand" href="/meta/pelure">Pelure</a>
-    <div class="nav-collapse collapse">
-      <ul class="nav navbar-nav">
-        <li><a href="/post">Posts</a></li>
-        <li><a href="/tags">Tags</a></li>
-      </ul>
-      <ul class="nav navbar-nav pull-right">
-        <li><a href="/meta/contact">Contact</a></li>
-      </ul>
-    </div>
-    </div>
-  </div>
-</div>
 
-      <div class="row"> 
-  <div class="col-0 col-sm-2 col-lg-2"></div>
-  <div id="top" class="col-12 col-sm-8 col-lg-8">
-     
-      <h1>Complexity<a href="http://hugoduncan.github.com/tags/complexity/index.xml">&nbsp;<img src="/images/feed_mini.gif"></a></h1>
-      
-        <li class="list-unstyled">
-           <span class="post-date">20 March 2009</span>
-            &nbsp;<a href="http://hugoduncan.github.com/post/frameworks_and_productivity">Frameworks and Productivity</a>
-        </li>
-      
+    <div class="site-header">
+      <div class="wrapper">
+        <div class="site-nav">
+          <a class="page-link" href="../../archive.html">All Posts</a>
+          <a class="page-link" href="https://github.com/hugoduncan/hugoduncan.github.com/discussions/categories/posts">Discuss</a>
+          <a class="page-link" href="../../meta/pelure.html">About</a>
+          <a class="page-link" href="../../meta/contact.html">Contact</a>
+          <a class="page-link" href="index.xml">
+            <img class="page-icon"
+                 src="https://www.svgrepo.com/show/362316/feed.svg"
+                 width="30px"/>
+          </a>
+          <a class="page-link" href="https://twitter.com/hugoduncan">
+            <img class="page-icon"
+                 src="https://www.svgrepo.com/show/11841/twitter.svg"
+                 width="30px"/>
+          </a>
         </div>
-</div>
-<script src='http://www.google-analytics.com/ga.js' type='text/javascript'>
-</script>
-<script type="text/javascript">
-try {
-var pageTracker = _gat._getTracker("UA-3688366-1");
-pageTracker._trackPageview();
-} catch(err) {}</script>
-     
+        <div>
+          <h1 class="site-title">
+            <a class="page-link" href="../../index.html">Pelure</a>
+          </h1>
+          <p>Ephemeral musings, often about Clojure</p>
+        </div>
+      </div>
     </div>
-    <div class="row"> 
-  <div class="col-0 col-sm-2 col-lg-2"></div>
-  <div id="top" class="col-12 col-sm-8 col-lg-8">
-     
-<footer id="footer">
-  <p class="pull-right"><a href="#top">Back to top</a></p>
-</footer>
-  </div>
-</div>
-<script src='http://www.google-analytics.com/ga.js' type='text/javascript'>
-</script>
-<script type="text/javascript">
-try {
-var pageTracker = _gat._getTracker("UA-3688366-1");
-pageTracker._trackPageview();
-} catch(err) {}</script>
-     
 
-   </body>
+    <div class="wrapper">
+
+      <div><h1><a href="post/frameworks_and_productivity.html">Frameworks and Productivity</a></h1><p><p>Yesterday was frustrating; I spent far too long trying to debug some problems in a Rails application I am writing.  Rails, and frameworks in general, are supposed to give us improved productivity by hiding the complexity and mechanics of the task at hand.  This is great as long as the framework behaves as expected, but invariably causes problems when things go wrong.</p> <h2>The missing field</h2> My application uses associations, and I had a <code>belongs<i>to</code> association that was supposed to be populated in a <code>before</i>validation<i>on</i>create</code> callback.  In my tests I noticed that the linked model was not being instantiated.  After much searching, it turns out I had forgotten to create the foreign key field.  Unfortunately Rails was silent on this issue and the <code>belongs_to</code> association code seemed to execute quite happily without the field. <h2>Can't dup NilClass</h2> My models also use <code>has_many</code> associations, which I could populate with no problems.  When I tried to access the association though, I kept getting <code>Can't dup NilClass</code> errors.  This one turned out to be an issue with the generated <code>collection.build</code> method.  As noted in the documentation by the somewhat cryptic <cite>Note: This only works if an associated object already exists, not if it‘s nil!</cite>, the method fails if the collection is empty (at least that's what I think it means). Explicitly instantiating the associated model and then adding it to the collection fixed the problem. <h2>Bad choice of name</h2> <p>In my application I had a model named <code>Target</code>, which meant that models that associate with <code>Target</code>, such as my <code>TargetProfile</code> model, have a <code>target</code> attribute.</p>  Unfortunately the <code>target</code> attribute in <code>TargetProfile</code> always returned the instance of <code>TargetProfile</code> - not quite what is expected.  The problem was caused by the fact that <code>ActiveRecord</code>'s <code>AssociationProxy</code>, used to implement associations between models, has a <code>target</code> attribute.  The documentation contains another warning <cite>Don‘t create associations that have the same name as instance methods of ActiveRecord::Base</cite>, but mentions nothing of <code>AssociationProxy</code>, which isn't even part of the documented api.  I call this broken encapsulation. <h2>The Rails Way</h2> Rails heavily promotes testing and Test Driven Development (TDD), which is linked to the "fail early, fail fast" paradigm.  It seems strange that known issues (as partially documented) are allowed to persist and cause silent failures.  All the issues above could have been flagged by Rails. <h2>Conclusion</h2> I am not picking on Rails, however, as these type of issues seem to occur in many frameworks.  No software is bug free, and a framework has to work hard to hide the complexity and mechanics of its domain.  When things go wrong, we are always left questioning whether the issue is in the framework or in our application and we invariably end up getting to know the implementation details of the framework, which does little for our productivity.</p><p>Discuss this post <a href="https://github.com/hugoduncan/hugoduncan.github.com/discussions/categories/posts">here</a>.</p><p><i>Published: 2009-03-20</i></p></div>
+
+      
+      <div style="margin-bottom: 20px; float: right;">
+        <a class="page-link" href="archive.html">Archive</a>
+      </div>
+      
+    </div>
+    <script>
+      document.addEventListener('DOMContentLoaded', (event) => {
+        document.querySelectorAll('pre code').forEach((el) => {
+          if (!el.classList.contains('clojure')) {
+            hljs.highlightElement(el);
+          }
+        });
+      });
+    </script>
+  </body>
 </html>

@@ -1,65 +1,29 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<feed xmlns='http://www.w3.org/2005/Atom' xml:lang='en-us'>
- <title>pelure</title>
- <id>http://hugoduncan.github.com/</id>
- <link href='./' />
- <link rel='self' href='' />
- <logo>rsslogo.jpg</logo>
- <icon>/favicon.ico</icon>
- <author><name>Hugo Duncan</name></author>
- <subtitle>Pelure </subtitle>
- <rights>All content written by Hugo Duncan and photos by Hugo Duncan Copyright Hugo Duncan, all rights reserved.</rights> 
- <updated>2013-10-28T00:00:00Z</updated>
-
-
-<entry xml:base="http://hugoduncan.github.com/post/configure_nagios_using_pallet"><title>Configure Nagios using Pallet</title><link href="http://hugoduncan.github.com/post/configure_nagios_using_pallet"/><id>http://hugoduncan.github.com/post/configure_nagios_using_pallet</id><published>2010-08-18T00:00:00Z</published><updated>2010-08-18T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;Basic Nagios support was recently added to &lt;a href=&#34;http://github.com/hugoduncan/pallet&#34;&gt;pallet&lt;/a&gt;, and while very simple to use, this blog post should make it even simpler. The overall philosophy is to configure the nagios service monitoring definitions along with the service itself, rather than have monolithic nagios configuration, divorced from the configuration of the various nodes.&lt;/p&gt;
-
-&lt;p&gt;As an example, we can configure a machine to have it&#39;s ssh service, CPU load, number of processes and number of users monitored. Obviously, you would normally be monitoring several different types of nodes, but there is no difference as far as pallet is concerned.&lt;/p&gt;
-
-&lt;p&gt;We start by requiring various pallet components.  These would normally be part of a &lt;code&gt;ns&lt;/code&gt; declaration, but are provided here for ease of use at the REPL.&lt;/p&gt;
-
-&lt;pre class=&#34;clojure&#34;&gt;
-(require
-  &#39;[pallet.crate.automated-admin-user
-    :as admin-user]
-  &#39;[pallet.crate.iptables :as &#39;iptables]
-  &#39;[pallet.crate.ssh :as ssh]
-  &#39;[pallet.crate.nagios-config
-     :as nagios-config]
-  &#39;[pallet.crate.nagios :as nagios]
-  &#39;[pallet.crate.postfix :as postfix]
-  &#39;[pallet.resource.service :as service])
-&lt;/pre&gt;
-
-&lt;h2&gt;Node to be Monitored by Nagios&lt;/h2&gt;
-
-&lt;p&gt;Now we define the node to be monitored. We set up a machine that has &lt;abbr&gt;SSH&lt;/abbr&gt; running, and configure &lt;code&gt;iptables&lt;/code&gt; to allow access to &lt;abbr&gt;SSH&lt;/abbr&gt;, with a throttled connection rate (six connections/minute by default).&lt;/p&gt;
-
-&lt;pre class=&#34;clojure&#34;&gt;
-(pallet.core/defnode monitored
-  []
-  :bootstrap [(admin-user/automated-admin-user)]
-  :configure [;; set iptables for restricted access
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Pelure</title>
+  <link href="http://hugoduncan.org/index.xml" rel="self"/>
+  <link href="http://hugoduncan.org/"/>
+  <updated>2021-11-15T01:45:47+00:00</updated>
+  <id>http://hugoduncan.org/</id>
+  <author>
+    <name>Hugo Duncan</name>
+  </author>
+  <entry>
+    <id>http://hugoduncan.org/post/configure_nagios_using_pallet.html</id>
+    <link href="http://hugoduncan.org/post/configure_nagios_using_pallet.html"/>
+    <title>Configure Nagios using Pallet</title>
+    <summary>Basic Nagios support was recently added to pallet, and while very simple to use, this blog post should make it even simpler. The overall philosophy is to configure the nagios service monitoring definitions along with the service itself, rather than have monolithic nagios configuration, divorced from the configuration of the various nodes.</summary>
+    <updated>2010-08-18T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p><p>Basic Nagios support was recently added to <a href="http://github.com/hugoduncan/pallet">pallet</a>, and while very simple to use, this blog post should make it even simpler. The overall philosophy is to configure the nagios service monitoring definitions along with the service itself, rather than have monolithic nagios configuration, divorced from the configuration of the various nodes.</p></p><p><p>As an example, we can configure a machine to have it's ssh service, CPU load, number of processes and number of users monitored. Obviously, you would normally be monitoring several different types of nodes, but there is no difference as far as pallet is concerned.</p></p><p><p>We start by requiring various pallet components.  These would normally be part of a <code>ns</code> declaration, but are provided here for ease of use at the REPL.</p></p><p><pre class="clojure"> (require   '[pallet.crate.automated-admin-user
+    :as admin-user]   '[pallet.crate.iptables :as 'iptables]   '[pallet.crate.ssh :as ssh]   '[pallet.crate.nagios-config
+     :as nagios-config]   '[pallet.crate.nagios :as nagios]   '[pallet.crate.postfix :as postfix]   '[pallet.resource.service :as service]) </pre></p><p><h2>Node to be Monitored by Nagios</h2></p><p><p>Now we define the node to be monitored. We set up a machine that has <abbr>SSH</abbr> running, and configure <code>iptables</code> to allow access to <abbr>SSH</abbr>, with a throttled connection rate (six connections/minute by default).</p></p><p><pre class="clojure"> (pallet.core/defnode monitored   []   :bootstrap [(admin-user/automated-admin-user)]   :configure [;; set iptables for restricted access
               (iptables/iptables-accept-icmp)
               (iptables/iptables-accept-established)
               ;; allow connections to ssh
               ;; but throttle connection requests
               (ssh/iptables-throttle)
-              (ssh/iptables-accept)])
-&lt;/pre&gt;
-
-&lt;p&gt;Monitoring of the &lt;abbr&gt;SSH&lt;/abbr&gt; service is configured by simply adding
-&lt;code&gt;(ssh/nagios-monitor)&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;Remote monitoring is implemented using nagios&#39; &lt;code&gt;nrpe&lt;/code&gt; plugin, which we add with &lt;code&gt;(nagios-config/nrpe-client)&lt;/code&gt;.  To make nrpe accessible to the nagios server, we open the that the nrpe agent runs on using &lt;code&gt;(nagios-config/nrpe-client-port)&lt;/code&gt;, which restricts access to the nagios server node. We also add a phase, :restart-nagios, that can be used to restart the nrpe agent.&lt;/p&gt;
-
-&lt;p&gt;Pallet comes with some configured nrpe checks, and we add &lt;code&gt;nrpe-check-load&lt;/code&gt;, &lt;code&gt;nrpe-check-total-proces&lt;/code&gt; and &lt;code&gt;nrpe-check-users&lt;/code&gt;. The final configuration looks like this:&lt;/p&gt;
-
-&lt;pre class=&#34;clojure&#34;&gt;
-(pallet.core/defnode monitored
-  []
-  :bootstrap [(admin-user/automated-admin-user)]
-  :configure [;; set iptables for restricted access
+              (ssh/iptables-accept)]) </pre></p><p><p>Monitoring of the <abbr>SSH</abbr> service is configured by simply adding <code>(ssh/nagios-monitor)</code>.</p></p><p><p>Remote monitoring is implemented using nagios' <code>nrpe</code> plugin, which we add with <code>(nagios-config/nrpe-client)</code>.  To make nrpe accessible to the nagios server, we open the that the nrpe agent runs on using <code>(nagios-config/nrpe-client-port)</code>, which restricts access to the nagios server node. We also add a phase, :restart-nagios, that can be used to restart the nrpe agent.</p></p><p><p>Pallet comes with some configured nrpe checks, and we add <code>nrpe-check-load</code>, <code>nrpe-check-total-proces</code> and <code>nrpe-check-users</code>. The final configuration looks like this:</p></p><p><pre class="clojure"> (pallet.core/defnode monitored   []   :bootstrap [(admin-user/automated-admin-user)]   :configure [;; set iptables for restricted access
               (iptables/iptables-accept-icmp)
               (iptables/iptables-accept-established)
               ;; allow connections to ssh
@@ -75,96 +39,76 @@
               ;; add some remote checks
               (nagios-config/nrpe-check-load)
               (nagios-config/nrpe-check-total-procs)
-              (nagios-config/nrpe-check-users)]
-  :restart-nagios [(service/service
-                    &#34;nagios-nrpe-server&#34;
-                    :action :restart)])
-&lt;/pre&gt;
-
-&lt;p&gt;&lt;h2&gt;Nagios Server&lt;/h2&gt;
-&lt;p&gt;We now configure the nagios server node. The nagios server is installed with &lt;code&gt;(nagios/nagios &amp;ldquo;nagiospwd&amp;rdquo;)&lt;/code&gt;, specifying the password for the nagios web interface, and add a phase, :restart-nagios, that can be used to restart nagios.&lt;/p&gt;&lt;/p&gt;
-
-&lt;p&gt;Nagios also requires a &lt;abbr&gt;MTA&lt;/abbr&gt; for notifications, and here we install postfix.  We add a contact, which we make a member of the &#34;admins&#34; contact group, which is notified as part of the default host and service templates.&lt;/p&gt;
-
-&lt;pre class=&#34;clojure&#34;&gt;
-(pallet.core/defnode nagios
-  []
-  :bootstrap [(admin-user/automated-admin-user)]
-  :configure [;; restrict access
+              (nagios-config/nrpe-check-users)]   :restart-nagios [(service/service
+                    "nagios-nrpe-server"
+                    :action :restart)]) </pre></p><p><h2>Nagios Server</h2> <p>We now configure the nagios server node. The nagios server is installed with <code>(nagios/nagios "nagiospwd")</code>, specifying the password for the nagios web interface, and add a phase, :restart-nagios, that can be used to restart nagios.</p></p><p><p>Nagios also requires a <abbr>MTA</abbr> for notifications, and here we install postfix.  We add a contact, which we make a member of the "admins" contact group, which is notified as part of the default host and service templates.</p></p><p><pre class="clojure"> (pallet.core/defnode nagios   []   :bootstrap [(admin-user/automated-admin-user)]   :configure [;; restrict access
               (iptables/iptables-accept-icmp)
               (iptables/iptables-accept-established)
               (ssh/iptables-throttle)
               (ssh/iptables-accept)
               ;; configure MTA
               (postfix/postfix
-               &#34;pallet.org&#34; :internet-site)
+               "pallet.org" :internet-site)
               ;; install nagios
-              (nagios/nagios &#34;nagiospwd&#34;)
+              (nagios/nagios "nagiospwd")
               ;; allow access to nagios web site
               (iptables/iptables-accept-port 80)
               ;; configure notifications
               (nagios/contact
-              {:contact_name &#34;hugo&#34;
-               :service_notification_period &#34;24x7&#34;
-               :host_notification_period &#34;24x7&#34;
-               :service_notification_options
-                  &#34;w,u,c,r&#34;
-               :host_notification_options
-                  &#34;d,r&#34;
-               :service_notification_commands
-                 &#34;notify-service-by-email&#34;
-               :host_notification_commands
-                  &#34;notify-host-by-email&#34;
-               :email &#34;my.email@my.domain&#34;
-               :contactgroups [:admins]})]
-  :restart-nagios [(service/service &#34;nagios3&#34;
-                     :action :restart)])
-&lt;/pre&gt;
-
-&lt;p&gt;&lt;h2&gt;Trying it out&lt;/h2&gt;
-&lt;p&gt;That&amp;rsquo;s it. To fire up both machines, we use pallet&amp;rsquo;s &lt;code&gt;converge&lt;/code&gt; command.&lt;/p&gt;&lt;/p&gt;
-
-&lt;pre class=&#34;clojure&#34;&gt;
-(pallet.core/converge
-  {monitored 1 nagios 1} service
-  :configure :restart-nagios)
-&lt;/pre&gt;
-
-&lt;p&gt;The nagios web interface is then accessible on the &lt;code&gt;nagios&lt;/code&gt; node with the &lt;code&gt;nagiosadmin&lt;/code&gt; user and specified password.  Real world usage would probably have several different monitored configurations, and restricted access to the &lt;code&gt;nagios&lt;/code&gt; node.&lt;/p&gt;
-
-&lt;p&gt;&lt;h2&gt;Still to do&amp;hellip;&lt;/h2&gt;
-&lt;p&gt;Support for nagios is not complete (e.g. remote command configuration still needs to be added, and it has only been tested on Ubuntu), but I would appreciate any feedback on the general approach.&lt;/p&gt;&lt;/p&gt;
-</content></entry>
-
-<entry xml:base="http://hugoduncan.github.com/post/a_clojure_library_for_fluiddb"><title>A Clojure library for FluidDB</title><link href="http://hugoduncan.github.com/post/a_clojure_library_for_fluiddb"/><id>http://hugoduncan.github.com/post/a_clojure_library_for_fluiddb</id><published>2009-09-13T00:00:00Z</published><updated>2009-09-13T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;&lt;a href=&#34;http://fluidinfo.com/&#34;&gt;FluidDB&lt;/a&gt;, a &#34;cloud&#34; based triple-store, where the objects are immutable and can be tagged by anyone, launched about a month ago. As a another step to getting up to speed with &lt;a href=&#34;http://clojure.org&#34;&gt;Clojure&lt;/a&gt;, I decided to write a client library, and &lt;a href=&#34;http://github.com/hugoduncan/clj-fluiddb&#34;&gt;clj-fluiddb&lt;/a&gt; was born.  The code was very simple, especially as I could base the library on &lt;a href=&#34;http://github.com/hdurer/cl-fluiddb&#34;&gt;cl-fluiddb&lt;/a&gt;, a Common-Lisp library.&lt;/p&gt;
-&lt;p&gt;I have some ideas I want to try out using FluidDB.  It&#39;s permission system is one of it&#39;s &lt;a href=&#34;http://abouttag.blogspot.com/2009/09/permissions-worth-getting-excited-about.html&#34;&gt;best features&lt;/a&gt;, together with the ability to &lt;a href=&#34;http://www.xavierllora.net/2009/08/25/liquid-rdf-meandering-in-fluiddb/&#34;&gt;use it for RDF like triples&lt;/a&gt; means that it could provide a usable basis for growing the semantic web.  My ideas are less grandiose, but might take as long to develop, we&#39;ll see...&lt;/p&gt;
-</content></entry>
-
-<entry xml:base="http://hugoduncan.github.com/post/product_development_flow"><title>Product Development Flow</title><link href="http://hugoduncan.github.com/post/product_development_flow"/><id>http://hugoduncan.github.com/post/product_development_flow</id><published>2009-08-30T00:00:00Z</published><updated>2009-08-30T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;I have spent the last few months with my latest start-up, &lt;a href=&#34;http://artfox.com&#34;&gt;Artfox&lt;/a&gt;, where I have been trying to push home some of the lean start-up advice expounded by &lt;a href=&#34;http://startuplessonslearned.blogspot.com&#34;&gt;Eric Ries&lt;/a&gt; and &lt;a href=&#34;http://steveblank.com/&#34;&gt;Steve Blank&lt;/a&gt;.  I was hoping that &#34;The Principles of Product Development Flow&#34;, by &lt;a href=&#34;http://www.reinertsenassociates.com/&#34;&gt;Donald Reinertsen&lt;/a&gt;, might help me in making a persuasive argument for some of the more troublesome concepts around minimum viable product and ensuring that feedback loops are in place with your customers as soon as possible. Unfortunately, I don&#39;t think that this is the book if you are looking for immediate, practical prescription, but it is a thought provoking, rigorous view of the product development process, that pulls together ideas from manufacturing, telecommunications and the Marines.&lt;/p&gt;
-
-&lt;p&gt;Perhaps Reinertsen&#39;s most accessible advice is that decisions in product development should be based on a strong economic foundation, pulled together by a concept of the &#34;Cost of Delay&#34;.  Rather than on relying on prescriptions for each of several interconnected metrics, such as efficiency and utilisation, Reinertsen suggests that economics will provide different targets for each of these metrics depending on the costs of the project at hand.&lt;/p&gt;
-
-&lt;p&gt;His proposition that product development organisations should measure &#34;Design in Process&#34;, similar to the idea of &#34;Intellectual Working In Process&#34; proposed by Thomas Stewart in his book &#34;Intellectual Capital&#34;, is what allows him to make the parallels to manufacturing and queueing theory and enables the application of the wide body of work in these fields to product development.&lt;/p&gt;
-
-&lt;p&gt;His practical advice, such as working in small batches and using a cadence for activities that require coordination, will come as no surprise to practitioners of agile development, and Reinertsen provides clear reasoning of why these practices work.&lt;/p&gt;
-
-&lt;p&gt;During my time at Alcan, and later Novelis, I gave a lot of thought to scheduling, queues and cycle times in a transformation based manufacturing environment, and I found that this had many parallels to his view of the product development process, and little in common with what Reinertsen describes as manufacturing, which seems to be limited to high volume assembly type operations.  I found many ideas that could be usefully taken back to a manufacturing context.&lt;/p&gt;
-
-&lt;p&gt;If you look at this book as an introduction to scheduling, queueing theory and the reason&#39;s behind some of agile development practices, then you will not be disappointed.&lt;/p&gt;
-</content></entry>
-
-<entry xml:base="http://hugoduncan.github.com/post/rails_environments_for_lisp"><title>Rails Environments For Lisp</title><link href="http://hugoduncan.github.com/post/rails_environments_for_lisp"/><id>http://hugoduncan.github.com/post/rails_environments_for_lisp</id><published>2009-04-07T00:00:00Z</published><updated>2009-04-07T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;The facility of Ruby on Rails&#39; test, development and production environments is one of those features that goes almost unremarked, but which makes using rails more pleasant.  No doubt everyone has their own solution for this in other environments, and while I am sure Common Lisp is not lacking in examples, I have not seen an idiomatic implementation.  In developing &lt;a href=&#34;http://github.com/hugoduncan/cl-blog-generator&#34;&gt;cl-blog-generator&lt;/a&gt; I came up with the following solution.&lt;/p&gt;
-&lt;p&gt;Configuration in Common Lisp usually depends on using special variables, which can be rebound across any block of code.  I started by putting the configuration of my blog into s-expressions in files, but got tired of specifying the file names for different blogs.  Instead, I created an association list for each configuration, and registered each using a symbol as key.  I can now switch to a given environment by specifying the symbol for the environment.
-&lt;/p&gt;
-&lt;p&gt;The implementation (in &lt;code&gt;src/configure.lisp&lt;/code&gt; under the &lt;a href=&#34;http://github.com/hugoduncan/cl-blog-generator&#34;&gt;GitHub repository&lt;/a&gt;) consists of two functions and a special variable.  &lt;code&gt;SET-ENVIRONMENT&lt;/code&gt; is used to register an environment, and &lt;code&gt;CONFIGURE&lt;/code&gt; is used to make an environment active.  The environments are stored in &lt;code&gt;*ENVIRONMENTS*&lt;/code&gt; special as an association list.  An example of setting up the configurations can be seen in the &lt;code&gt;config.lisp&lt;/code&gt; file.  In creating the configurations I drop the &#39;*&#39; from the special names.&lt;/p&gt;
-&lt;p&gt;I&#39;m relatively new to CL, so let me now if I have overlooked anything.  Writing this post makes me think I am missing a &lt;code&gt;WITH-ENVIRONMENT&lt;/code&gt; macro ...&lt;/p&gt;
-</content></entry>
-
-<entry xml:base="http://hugoduncan.github.com/post/cl_blog_generator_gets_comments"><title>cl-blog-generator Gets Comments</title><link href="http://hugoduncan.github.com/post/cl_blog_generator_gets_comments"/><id>http://hugoduncan.github.com/post/cl_blog_generator_gets_comments</id><published>2009-03-31T00:00:00Z</published><updated>2009-03-31T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;I have now added a comment system to &lt;a href=&#34;http://github.com/hugoduncan/cl-blog-generator&#34;&gt;cl-blog-generator&lt;/a&gt;.  My requirements were for a simple, low overhead, commenting system, preferable one that could possibly be fully automated.&lt;/p&gt;
-
-&lt;p&gt;The comment system was inspired by &lt;a href=&#34;http://www.steve.org.uk/Software/chronicle/&#34;&gt;Chronicle&lt;/a&gt;&#39;s, with a slight modification in approach - the comments are never saved on the web server, and are just sent by email to a dedicated email address.  Spam filtering is delegated to the whatever spam filtering is implemented on the mail server, or in your email client.  The comment emails are then processed in CL using &lt;a href=&#34;http://common-lisp.net/project/mel-base/&#34;&gt;mel-base&lt;/a&gt; and written to the local filesystem.  Moderation can optionally occur on the CL side, if that is preferable to using the email client.&lt;/p&gt;
-
-&lt;p&gt;There is still some work left to do - I would like to be able to switch off comments on individual posts, either on demand on after a default time period - but I thought I would let real world usage drive my development.&lt;/p&gt;
-</content></entry>
-
+              {:contact<i>name "hugo"
+               :service</i>notification<i>period "24x7"
+               :host</i>notification<i>period "24x7"
+               :service</i>notification<i>options
+                  "w,u,c,r"
+               :host</i>notification<i>options
+                  "d,r"
+               :service</i>notification<i>commands
+                 "notify-service-by-email"
+               :host</i>notification_commands
+                  "notify-host-by-email"
+               :email "my.email@my.domain"
+               :contactgroups [:admins]})]   :restart-nagios [(service/service "nagios3"
+                     :action :restart)]) </pre></p><p><h2>Trying it out</h2> <p>That's it. To fire up both machines, we use pallet's <code>converge</code> command.</p></p><p><pre class="clojure"> (pallet.core/converge   {monitored 1 nagios 1} service   :configure :restart-nagios) </pre></p><p><p>The nagios web interface is then accessible on the <code>nagios</code> node with the <code>nagiosadmin</code> user and specified password.  Real world usage would probably have several different monitored configurations, and restricted access to the <code>nagios</code> node.</p></p><p><h2>Still to do...</h2> <p>Support for nagios is not complete (e.g. remote command configuration still needs to be added, and it has only been tested on Ubuntu), but I would appreciate any feedback on the general approach.</p></p>]]>
+    </content>
+  </entry>
+  <entry>
+    <id>http://hugoduncan.org/post/a_clojure_library_for_fluiddb.html</id>
+    <link href="http://hugoduncan.org/post/a_clojure_library_for_fluiddb.html"/>
+    <title>A Clojure library for FluidDB</title>
+    <summary>I have released Criterium, a new project for benchmarking code in Clojure.  I found Brent Broyer's article on Java benchmarking which explains many of the pitfalls of benchmarking on the JVM, and Criterion, a benchmarking library in Haskell.</summary>
+    <updated>2009-09-13T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p><p><a href="http://fluidinfo.com/">FluidDB</a>, a "cloud" based triple-store, where the objects are immutable and can be tagged by anyone, launched about a month ago. As a another step to getting up to speed with <a href="http://clojure.org">Clojure</a>, I decided to write a client library, and <a href="http://github.com/hugoduncan/clj-fluiddb">clj-fluiddb</a> was born.  The code was very simple, especially as I could base the library on <a href="http://github.com/hdurer/cl-fluiddb">cl-fluiddb</a>, a Common-Lisp library.</p> <p>I have some ideas I want to try out using FluidDB.  It's permission system is one of it's <a href="http://abouttag.blogspot.com/2009/09/permissions-worth-getting-excited-about.html">best features</a>, together with the ability to <a href="http://www.xavierllora.net/2009/08/25/liquid-rdf-meandering-in-fluiddb/">use it for RDF like triples</a> means that it could provide a usable basis for growing the semantic web.  My ideas are less grandiose, but might take as long to develop, we'll see...</p></p>]]>
+    </content>
+  </entry>
+  <entry>
+    <id>http://hugoduncan.org/post/product_development_flow.html</id>
+    <link href="http://hugoduncan.org/post/product_development_flow.html"/>
+    <title>Product Development Flow</title>
+    <summary>I have spent the last few months with my latest start-up, Artfox, where I have been trying to push home some of the lean start-up advice expounded by Eric Lie's and Steve Blank.  I was hoping that 'The Principles of Product Development Flow', by Donald Reinertsen, might help me in making a persuasive argument for some of the more troublesome concepts around minimum viable product and ensuring that feedback loops are in place with your customers as soon as possible. Unfortunately, I don't think that this is the book if you are looking for immediate, practical prescription, but it is a thought provoking, rigorous view of the product development process, that pulls together ideas from manufacturing, telecommunications and the Marines.</summary>
+    <updated>2009-08-30T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p><p>I have spent the last few months with my latest start-up, <a href="http://artfox.com">Artfox</a>, where I have been trying to push home some of the lean start-up advice expounded by <a href="http://startuplessonslearned.blogspot.com">Eric Ries</a> and <a href="http://steveblank.com/">Steve Blank</a>.  I was hoping that "The Principles of Product Development Flow", by <a href="http://www.reinertsenassociates.com/">Donald Reinertsen</a>, might help me in making a persuasive argument for some of the more troublesome concepts around minimum viable product and ensuring that feedback loops are in place with your customers as soon as possible. Unfortunately, I don't think that this is the book if you are looking for immediate, practical prescription, but it is a thought provoking, rigorous view of the product development process, that pulls together ideas from manufacturing, telecommunications and the Marines.</p></p><p><p>Perhaps Reinertsen's most accessible advice is that decisions in product development should be based on a strong economic foundation, pulled together by a concept of the "Cost of Delay".  Rather than on relying on prescriptions for each of several interconnected metrics, such as efficiency and utilisation, Reinertsen suggests that economics will provide different targets for each of these metrics depending on the costs of the project at hand.</p></p><p><p>His proposition that product development organisations should measure "Design in Process", similar to the idea of "Intellectual Working In Process" proposed by Thomas Stewart in his book "Intellectual Capital", is what allows him to make the parallels to manufacturing and queueing theory and enables the application of the wide body of work in these fields to product development.</p></p><p><p>His practical advice, such as working in small batches and using a cadence for activities that require coordination, will come as no surprise to practitioners of agile development, and Reinertsen provides clear reasoning of why these practices work.</p></p><p><p>During my time at Alcan, and later Novelis, I gave a lot of thought to scheduling, queues and cycle times in a transformation based manufacturing environment, and I found that this had many parallels to his view of the product development process, and little in common with what Reinertsen describes as manufacturing, which seems to be limited to high volume assembly type operations.  I found many ideas that could be usefully taken back to a manufacturing context.</p></p><p><p>If you look at this book as an introduction to scheduling, queueing theory and the reason's behind some of agile development practices, then you will not be disappointed.</p></p>]]>
+    </content>
+  </entry>
+  <entry>
+    <id>http://hugoduncan.org/post/rails_environments_for_lisp.html</id>
+    <link href="http://hugoduncan.org/post/rails_environments_for_lisp.html"/>
+    <title>Rails Environments For Lisp</title>
+    <summary>The facility of Ruby on Rails' test, development and production environments is one of those features that goes almost unremarked, but which makes using rails more pleasant.  No doubt everyone has their own solution for this in other environments, and while I am sure Common Lisp is not lacking in examples, I have not seen an idiomatic implementation.  In developing cl-blog-generator I came up with the following solution.</summary>
+    <updated>2009-04-07T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p><p>The facility of Ruby on Rails' test, development and production environments is one of those features that goes almost unremarked, but which makes using rails more pleasant.  No doubt everyone has their own solution for this in other environments, and while I am sure Common Lisp is not lacking in examples, I have not seen an idiomatic implementation.  In developing <a href="http://github.com/hugoduncan/cl-blog-generator">cl-blog-generator</a> I came up with the following solution.</p> <p>Configuration in Common Lisp usually depends on using special variables, which can be rebound across any block of code.  I started by putting the configuration of my blog into s-expressions in files, but got tired of specifying the file names for different blogs.  Instead, I created an association list for each configuration, and registered each using a symbol as key.  I can now switch to a given environment by specifying the symbol for the environment. </p> <p>The implementation (in <code>src/configure.lisp</code> under the <a href="http://github.com/hugoduncan/cl-blog-generator">GitHub repository</a>) consists of two functions and a special variable.  <code>SET-ENVIRONMENT</code> is used to register an environment, and <code>CONFIGURE</code> is used to make an environment active.  The environments are stored in <code><em>ENVIRONMENTS</em></code> special as an association list.  An example of setting up the configurations can be seen in the <code>config.lisp</code> file.  In creating the configurations I drop the '*' from the special names.</p> <p>I'm relatively new to CL, so let me now if I have overlooked anything.  Writing this post makes me think I am missing a <code>WITH-ENVIRONMENT</code> macro ...</p></p>]]>
+    </content>
+  </entry>
+  <entry>
+    <id>http://hugoduncan.org/post/cl_blog_generator_gets_comments.html</id>
+    <link href="http://hugoduncan.org/post/cl_blog_generator_gets_comments.html"/>
+    <title>cl-blog-generator Gets Comments</title>
+    <summary>I have now added a comment system to cl-blog-generator.  My requirements were for a simple, low overhead, commenting system, preferable one that could possibly be fully automated.</summary>
+    <updated>2009-03-31T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p><p>I have now added a comment system to <a href="http://github.com/hugoduncan/cl-blog-generator">cl-blog-generator</a>.  My requirements were for a simple, low overhead, commenting system, preferable one that could possibly be fully automated.</p></p><p><p>The comment system was inspired by <a href="http://www.steve.org.uk/Software/chronicle/">Chronicle</a>'s, with a slight modification in approach - the comments are never saved on the web server, and are just sent by email to a dedicated email address.  Spam filtering is delegated to the whatever spam filtering is implemented on the mail server, or in your email client.  The comment emails are then processed in CL using <a href="http://common-lisp.net/project/mel-base/">mel-base</a> and written to the local filesystem.  Moderation can optionally occur on the CL side, if that is preferable to using the email client.</p></p><p><p>There is still some work left to do - I would like to be able to switch off comments on individual posts, either on demand on after a default time period - but I thought I would let real world usage drive my development.</p></p>]]>
+    </content>
+  </entry>
 </feed>

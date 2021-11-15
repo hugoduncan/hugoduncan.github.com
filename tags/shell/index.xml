@@ -1,117 +1,24 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<feed xmlns='http://www.w3.org/2005/Atom' xml:lang='en-us'>
- <title>pelure</title>
- <id>http://hugoduncan.github.com/</id>
- <link href='./' />
- <link rel='self' href='' />
- <logo>rsslogo.jpg</logo>
- <icon>/favicon.ico</icon>
- <author><name>Hugo Duncan</name></author>
- <subtitle>Pelure </subtitle>
- <rights>All content written by Hugo Duncan and photos by Hugo Duncan Copyright Hugo Duncan, all rights reserved.</rights> 
- <updated>2013-10-28T00:00:00Z</updated>
-
-
-<entry xml:base="http://hugoduncan.github.com/post/shell_scripting_in_clojure_with_pallet"><title>Shell Scripting in Clojure with Pallet</title><link href="http://hugoduncan.github.com/post/shell_scripting_in_clojure_with_pallet"/><id>http://hugoduncan.github.com/post/shell_scripting_in_clojure_with_pallet</id><published>2010-05-03T00:00:00Z</published><updated>2010-05-03T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;Let&#39;s face it, many of us hate writing shell scripts, and with good
-reason. Personally, it&#39;s not so much the shell language itself that puts me off,
-but organising everything around it; how do you deploy your scripts, how do you
-arrange to call other scripts, how do you manage the dependencies between your
-scripts?  &lt;a href=&#34;http://github.com/hugoduncan/pallet&#34;&gt;Pallet&lt;/a&gt; aims to solve
-these problems by embedding shell script in &lt;a href=&#34;http://clojure.org/&#34;&gt;clojure&lt;/a&gt;.&lt;/p&gt;
-
-&lt;h2&gt;Embedding in Clojure&lt;/h2&gt;
-
-&lt;p&gt;Embedding other languages in lisp is not a new idea; &lt;a href=&#34;http://common-lisp.net/project/parenscript/&#34;&gt;parenscript&lt;/a&gt;, &lt;a href=&#34;http://github.com/arohner/scriptjure&#34;&gt;scriptjure&lt;/a&gt; (which Pallet&#39;s
-embedding is based on), and &lt;a href=&#34;http://www.gitorious.org/clojureql/&#34;&gt;ClojureQL&lt;/a&gt; all do this.&lt;/p&gt;
-
-&lt;p&gt;So what does shell script in clojure look like? Some examples:&lt;/p&gt;
-&lt;pre class=&#34;clojure&#34;&gt;(script
-  (ls &#34;/some/path&#34;)
-  (defvar x 1)
-  (println @x)
-  (defn foo [x] (ls @x))
-  (foo 1)
-  (if (= a a)
-    (println &#34;Reassuring&#34;)
-    (println &#34;Ooops&#34;))
-  (println &#34;I am&#34; @(whomai))&lt;/pre&gt;
-
-&lt;p&gt;which generates:&lt;/p&gt;
-
-&lt;pre&gt;ls /some/path
-x=1
-echo ${x}
-function foo(x) {
-ls ${x}
- }
-foo 1
-if [ \\( \&#34;a\&#34; == \&#34;a\&#34; \\) ]; then echo Reassuring;else echo Ooops;fi
-echo I am $(whomai)
-&lt;/pre&gt;
-
-&lt;p&gt;The aim is to make writing shell script similar to writing Clojure, but there
-are obvious differences in the language that limit how far that can be taken. To
-run the code above at the REPL, you&#39;ll have to use the
-&lt;code&gt;pallet.stevedore&lt;/code&gt; package.&lt;/p&gt;
-
-&lt;h2&gt;Escaping back to Clojure&lt;/h2&gt;
-
-&lt;p&gt;Escaping allows us to embed Clojure values and expressions inside our scripts, in much the same way as symbols can be unquoted when writing macros.&lt;/p&gt;
-
-&lt;pre class=&#34;clojure&#34;&gt;(let [path &#34;/some/path&#34;]
-  (script
-    (ls ~path)
-    (ls ~(.replace path &#34;some&#34; &#34;other)))&lt;/pre&gt;
-
-&lt;p&gt;We can now write Clojure functions that produce shell scripts.  Writing
-scripts as clojure functions allows you to use the Clojure namespace facilities,
-and allows you to distribute you scripts in jar files (which can be deployed in
-a versioned manner with maven)&lt;/p&gt;
-
-&lt;pre class=&#34;clojure&#34;&gt;(defn list-path [path]
-  (script
-    (ls ~path)
-    (ls ~(.replace path &#34;some&#34; &#34;other)))&lt;/pre&gt;
-
-&lt;h2&gt;Composing scripts&lt;/h2&gt;
-
-&lt;p&gt;Pallet allows the scripts to be combined. &lt;code&gt;do-script&lt;/code&gt; concatenates
-the code pieces together.&lt;/p&gt;
-
-&lt;pre class=&#34;clojure&#34;&gt;(do-script
-  (list-path &#34;path1&#34;)
-  (list-path &#34;path2&#34;))
-&lt;/pre&gt;
-
-&lt;p&gt;&lt;code&gt;chain-script&lt;/code&gt; chains the scripts together with &#39;&amp;amp;&amp;amp;&#39;.&lt;/p&gt;
-
-&lt;pre class=&#34;clojure&#34;&gt;(chain-script
-  (list-path &#34;path1&#34;)
-  (list-path &#34;path2&#34;))
-&lt;/pre&gt;
-
-&lt;p&gt;&lt;code&gt;checked-script&lt;/code&gt; finally allows the chaining of scripts, and calls
-exit if the chain fails.&lt;/p&gt;
-
-&lt;pre class=&#34;clojure&#34;&gt;(checked-script &#34;Message&#34;
-  (list-path &#34;path1&#34;)
-  (list-path &#34;path2&#34;))
-&lt;/pre&gt;
-
-&lt;h2&gt;Conclusion&lt;/h2&gt;
-
-&lt;p&gt;Writing shell script in Clojure gives access to Clojure&#39;s namespace facility
-allowing modularised shell script, and to Clojure&#39;s packaging as jar files,
-which allows reuse and distribution.  The ability to compose script fragments
-leads to being able to macro-like functions, such &lt;code&gt;checked-script&lt;/code&gt;,
-and you could even use Clojure macros to generate script (but I haven&#39;t thought
-of a use for that, yet).&lt;/p&gt;
-
-&lt;p&gt;The syntax for the embedding has arisen out of practical usage, so is far
-from complete, and can definitely be improved. I look forward to hearing your
-feedback!&lt;/p&gt;
-
-&lt;p&gt;UPDATE: stevedore now requires a binding for *template*, to specify the target for the script generation.  This should be a vector containing one of :ubuntu, :centos, or :darwin, and one of :aptitude, :yum, :brew.&lt;/p&gt;
-</content></entry>
-
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Pelure</title>
+  <link href="http://hugoduncan.org/index.xml" rel="self"/>
+  <link href="http://hugoduncan.org/"/>
+  <updated>2021-11-15T01:45:47+00:00</updated>
+  <id>http://hugoduncan.org/</id>
+  <author>
+    <name>Hugo Duncan</name>
+  </author>
+  <entry>
+    <id>http://hugoduncan.org/post/shell_scripting_in_clojure_with_pallet.html</id>
+    <link href="http://hugoduncan.org/post/shell_scripting_in_clojure_with_pallet.html"/>
+    <title>Shell Scripting in Clojure with Pallet</title>
+    <summary>Let's face it, many of us hate writing shell scripts, and with good reason. Personally, it's not so much the shell language itself that puts me off, but organising everything around it; how do you deploy your scripts, how do you arrange to call other scripts, how do you manage the dependencies between your scripts?  Pallet aims to solve these problems by embedding shell script in clojure.</summary>
+    <updated>2010-05-03T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p><p>Let's face it, many of us hate writing shell scripts, and with good reason. Personally, it's not so much the shell language itself that puts me off, but organising everything around it; how do you deploy your scripts, how do you arrange to call other scripts, how do you manage the dependencies between your scripts?  <a href="http://github.com/hugoduncan/pallet">Pallet</a> aims to solve these problems by embedding shell script in <a href="http://clojure.org/">clojure</a>.</p></p><p><h2>Embedding in Clojure</h2></p><p><p>Embedding other languages in lisp is not a new idea; <a href="http://common-lisp.net/project/parenscript/">parenscript</a>, <a href="http://github.com/arohner/scriptjure">scriptjure</a> (which Pallet's embedding is based on), and <a href="http://www.gitorious.org/clojureql/">ClojureQL</a> all do this.</p></p><p><p>So what does shell script in clojure look like? Some examples:</p> <pre class="clojure">(script   (ls "/some/path")   (defvar x 1)   (println @x)   (defn foo [x] (ls @x))   (foo 1)   (if (= a a)<pre><code>&#40;println &quot;Reassuring&quot;&#41;
+&#40;println &quot;Ooops&quot;&#41;&#41; </code></pre>  (println "I am" @(whomai))</pre></p><p><p>which generates:</p></p><p><pre>ls /some/path x=1 echo ${x} function foo(x) { ls ${x}  } foo 1 if [ &#92;( \"a\" == \"a\" &#92;) ]; then echo Reassuring;else echo Ooops;fi echo I am $(whomai) </pre></p><p><p>The aim is to make writing shell script similar to writing Clojure, but there are obvious differences in the language that limit how far that can be taken. To run the code above at the REPL, you'll have to use the <code>pallet.stevedore</code> package.</p></p><p><h2>Escaping back to Clojure</h2></p><p><p>Escaping allows us to embed Clojure values and expressions inside our scripts, in much the same way as symbols can be unquoted when writing macros.</p></p><p><pre class="clojure">(let [path "/some/path"]   (script<pre><code>&#40;ls &#126;path&#41;
+&#40;ls &#126;&#40;.replace path &quot;some&quot; &quot;other&#41;&#41;&#41;&lt;/pre&gt; </code></pre><p>We can now write Clojure functions that produce shell scripts.  Writing scripts as clojure functions allows you to use the Clojure namespace facilities, and allows you to distribute you scripts in jar files (which can be deployed in a versioned manner with maven)</p></p><p><pre class="clojure">(defn list-path [path]   (script<pre><code>&#40;ls &#126;path&#41;
+&#40;ls &#126;&#40;.replace path &quot;some&quot; &quot;other&#41;&#41;&#41;&lt;/pre&gt; </code></pre><h2>Composing scripts</h2></p><p><p>Pallet allows the scripts to be combined. <code>do-script</code> concatenates the code pieces together.</p></p><p><pre class="clojure">(do-script   (list-path "path1")   (list-path "path2")) </pre></p><p><p><code>chain-script</code> chains the scripts together with '&amp;&amp;'.</p></p><p><pre class="clojure">(chain-script   (list-path "path1")   (list-path "path2")) </pre></p><p><p><code>checked-script</code> finally allows the chaining of scripts, and calls exit if the chain fails.</p></p><p><pre class="clojure">(checked-script "Message"   (list-path "path1")   (list-path "path2")) </pre></p><p><h2>Conclusion</h2></p><p><p>Writing shell script in Clojure gives access to Clojure's namespace facility allowing modularised shell script, and to Clojure's packaging as jar files, which allows reuse and distribution.  The ability to compose script fragments leads to being able to macro-like functions, such <code>checked-script</code>, and you could even use Clojure macros to generate script (but I haven't thought of a use for that, yet).</p></p><p><p>The syntax for the embedding has arisen out of practical usage, so is far from complete, and can definitely be improved. I look forward to hearing your feedback!</p></p><p><p>UPDATE: stevedore now requires a binding for <em>template</em>, to specify the target for the script generation.  This should be a vector containing one of :ubuntu, :centos, or :darwin, and one of :aptitude, :yum, :brew.</p></p>]]>
+    </content>
+  </entry>
 </feed>

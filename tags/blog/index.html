@@ -1,78 +1,62 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
   <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
-    <link rel="stylesheet" 
-      href="//netdna.bootstrapcdn.com/bootstrap/3.0.0-rc1/css/bootstrap.min.css"
-      media="screen">
-<link rel="stylesheet" href="/css/pelure.css">
-
+    <title>blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta charset="utf-8"/>
+    <meta name="description"
+          content="Pelure - ephemeral writing surface?"/>
+    <meta name="author" content="Hugo Duncan"/>
+    <link type="application/atom+xml" rel="alternate" href="../../index.xml" title="Pelure">
+    <link rel="stylesheet" href="../../style.css">
   </head>
   <body>
-    <div class="container">
-      <div class="row">
-  <div class="col-0 col-sm-2 col-lg-2"></div>
-  <div class="col-12 col-sm-8 col-lg-8">
-    <div class="navbar">
-      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
-      <span class="icon-bar"></span>
-      <span class="icon-bar"></span>
-      <span class="icon-bar"></span>
-    </button>
-    <a class="navbar-brand" href="/meta/pelure">Pelure</a>
-    <div class="nav-collapse collapse">
-      <ul class="nav navbar-nav">
-        <li><a href="/post">Posts</a></li>
-        <li><a href="/tags">Tags</a></li>
-      </ul>
-      <ul class="nav navbar-nav pull-right">
-        <li><a href="/meta/contact">Contact</a></li>
-      </ul>
-    </div>
-    </div>
-  </div>
-</div>
 
-      <div class="row"> 
-  <div class="col-0 col-sm-2 col-lg-2"></div>
-  <div id="top" class="col-12 col-sm-8 col-lg-8">
-     
-      <h1>Blog<a href="http://hugoduncan.github.com/tags/blog/index.xml">&nbsp;<img src="/images/feed_mini.gif"></a></h1>
-      
-        <li class="list-unstyled">
-           <span class="post-date">27 March 2009</span>
-            &nbsp;<a href="http://hugoduncan.github.com/post/blog_site_generators">Blog Site Generators</a>
-        </li>
-      
+    <div class="site-header">
+      <div class="wrapper">
+        <div class="site-nav">
+          <a class="page-link" href="../../archive.html">All Posts</a>
+          <a class="page-link" href="https://github.com/hugoduncan/hugoduncan.github.com/discussions/categories/posts">Discuss</a>
+          <a class="page-link" href="../../meta/pelure.html">About</a>
+          <a class="page-link" href="../../meta/contact.html">Contact</a>
+          <a class="page-link" href="index.xml">
+            <img class="page-icon"
+                 src="https://www.svgrepo.com/show/362316/feed.svg"
+                 width="30px"/>
+          </a>
+          <a class="page-link" href="https://twitter.com/hugoduncan">
+            <img class="page-icon"
+                 src="https://www.svgrepo.com/show/11841/twitter.svg"
+                 width="30px"/>
+          </a>
         </div>
-</div>
-<script src='http://www.google-analytics.com/ga.js' type='text/javascript'>
-</script>
-<script type="text/javascript">
-try {
-var pageTracker = _gat._getTracker("UA-3688366-1");
-pageTracker._trackPageview();
-} catch(err) {}</script>
-     
+        <div>
+          <h1 class="site-title">
+            <a class="page-link" href="../../index.html">Pelure</a>
+          </h1>
+          <p>Ephemeral musings, often about Clojure</p>
+        </div>
+      </div>
     </div>
-    <div class="row"> 
-  <div class="col-0 col-sm-2 col-lg-2"></div>
-  <div id="top" class="col-12 col-sm-8 col-lg-8">
-     
-<footer id="footer">
-  <p class="pull-right"><a href="#top">Back to top</a></p>
-</footer>
-  </div>
-</div>
-<script src='http://www.google-analytics.com/ga.js' type='text/javascript'>
-</script>
-<script type="text/javascript">
-try {
-var pageTracker = _gat._getTracker("UA-3688366-1");
-pageTracker._trackPageview();
-} catch(err) {}</script>
-     
 
-   </body>
+    <div class="wrapper">
+
+      <div><h1><a href="post/back_to_blogging.html">Back to blogging</a></h1><blockquote><p> “My mind turned by anxiety, or other cause, from its scrutiny of blank  paper, is like a lost child–wandering the house, sitting on the bottom  step to cry.”  — Virginia Woolf </p></blockquote><p>I was inspired to write some blog posts, which led me to realise my current blog and blogging setup were completely broken.</p><p>Michiel Borkent (<a href='https://twitter.com/borkdude'>@borkdude</a>) recently wrote about his <a href='https://blog.michielborkent.nl/migrating-octopress-to-babashka.html'>migration from Octopress</a>. His requirements were very similar to mine, so I copied and modified. Thank you Michiel!</p><p>His blog, <a href='https://blog.michielborkent.nl/'>REPL adventures</a>, is well worth the read.</p><h2>Blog Post Discussions</h2><p>With a static web site, the perennial problem is how to enable discussions.  Some people just punt pn this, and point to reddit, but Michiel's solution is to use github discussions.  As a way of owning the discussion, this has a lot of appeal.</p><p>I think it could be taken further.  It would be great if we could automate the creation of a blog post topic when creating a blog post. Unfortunately the <a href='https://cli.github.com/'><code>gh</code></a> command line client doesn't support discussions yet, so that would require using Github's GraphQL API - more work than I wanted to do for now.</p><p>One downside though, is that the discussions are not visible on the blog pages, where discussion could easily engender more discussion. I wonder if a Github Action could be triggered by conversation activity, and automatically republish the post with the discussion to date at the end of the post.</p><h2>Blogging Frameworks vs Tasks</h2><p>There are many blog site generators (I used <a href='https://gohugo.io/'>Hugo</a>, of course), even if we limit ourselves to clojure:- <a href='https://github.com/retrogradeorbit/bootleg'>bootleg</a>, <a href='https://github.com/rafaeldelboni/nota'>nota</a>, <a href='https://github.com/cryogen-project/cryogen'>cryogen</a>, and <a href='https://github.com/nakkaya/static'>static</a> to name a few.</p><p>These are usually feature rich.  The price for those features though, is extra complexity.</p><p>Michiel's blog uses <a href='https://book.babashka.org/'>babashka</a> tasks to add a post, render posts, etc. These are extremely quick to run and make maintaining the blog simple.  it does just what he needs, and no more.</p><p>This reminds me of project automation, and the <a href='https://clojure.org/guides/tools_build'><code>tools.build</code></a> approach of using composable code tasks to build just what is needed.</p><p>Maybe there is an opportunity to take the same approach for building a blog or static site. If we could pick from a selection of configurable tasks, maybe we wouldn't need to write our own.</p><p>Speaking of which, I have tried writing my own before, in common-lisp: <a href='http://github.com/hugoduncan/cl-blog-generator'>cl-blog-generator</a>.</p><h2>And…</h2><p>So I have a blogging setup.  Now I just need to write something.</p><p><!&mdash; [borkdude-octopress][https://blog.michielborkent.nl/migrating-octopress-to-babashka.html] [borkdude-blog][https://blog.michielborkent.nl/] [cryogen][https://github.com/cryogen-project/cryogen] [static][https://github.com/nakkaya/static] [nota][https://github.com/rafaeldelboni/nota] [hugo][https://gohugo.io/] [babashka][https://book.babashka.org/] [tools.build][https://clojure.org/guides/tools_build] [gh][https://cli.github.com/] [bootleg][https://github.com/retrogradeorbit/bootleg] &mdash;></p><p>Discuss this post <a href="https://github.com/hugoduncan/hugoduncan.github.com/discussions/4">here</a>.</p><p><i>Published: 2021-11-14</i></p></div><div><h1><a href="post/blog_site_generators.html">Blog Site Generators</a></h1><p><p> I recently uploaded some links to my <a href="http://github.com/hugoduncan/cl-blog-generator">cl-blog-generator</a> project, and have been getting some feedback with comparisons to other blog site generators, or compilers, such as <a href="http://www.advogato.org/person/Stevey/">Steve Kemp</a>'s <a href="http://www.steve.org.uk/Software/chronicle/">Chronicle</a>, or <a href="http://github.com/mojombo/jekyll">Jekyll</a> as used on <a href="http://github.com/blog/272-github-pages">GitHub Pages</a>.  Compared to these, cl-blog-generator is immature, but takes a different approach in several areas that <a href="http://advogato.org/person/chalst/">Charles Stewart</a> suggested might be worth exploring.  I look forward to any comments you might have. </p> <h3>Formatting</h3> <p> All the blog generators seem to use a file based approach for writing content, but they differ in the choice of input formats supported, and in the approach to templating. <code>cl-blog-generator</code> is the least flexible, requiring input in XHTML, while <code>Chronicle</code> allows HTML, Textile or Markdown, and <code>Jekyll</code> Textile or Markdown.  For templates, <code>Chronicle</code> uses Perl's <a href="http://search.cpan.org/~samtregar/HTML-Template-2.9/Template.pm">HTML::Template</a>, and <code>Jekyll</code> uses <a href="http://www.liquidmarkup.org/">Liquid</a>. <code>cl-blog-generator</code> uses an approach which substitutes content into elements identified with specific id's or classes, similar to transforming the templates with XSLT. </p> <p> <code>cl-blog-generator</code>'s choice of XHTML input was driven by a requirement to enable the validation of post content in the editor, which is not possible using <code>Chronicle</code>'s HTML input because of the headers and lack of a <code>body</code> or <code>head</code> element, and a desire to be able to use any CSS tricks I wanted, which ruled out Textile and Markdown, or any other markup language.  The lack of an external templating engine in <code>cl-blog-generator</code> was driven by simplicity; I couldn't see a use for conditionals or loops given the fixed structure of the content, and this choice leads to templates that validate, unlike <code>Jekyll</code>, and which are not full of HTML comments.  The current id and class naming scheme in <code>cl-blog-generator</code> could certainly use some refinement to improve the flexibility of the output content format, and I would definitely welcome requests for enhancements should the scheme not fit your requirements. </p></p><p><h3>Database and Two Phase Publishing</h3> <p> Perhaps the most significant difference in approach for <code>cl-blog-generator</code> is its use of a database and an explicit publish step.  With <code>cl-blog-generator</code> a draft can exist anywhere in the filesystem, and must be "published" to be recognised by the blog site generator.  The publishing process fills in some default metadata, such as post date, if this is not originally specified, copies the modified draft to a configurable location, and enters the metadata into the database.  This ensures that the post is completely specified by its representation in the filesystem, and that the database is recreatable. </p> <p> The database enables the partial regeneration of the site, without having to parse the whole site, and makes the linking of content much simpler. However, having <a href="http://common-lisp.net/project/elephant/">Elephant</a> as a dependency is probably the largest impediment to installation at present. </p></p><p><h3>On Titles, Dates, Tags and Filenames</h3></p><p><p><code>cl-blog-generator</code>'s input XHTML has been augmented to add elements for specifying post title, date, update date (which I believe is missing from the other systems), slug, description, and tags.  On publising (see next section), any of these elements that is missing, except the mandatory title, is filled in with defaults.</p></p><p><p>Both <code>Chronicle</code> and <code>Jekyll</code> use a preamble to specify metadata, with the filename being used to generate the post's slug. <code>Jekyll</code> also uses the filename and its path for specifying the post date, and tags. </p></p><p><h3>Bells and Whistles</h3></p><p><p>Finally, here is a grab bag of features.</p> <ul> <li> <code>Chronicle</code> comes with a commenting system. </li> <li> <code>cl-blog-generator</code> generates a <code>meta</code> description element, which is used by search engines to generate link text.  It also generates <code>meta</code> elements with links to the previous and next posts. </li> <li> <code>Jekyll</code> has a "Related posts" feature for generating links to similar posts. </li></p><p><li> <code>Chronicle</code> and <code>Jekyll</code> both have migration scripts for importing content. </li> <li> <code>Chronicle</code> has a spooler for posting pre-written content at specific times</li> </ul></p><p>Discuss this post <a href="https://github.com/hugoduncan/hugoduncan.github.com/discussions/categories/posts">here</a>.</p><p><i>Published: 2009-03-27</i></p></div>
+
+      
+      <div style="margin-bottom: 20px; float: right;">
+        <a class="page-link" href="archive.html">Archive</a>
+      </div>
+      
+    </div>
+    <script>
+      document.addEventListener('DOMContentLoaded', (event) => {
+        document.querySelectorAll('pre code').forEach((el) => {
+          if (!el.classList.contains('clojure')) {
+            hljs.highlightElement(el);
+          }
+        });
+      });
+    </script>
+  </body>
 </html>

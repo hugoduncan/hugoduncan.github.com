@@ -1,20 +1,21 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<feed xmlns='http://www.w3.org/2005/Atom' xml:lang='en-us'>
- <title>pelure</title>
- <id>http://hugoduncan.github.com/</id>
- <link href='./' />
- <link rel='self' href='' />
- <logo>rsslogo.jpg</logo>
- <icon>/favicon.ico</icon>
- <author><name>Hugo Duncan</name></author>
- <subtitle>Pelure </subtitle>
- <rights>All content written by Hugo Duncan and photos by Hugo Duncan Copyright Hugo Duncan, all rights reserved.</rights> 
- <updated>2013-10-28T00:00:00Z</updated>
-
-
-<entry xml:base="http://hugoduncan.github.com/post/search_across_open_browser_tabs"><title>Search Across Open Browser Tabs</title><link href="http://hugoduncan.github.com/post/search_across_open_browser_tabs"/><id>http://hugoduncan.github.com/post/search_across_open_browser_tabs</id><published>2009-03-28T00:00:00Z</published><updated>2009-03-28T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;I am an &lt;a href=&#34;http://www.opera.com/&#34;&gt;Opera&lt;/a&gt; user, these days mainly because it gives me integrated mail, feed and news reading, so that everything that comes from the web appears in one place.  The last significant innovation I remember was the introduction of tabs, and that was some time ago (long before it made its way into IE, for example).  I am a heavy user of tabs - it is not unusual for me to have over fifty pages open, as I tend to just open pages and rarely close them again.  This means that the tab icons are unreadable, and Alt+Tab (I&#39;m on a mac) produces three or four columns to scroll through to select the tab I&#39;m after.  I dream of a better tab navigation model, and would love to be able to search across all the open tabs.  Surely it wouldn&#39;t be that hard to implement.&lt;/p&gt;
-&lt;p&gt;Maybe I&#39;m being a little harsh as there have been some other innovations.  &lt;a href=&#34;http://www.mozilla.com/firefox/&#34;&gt;Firefox&#39;s&lt;/a&gt; add-ons work seamlessly, we can use arbitrary search engines thanks to &lt;a href=&#34;http://www.opensearch.org/&#34;&gt;OpenSearch&lt;/a&gt;, and &lt;a href=&#34;http://conkeror.org/&#34;&gt;Conkeror&lt;/a&gt; gives full screen browsing with emacs key bindings, but for the most part it has been better support for standards that has dominated the release notes.&lt;/p&gt;
-&lt;p&gt;In preparing this post, I found that Google&#39;s &lt;a href=&#34;http://www.google.com/chrome&#34;&gt;Chrome&lt;/a&gt; has search over your page history.  Sounds like that might fulfill my wish, though I wonder how its process per tab model will scale to lots of tabs.  I just have to wait for its release on mac OS X.&lt;/p&gt;
-</content></entry>
-
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Pelure</title>
+  <link href="http://hugoduncan.org/index.xml" rel="self"/>
+  <link href="http://hugoduncan.org/"/>
+  <updated>2021-11-15T01:45:47+00:00</updated>
+  <id>http://hugoduncan.org/</id>
+  <author>
+    <name>Hugo Duncan</name>
+  </author>
+  <entry>
+    <id>http://hugoduncan.org/post/search_across_open_browser_tabs.html</id>
+    <link href="http://hugoduncan.org/post/search_across_open_browser_tabs.html"/>
+    <title>Search Across Open Browser Tabs</title>
+    <summary>I am an Opera user, these days mainly because it gives me integrated mail, feed and news reading, so that everything that comes from the web appears in one place.  The last significant innovation I remember was the introduction of tabs, and that was some time ago (long before it made its way into IE, for example).  I am a heavy user of tabs - it is not unusual for me to have over fifty pages open, as I tend to just open pages and rarely close them again.  This means that the tab icons are unreadable, and Alt+Tab (I'm on a mac) produces three or four columns to scroll through to select the tab I'm after.  I dream of a better tab navigation model, and would love to be able to search across all the open tabs.  Surely it wouldn't be that hard to implement.</summary>
+    <updated>2009-03-28T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p><p>I am an <a href="http://www.opera.com/">Opera</a> user, these days mainly because it gives me integrated mail, feed and news reading, so that everything that comes from the web appears in one place.  The last significant innovation I remember was the introduction of tabs, and that was some time ago (long before it made its way into IE, for example).  I am a heavy user of tabs - it is not unusual for me to have over fifty pages open, as I tend to just open pages and rarely close them again.  This means that the tab icons are unreadable, and Alt+Tab (I'm on a mac) produces three or four columns to scroll through to select the tab I'm after.  I dream of a better tab navigation model, and would love to be able to search across all the open tabs.  Surely it wouldn't be that hard to implement.</p> <p>Maybe I'm being a little harsh as there have been some other innovations.  <a href="http://www.mozilla.com/firefox/">Firefox's</a> add-ons work seamlessly, we can use arbitrary search engines thanks to <a href="http://www.opensearch.org/">OpenSearch</a>, and <a href="http://conkeror.org/">Conkeror</a> gives full screen browsing with emacs key bindings, but for the most part it has been better support for standards that has dominated the release notes.</p> <p>In preparing this post, I found that Google's <a href="http://www.google.com/chrome">Chrome</a> has search over your page history.  Sounds like that might fulfill my wish, though I wonder how its process per tab model will scale to lots of tabs.  I just have to wait for its release on mac OS X.</p></p>]]>
+    </content>
+  </entry>
 </feed>

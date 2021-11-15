@@ -1,101 +1,25 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<feed xmlns='http://www.w3.org/2005/Atom' xml:lang='en-us'>
- <title>pelure</title>
- <id>http://hugoduncan.github.com/</id>
- <link href='./' />
- <link rel='self' href='' />
- <logo>rsslogo.jpg</logo>
- <icon>/favicon.ico</icon>
- <author><name>Hugo Duncan</name></author>
- <subtitle>Pelure </subtitle>
- <rights>All content written by Hugo Duncan and photos by Hugo Duncan Copyright Hugo Duncan, all rights reserved.</rights> 
- <updated>2013-10-28T00:00:00Z</updated>
-
-
-<entry xml:base="http://hugoduncan.github.com/post/provisioning_cloud_nodes_with_pallet"><title>Provisioning Cloud Nodes with Pallet</title><link href="http://hugoduncan.github.com/post/provisioning_cloud_nodes_with_pallet"/><id>http://hugoduncan.github.com/post/provisioning_cloud_nodes_with_pallet</id><published>2010-05-12T00:00:00Z</published><updated>2010-05-12T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;I recently needed to move a server from dedicated hosting to a cloud server. The existing server had been configured over time by several people, with little documentation.  I want to make sure that this time everything was documented, and what better way than doing that than using an automated configuration tool.&lt;/p&gt;
-&lt;p&gt;Looking around at the configuration tools, I couldn&#39;t find one I really liked, so I started &lt;a href=&#34;http://github.com/hugoduncan/pallet&#34;&gt;Pallet&lt;/a&gt;. I&#39;ll explain why I didn&#39;t use an existing tool below, but first I wanted to show how to manage nodes in Pallet.&lt;/p&gt;
-
-&lt;pre class=&#34;clojure&#34;&gt;
-  ;; Pull in the pallet namespaces
-  (require &#39;pallet.repl)
-  (pallet.repl/use-pallet)
-
-  ;; Define a default node
-  (defnode mynode [])
-
-  ;; Define the cloud account to use
-  (def service
-    (compute-service &#34;provider&#34; &#34;user&#34; &#34;password&#34;
-                      :log4j :ssh))
-
-  ;; Create 2 nodes
-  (converge {mynode 2} service)
-&lt;/pre&gt;
-
-&lt;p&gt;This example would create two nodes (cloud vm instances) with the tag &#34;mynode&#34; in your cloud account, as specified in the &lt;code&gt;service&lt;/code&gt;.  This would give you the smallest size, ubuntu image on most clouds.  Of course, to do anything serious, you would want to specify the image you would like, and you would probably like some configuration of the nodes.  So carrying on the above example:
-&lt;/p&gt;
-&lt;pre class=&#34;clojure&#34;&gt;
-  ;; Pull in the needed crates
-  (use &#39;pallet.crate.automated-admin-user)
-  (use &#39;pallet.crate.java)
-
-  ;; Define a new node that will use the Java JDK
-  (defnode javanode
-    [:ubuntu :X86_64 :smallest
-     :os-description-matches &#34;[^J]+9.10[^32]+&#34;]
-    :bootstrap [(automated-admin-user)]
-    :configure [(java :openjdk :jdk)])
-
-  ;; Create a new node, and remove the previous ones
-  (converge {javanode 1 mynode 0} service)
-&lt;/pre&gt;
-
-&lt;p&gt;This would stop the two nodes that were created before, and create a new one, with the specified ubuntu version.  On first boot, it would create a user account with your current username, authorize your id_rsa key on that account, and give it sudo permissions.  Every time converge is run, it also ensures that the openjdk JDK is installed.&lt;/p&gt;
-
-&lt;p&gt;The configuration to be applied is specified as a call to a crate -
-automated-admin-user and java in the example above. Crates are just clojure
-functions that specify some configuration or other action on the nodes (they&#39;re
-equivalent to Chef&#39;s recipes, which Pallet can also execute using
-chef-solo). Pallet can be extended with your own crates, and crates can specify
-general actions, not just configuration.  &lt;code&gt;lift&lt;/code&gt; is a companion to
-&lt;code&gt;converge&lt;/code&gt;, and can be used to apply crates to existing nodes
-(including local VM&#39;s).  The hypothetical example below would execute
-&lt;code&gt;my-backup-crate&lt;/code&gt; on all the &#34;mynode&#34; nodes.&lt;/p&gt;
-
-&lt;pre class=&#34;clojure&#34;&gt;
-  (defnode mynode [] :backup [(my-backup-crate)])
-  (lift mynode service :backup)
-&lt;/pre&gt;
-
-&lt;p&gt;This was just a quick overview of Pallet, to give you an idea of what it is. One big area of Pallet not demonstrated here is its command line tool. But that is a topic for another post.&lt;/p&gt;
-
-&lt;h2&gt;Why Write another Tool?&lt;/h2&gt;
-
-&lt;p&gt;Now you&#39;ve seen some examples, I&#39;ll try and explain the features that make Pallet distinct from other configuration tools out there.&lt;/p&gt;
-
-&lt;h3&gt;No Dependencies&lt;/h3&gt;
-
-&lt;p&gt;The machines being managed require no special dependencies to be installed. As long as they have bash and ssh running, they can be used with pallet.  For me this was important - it means that you can use pretty much any image out there, which is great for ad-hoc testing and development.&lt;/p&gt;
-
-&lt;h3&gt;No Server&lt;/h3&gt;
-
-&lt;p&gt;Pallet has no central server to set up and maintain - it simply runs on demand. You can run it from anywhere, even over a remote REPL connection.&lt;/p&gt;
-
-&lt;h3&gt;Everything in Version Control&lt;/h3&gt;
-
-&lt;p&gt;In pallet, all your configuration is handled in SCM controlled files - there is no database involved.  This means that your configuration can always be kept in step with the development of your crates, and the versions of the external crates that you use.&lt;/p&gt;
-
-&lt;h3&gt;Jar File Distribution of Crates&lt;/h3&gt;
-
-&lt;p&gt;Custom crates can be distributed as jar files, and so can be published in maven repositories, and be consumed in a version controlled manner.  Hopefully this will promote shared crates.&lt;/p&gt;
-
-&lt;h3&gt;Provisioning, Configuration and Administration&lt;/h3&gt;
-
-&lt;p&gt;Pallet aims quite wide. You can use it for starting an stopping nodes, for configuring nodes, deploying projects and also for running administration tasks.  To be honest, this wasn&#39;t an initial design goal, but has come out of the wash that way.&lt;/p&gt;
-
-&lt;h2&gt;Interested?&lt;/h2&gt;
-
-&lt;p&gt;Hopefully this has whetted your appetite, and you&#39;ll give pallet a try.  You can get support via &lt;a href=&#34;http://groups.google.com/group/pallet-clj&#34;&gt;the Google Group&lt;/a&gt;, or #pallet on freenode irc.&lt;/p&gt;
-</content></entry>
-
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Pelure</title>
+  <link href="http://hugoduncan.org/index.xml" rel="self"/>
+  <link href="http://hugoduncan.org/"/>
+  <updated>2021-11-15T01:45:47+00:00</updated>
+  <id>http://hugoduncan.org/</id>
+  <author>
+    <name>Hugo Duncan</name>
+  </author>
+  <entry>
+    <id>http://hugoduncan.org/post/provisioning_cloud_nodes_with_pallet.html</id>
+    <link href="http://hugoduncan.org/post/provisioning_cloud_nodes_with_pallet.html"/>
+    <title>Provisioning Cloud Nodes with Pallet</title>
+    <summary>I recently needed to move a server from dedicated hosting to a cloud server. The existing server had been configured over time by several people, with little documentation.  I want to make sure that this time everything was documented, and what better way than doing that than using an automated configuration tool.</summary>
+    <updated>2010-05-12T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p><p>I recently needed to move a server from dedicated hosting to a cloud server. The existing server had been configured over time by several people, with little documentation.  I want to make sure that this time everything was documented, and what better way than doing that than using an automated configuration tool.</p> <p>Looking around at the configuration tools, I couldn't find one I really liked, so I started <a href="http://github.com/hugoduncan/pallet">Pallet</a>. I'll explain why I didn't use an existing tool below, but first I wanted to show how to manage nodes in Pallet.</p></p><p><pre class="clojure">   ;; Pull in the pallet namespaces   (require 'pallet.repl)   (pallet.repl/use-pallet)</p><p>  ;; Define a default node   (defnode mynode [])</p><p>  ;; Define the cloud account to use   (def service<pre><code>&#40;compute-service &quot;provider&quot; &quot;user&quot; &quot;password&quot;
+                  :log4j :ssh&#41;&#41; </code></pre>  ;; Create 2 nodes   (converge {mynode 2} service) </pre></p><p><p>This example would create two nodes (cloud vm instances) with the tag "mynode" in your cloud account, as specified in the <code>service</code>.  This would give you the smallest size, ubuntu image on most clouds.  Of course, to do anything serious, you would want to specify the image you would like, and you would probably like some configuration of the nodes.  So carrying on the above example: </p> <pre class="clojure">   ;; Pull in the needed crates   (use 'pallet.crate.automated-admin-user)   (use 'pallet.crate.java)</p><p>  ;; Define a new node that will use the Java JDK   (defnode javanode<pre><code>&#91;:ubuntu :X86&#95;64 :smallest
+     :os-description-matches &quot;&#91;&#94;J&#93;+9.10&#91;&#94;32&#93;+&quot;&#93;
+:bootstrap &#91;&#40;automated-admin-user&#41;&#93;
+:configure &#91;&#40;java :openjdk :jdk&#41;&#93;&#41; </code></pre>  ;; Create a new node, and remove the previous ones   (converge {javanode 1 mynode 0} service) </pre></p><p><p>This would stop the two nodes that were created before, and create a new one, with the specified ubuntu version.  On first boot, it would create a user account with your current username, authorize your id_rsa key on that account, and give it sudo permissions.  Every time converge is run, it also ensures that the openjdk JDK is installed.</p></p><p><p>The configuration to be applied is specified as a call to a crate - automated-admin-user and java in the example above. Crates are just clojure functions that specify some configuration or other action on the nodes (they're equivalent to Chef's recipes, which Pallet can also execute using chef-solo). Pallet can be extended with your own crates, and crates can specify general actions, not just configuration.  <code>lift</code> is a companion to <code>converge</code>, and can be used to apply crates to existing nodes (including local VM's).  The hypothetical example below would execute <code>my-backup-crate</code> on all the "mynode" nodes.</p></p><p><pre class="clojure">   (defnode mynode [] :backup [(my-backup-crate)])   (lift mynode service :backup) </pre></p><p><p>This was just a quick overview of Pallet, to give you an idea of what it is. One big area of Pallet not demonstrated here is its command line tool. But that is a topic for another post.</p></p><p><h2>Why Write another Tool?</h2></p><p><p>Now you've seen some examples, I'll try and explain the features that make Pallet distinct from other configuration tools out there.</p></p><p><h3>No Dependencies</h3></p><p><p>The machines being managed require no special dependencies to be installed. As long as they have bash and ssh running, they can be used with pallet.  For me this was important - it means that you can use pretty much any image out there, which is great for ad-hoc testing and development.</p></p><p><h3>No Server</h3></p><p><p>Pallet has no central server to set up and maintain - it simply runs on demand. You can run it from anywhere, even over a remote REPL connection.</p></p><p><h3>Everything in Version Control</h3></p><p><p>In pallet, all your configuration is handled in SCM controlled files - there is no database involved.  This means that your configuration can always be kept in step with the development of your crates, and the versions of the external crates that you use.</p></p><p><h3>Jar File Distribution of Crates</h3></p><p><p>Custom crates can be distributed as jar files, and so can be published in maven repositories, and be consumed in a version controlled manner.  Hopefully this will promote shared crates.</p></p><p><h3>Provisioning, Configuration and Administration</h3></p><p><p>Pallet aims quite wide. You can use it for starting an stopping nodes, for configuring nodes, deploying projects and also for running administration tasks.  To be honest, this wasn't an initial design goal, but has come out of the wash that way.</p></p><p><h2>Interested?</h2></p><p><p>Hopefully this has whetted your appetite, and you'll give pallet a try.  You can get support via <a href="http://groups.google.com/group/pallet-clj">the Google Group</a>, or #pallet on freenode irc.</p></p>]]>
+    </content>
+  </entry>
 </feed>

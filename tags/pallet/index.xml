@@ -1,82 +1,39 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<feed xmlns='http://www.w3.org/2005/Atom' xml:lang='en-us'>
- <title>pelure</title>
- <id>http://hugoduncan.github.com/</id>
- <link href='./' />
- <link rel='self' href='' />
- <logo>rsslogo.jpg</logo>
- <icon>/favicon.ico</icon>
- <author><name>Hugo Duncan</name></author>
- <subtitle>Pelure </subtitle>
- <rights>All content written by Hugo Duncan and photos by Hugo Duncan Copyright Hugo Duncan, all rights reserved.</rights> 
- <updated>2013-10-28T00:00:00Z</updated>
-
-
-<entry xml:base="http://hugoduncan.github.com/post/configuration_in_templates_is_not_configuration_as_code"><title>Configuration in Templates is not Configuration as Code</title><link href="http://hugoduncan.github.com/post/configuration_in_templates_is_not_configuration_as_code"/><id>http://hugoduncan.github.com/post/configuration_in_templates_is_not_configuration_as_code</id><published>2010-10-04T00:00:00Z</published><updated>2010-10-04T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;If you have configuration that uses template configuration files, you are practising neither configuration as code nor configuration as data.  Having configuration locked away in template files reduces its visibility, and makes it hard for you to query it. It might be easier to write configuration code to use templates, but it will come back to bite you.&lt;/p&gt;
-
-&lt;p&gt;One of the first things I implemented in &lt;a href=&#34;http://github.com/hugoduncan/pallet&#34;&gt;pallet&lt;/a&gt; was a templating mechanism, because configuration management tools use templates, right?  I even built a template selection mechanism, just like &lt;a href=&#34;http://wiki.opscode.com/display/chef/Templates&#34;&gt;Chef&#39;s&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;I have come to realise however, that having configuration in template files is not particularly useful. There are three major problems you are likely to encounter.  Firstly template files are not visible, secondly you can not query the data in the template files, and lastly you will need to touch multiple files to add or modify parameters.&lt;/p&gt;
-
-&lt;p&gt;Visibility at the point of usage is important, especially in a team environment.  If you have to find the template file and look at its content when reading your configuration code, then the chances are you assume it hasn&#39;t changed, and skip the contents. Making an analogy to the world of software development, templates are like global variables in one sense. You can change the operation of a program with a global variable modified in some obscure place, and in the same way, you can change your system configuration by changing a template file, tucked away in some folder, and not visible from where you are actually calling your configuration crate/recipe.&lt;/p&gt;
-
-&lt;p&gt;The ability to query configuration settings allows not just finding out, for example,  which directory a log file is in, but also enables you to put tools on top of your configuration data.  Template configuration files suffer on two counts here - they are separate text files that require parsing to be read, and the format of each configuration file is different.&lt;/p&gt;
-
-&lt;p&gt;The last point concerns the flexibility of your configuration. If you have used template files, with hard coded parameter values, and you then want to modify your configuration to dynamically set one of those hard coded values, you have to modify all the specialised versions of the existing templates, and specify the value in code. You have to touch multiple files - lots of room for making typos.&lt;/p&gt;
-
-&lt;p&gt;My goal for pallet then, is to have all configuration supplied as arguments to crates.  For most packages a hash map is sufficient an abstraction for providing the data, but when this gets too cumbersome, we&#39;ll use a DSL that mirrors the original configuration file language.&lt;/p&gt;
-
-&lt;p&gt;Goodbye hidden configuration!&lt;/p&gt;
-</content></entry>
-
-<entry xml:base="http://hugoduncan.github.com/post/configure_nagios_using_pallet"><title>Configure Nagios using Pallet</title><link href="http://hugoduncan.github.com/post/configure_nagios_using_pallet"/><id>http://hugoduncan.github.com/post/configure_nagios_using_pallet</id><published>2010-08-18T00:00:00Z</published><updated>2010-08-18T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;Basic Nagios support was recently added to &lt;a href=&#34;http://github.com/hugoduncan/pallet&#34;&gt;pallet&lt;/a&gt;, and while very simple to use, this blog post should make it even simpler. The overall philosophy is to configure the nagios service monitoring definitions along with the service itself, rather than have monolithic nagios configuration, divorced from the configuration of the various nodes.&lt;/p&gt;
-
-&lt;p&gt;As an example, we can configure a machine to have it&#39;s ssh service, CPU load, number of processes and number of users monitored. Obviously, you would normally be monitoring several different types of nodes, but there is no difference as far as pallet is concerned.&lt;/p&gt;
-
-&lt;p&gt;We start by requiring various pallet components.  These would normally be part of a &lt;code&gt;ns&lt;/code&gt; declaration, but are provided here for ease of use at the REPL.&lt;/p&gt;
-
-&lt;pre class=&#34;clojure&#34;&gt;
-(require
-  &#39;[pallet.crate.automated-admin-user
-    :as admin-user]
-  &#39;[pallet.crate.iptables :as &#39;iptables]
-  &#39;[pallet.crate.ssh :as ssh]
-  &#39;[pallet.crate.nagios-config
-     :as nagios-config]
-  &#39;[pallet.crate.nagios :as nagios]
-  &#39;[pallet.crate.postfix :as postfix]
-  &#39;[pallet.resource.service :as service])
-&lt;/pre&gt;
-
-&lt;h2&gt;Node to be Monitored by Nagios&lt;/h2&gt;
-
-&lt;p&gt;Now we define the node to be monitored. We set up a machine that has &lt;abbr&gt;SSH&lt;/abbr&gt; running, and configure &lt;code&gt;iptables&lt;/code&gt; to allow access to &lt;abbr&gt;SSH&lt;/abbr&gt;, with a throttled connection rate (six connections/minute by default).&lt;/p&gt;
-
-&lt;pre class=&#34;clojure&#34;&gt;
-(pallet.core/defnode monitored
-  []
-  :bootstrap [(admin-user/automated-admin-user)]
-  :configure [;; set iptables for restricted access
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Pelure</title>
+  <link href="http://hugoduncan.org/index.xml" rel="self"/>
+  <link href="http://hugoduncan.org/"/>
+  <updated>2021-11-15T01:45:47+00:00</updated>
+  <id>http://hugoduncan.org/</id>
+  <author>
+    <name>Hugo Duncan</name>
+  </author>
+  <entry>
+    <id>http://hugoduncan.org/post/configuration_in_templates_is_not_configuration_as_code.html</id>
+    <link href="http://hugoduncan.org/post/configuration_in_templates_is_not_configuration_as_code.html"/>
+    <title>Configuration in Templates is not Configuration as Code</title>
+    <summary>If you have configuration that uses template configuration files, you are practising neither configuration as code nor configuration as data.  Having configuration locked away in template files reduces its visibility, and makes it hard for you to query it. It might be easier to write configuration code to use templates, but it will come back to bite you.</summary>
+    <updated>2010-10-04T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p><p>If you have configuration that uses template configuration files, you are practising neither configuration as code nor configuration as data.  Having configuration locked away in template files reduces its visibility, and makes it hard for you to query it. It might be easier to write configuration code to use templates, but it will come back to bite you.</p></p><p><p>One of the first things I implemented in <a href="http://github.com/hugoduncan/pallet">pallet</a> was a templating mechanism, because configuration management tools use templates, right?  I even built a template selection mechanism, just like <a href="http://wiki.opscode.com/display/chef/Templates">Chef's</a>.</p></p><p><p>I have come to realise however, that having configuration in template files is not particularly useful. There are three major problems you are likely to encounter.  Firstly template files are not visible, secondly you can not query the data in the template files, and lastly you will need to touch multiple files to add or modify parameters.</p></p><p><p>Visibility at the point of usage is important, especially in a team environment.  If you have to find the template file and look at its content when reading your configuration code, then the chances are you assume it hasn't changed, and skip the contents. Making an analogy to the world of software development, templates are like global variables in one sense. You can change the operation of a program with a global variable modified in some obscure place, and in the same way, you can change your system configuration by changing a template file, tucked away in some folder, and not visible from where you are actually calling your configuration crate/recipe.</p></p><p><p>The ability to query configuration settings allows not just finding out, for example,  which directory a log file is in, but also enables you to put tools on top of your configuration data.  Template configuration files suffer on two counts here - they are separate text files that require parsing to be read, and the format of each configuration file is different.</p></p><p><p>The last point concerns the flexibility of your configuration. If you have used template files, with hard coded parameter values, and you then want to modify your configuration to dynamically set one of those hard coded values, you have to modify all the specialised versions of the existing templates, and specify the value in code. You have to touch multiple files - lots of room for making typos.</p></p><p><p>My goal for pallet then, is to have all configuration supplied as arguments to crates.  For most packages a hash map is sufficient an abstraction for providing the data, but when this gets too cumbersome, we'll use a DSL that mirrors the original configuration file language.</p></p><p><p>Goodbye hidden configuration!</p></p>]]>
+    </content>
+  </entry>
+  <entry>
+    <id>http://hugoduncan.org/post/configure_nagios_using_pallet.html</id>
+    <link href="http://hugoduncan.org/post/configure_nagios_using_pallet.html"/>
+    <title>Configure Nagios using Pallet</title>
+    <summary>Basic Nagios support was recently added to pallet, and while very simple to use, this blog post should make it even simpler. The overall philosophy is to configure the nagios service monitoring definitions along with the service itself, rather than have monolithic nagios configuration, divorced from the configuration of the various nodes.</summary>
+    <updated>2010-08-18T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p><p>Basic Nagios support was recently added to <a href="http://github.com/hugoduncan/pallet">pallet</a>, and while very simple to use, this blog post should make it even simpler. The overall philosophy is to configure the nagios service monitoring definitions along with the service itself, rather than have monolithic nagios configuration, divorced from the configuration of the various nodes.</p></p><p><p>As an example, we can configure a machine to have it's ssh service, CPU load, number of processes and number of users monitored. Obviously, you would normally be monitoring several different types of nodes, but there is no difference as far as pallet is concerned.</p></p><p><p>We start by requiring various pallet components.  These would normally be part of a <code>ns</code> declaration, but are provided here for ease of use at the REPL.</p></p><p><pre class="clojure"> (require   '[pallet.crate.automated-admin-user
+    :as admin-user]   '[pallet.crate.iptables :as 'iptables]   '[pallet.crate.ssh :as ssh]   '[pallet.crate.nagios-config
+     :as nagios-config]   '[pallet.crate.nagios :as nagios]   '[pallet.crate.postfix :as postfix]   '[pallet.resource.service :as service]) </pre></p><p><h2>Node to be Monitored by Nagios</h2></p><p><p>Now we define the node to be monitored. We set up a machine that has <abbr>SSH</abbr> running, and configure <code>iptables</code> to allow access to <abbr>SSH</abbr>, with a throttled connection rate (six connections/minute by default).</p></p><p><pre class="clojure"> (pallet.core/defnode monitored   []   :bootstrap [(admin-user/automated-admin-user)]   :configure [;; set iptables for restricted access
               (iptables/iptables-accept-icmp)
               (iptables/iptables-accept-established)
               ;; allow connections to ssh
               ;; but throttle connection requests
               (ssh/iptables-throttle)
-              (ssh/iptables-accept)])
-&lt;/pre&gt;
-
-&lt;p&gt;Monitoring of the &lt;abbr&gt;SSH&lt;/abbr&gt; service is configured by simply adding
-&lt;code&gt;(ssh/nagios-monitor)&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;Remote monitoring is implemented using nagios&#39; &lt;code&gt;nrpe&lt;/code&gt; plugin, which we add with &lt;code&gt;(nagios-config/nrpe-client)&lt;/code&gt;.  To make nrpe accessible to the nagios server, we open the that the nrpe agent runs on using &lt;code&gt;(nagios-config/nrpe-client-port)&lt;/code&gt;, which restricts access to the nagios server node. We also add a phase, :restart-nagios, that can be used to restart the nrpe agent.&lt;/p&gt;
-
-&lt;p&gt;Pallet comes with some configured nrpe checks, and we add &lt;code&gt;nrpe-check-load&lt;/code&gt;, &lt;code&gt;nrpe-check-total-proces&lt;/code&gt; and &lt;code&gt;nrpe-check-users&lt;/code&gt;. The final configuration looks like this:&lt;/p&gt;
-
-&lt;pre class=&#34;clojure&#34;&gt;
-(pallet.core/defnode monitored
-  []
-  :bootstrap [(admin-user/automated-admin-user)]
-  :configure [;; set iptables for restricted access
+              (ssh/iptables-accept)]) </pre></p><p><p>Monitoring of the <abbr>SSH</abbr> service is configured by simply adding <code>(ssh/nagios-monitor)</code>.</p></p><p><p>Remote monitoring is implemented using nagios' <code>nrpe</code> plugin, which we add with <code>(nagios-config/nrpe-client)</code>.  To make nrpe accessible to the nagios server, we open the that the nrpe agent runs on using <code>(nagios-config/nrpe-client-port)</code>, which restricts access to the nagios server node. We also add a phase, :restart-nagios, that can be used to restart the nrpe agent.</p></p><p><p>Pallet comes with some configured nrpe checks, and we add <code>nrpe-check-load</code>, <code>nrpe-check-total-proces</code> and <code>nrpe-check-users</code>. The final configuration looks like this:</p></p><p><pre class="clojure"> (pallet.core/defnode monitored   []   :bootstrap [(admin-user/automated-admin-user)]   :configure [;; set iptables for restricted access
               (iptables/iptables-accept-icmp)
               (iptables/iptables-accept-established)
               ;; allow connections to ssh
@@ -92,253 +49,63 @@
               ;; add some remote checks
               (nagios-config/nrpe-check-load)
               (nagios-config/nrpe-check-total-procs)
-              (nagios-config/nrpe-check-users)]
-  :restart-nagios [(service/service
-                    &#34;nagios-nrpe-server&#34;
-                    :action :restart)])
-&lt;/pre&gt;
-
-&lt;p&gt;&lt;h2&gt;Nagios Server&lt;/h2&gt;
-&lt;p&gt;We now configure the nagios server node. The nagios server is installed with &lt;code&gt;(nagios/nagios &amp;ldquo;nagiospwd&amp;rdquo;)&lt;/code&gt;, specifying the password for the nagios web interface, and add a phase, :restart-nagios, that can be used to restart nagios.&lt;/p&gt;&lt;/p&gt;
-
-&lt;p&gt;Nagios also requires a &lt;abbr&gt;MTA&lt;/abbr&gt; for notifications, and here we install postfix.  We add a contact, which we make a member of the &#34;admins&#34; contact group, which is notified as part of the default host and service templates.&lt;/p&gt;
-
-&lt;pre class=&#34;clojure&#34;&gt;
-(pallet.core/defnode nagios
-  []
-  :bootstrap [(admin-user/automated-admin-user)]
-  :configure [;; restrict access
+              (nagios-config/nrpe-check-users)]   :restart-nagios [(service/service
+                    "nagios-nrpe-server"
+                    :action :restart)]) </pre></p><p><h2>Nagios Server</h2> <p>We now configure the nagios server node. The nagios server is installed with <code>(nagios/nagios "nagiospwd")</code>, specifying the password for the nagios web interface, and add a phase, :restart-nagios, that can be used to restart nagios.</p></p><p><p>Nagios also requires a <abbr>MTA</abbr> for notifications, and here we install postfix.  We add a contact, which we make a member of the "admins" contact group, which is notified as part of the default host and service templates.</p></p><p><pre class="clojure"> (pallet.core/defnode nagios   []   :bootstrap [(admin-user/automated-admin-user)]   :configure [;; restrict access
               (iptables/iptables-accept-icmp)
               (iptables/iptables-accept-established)
               (ssh/iptables-throttle)
               (ssh/iptables-accept)
               ;; configure MTA
               (postfix/postfix
-               &#34;pallet.org&#34; :internet-site)
+               "pallet.org" :internet-site)
               ;; install nagios
-              (nagios/nagios &#34;nagiospwd&#34;)
+              (nagios/nagios "nagiospwd")
               ;; allow access to nagios web site
               (iptables/iptables-accept-port 80)
               ;; configure notifications
               (nagios/contact
-              {:contact_name &#34;hugo&#34;
-               :service_notification_period &#34;24x7&#34;
-               :host_notification_period &#34;24x7&#34;
-               :service_notification_options
-                  &#34;w,u,c,r&#34;
-               :host_notification_options
-                  &#34;d,r&#34;
-               :service_notification_commands
-                 &#34;notify-service-by-email&#34;
-               :host_notification_commands
-                  &#34;notify-host-by-email&#34;
-               :email &#34;my.email@my.domain&#34;
-               :contactgroups [:admins]})]
-  :restart-nagios [(service/service &#34;nagios3&#34;
-                     :action :restart)])
-&lt;/pre&gt;
-
-&lt;p&gt;&lt;h2&gt;Trying it out&lt;/h2&gt;
-&lt;p&gt;That&amp;rsquo;s it. To fire up both machines, we use pallet&amp;rsquo;s &lt;code&gt;converge&lt;/code&gt; command.&lt;/p&gt;&lt;/p&gt;
-
-&lt;pre class=&#34;clojure&#34;&gt;
-(pallet.core/converge
-  {monitored 1 nagios 1} service
-  :configure :restart-nagios)
-&lt;/pre&gt;
-
-&lt;p&gt;The nagios web interface is then accessible on the &lt;code&gt;nagios&lt;/code&gt; node with the &lt;code&gt;nagiosadmin&lt;/code&gt; user and specified password.  Real world usage would probably have several different monitored configurations, and restricted access to the &lt;code&gt;nagios&lt;/code&gt; node.&lt;/p&gt;
-
-&lt;p&gt;&lt;h2&gt;Still to do&amp;hellip;&lt;/h2&gt;
-&lt;p&gt;Support for nagios is not complete (e.g. remote command configuration still needs to be added, and it has only been tested on Ubuntu), but I would appreciate any feedback on the general approach.&lt;/p&gt;&lt;/p&gt;
-</content></entry>
-
-<entry xml:base="http://hugoduncan.github.com/post/provisioning_cloud_nodes_with_pallet"><title>Provisioning Cloud Nodes with Pallet</title><link href="http://hugoduncan.github.com/post/provisioning_cloud_nodes_with_pallet"/><id>http://hugoduncan.github.com/post/provisioning_cloud_nodes_with_pallet</id><published>2010-05-12T00:00:00Z</published><updated>2010-05-12T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;I recently needed to move a server from dedicated hosting to a cloud server. The existing server had been configured over time by several people, with little documentation.  I want to make sure that this time everything was documented, and what better way than doing that than using an automated configuration tool.&lt;/p&gt;
-&lt;p&gt;Looking around at the configuration tools, I couldn&#39;t find one I really liked, so I started &lt;a href=&#34;http://github.com/hugoduncan/pallet&#34;&gt;Pallet&lt;/a&gt;. I&#39;ll explain why I didn&#39;t use an existing tool below, but first I wanted to show how to manage nodes in Pallet.&lt;/p&gt;
-
-&lt;pre class=&#34;clojure&#34;&gt;
-  ;; Pull in the pallet namespaces
-  (require &#39;pallet.repl)
-  (pallet.repl/use-pallet)
-
-  ;; Define a default node
-  (defnode mynode [])
-
-  ;; Define the cloud account to use
-  (def service
-    (compute-service &#34;provider&#34; &#34;user&#34; &#34;password&#34;
-                      :log4j :ssh))
-
-  ;; Create 2 nodes
-  (converge {mynode 2} service)
-&lt;/pre&gt;
-
-&lt;p&gt;This example would create two nodes (cloud vm instances) with the tag &#34;mynode&#34; in your cloud account, as specified in the &lt;code&gt;service&lt;/code&gt;.  This would give you the smallest size, ubuntu image on most clouds.  Of course, to do anything serious, you would want to specify the image you would like, and you would probably like some configuration of the nodes.  So carrying on the above example:
-&lt;/p&gt;
-&lt;pre class=&#34;clojure&#34;&gt;
-  ;; Pull in the needed crates
-  (use &#39;pallet.crate.automated-admin-user)
-  (use &#39;pallet.crate.java)
-
-  ;; Define a new node that will use the Java JDK
-  (defnode javanode
-    [:ubuntu :X86_64 :smallest
-     :os-description-matches &#34;[^J]+9.10[^32]+&#34;]
-    :bootstrap [(automated-admin-user)]
-    :configure [(java :openjdk :jdk)])
-
-  ;; Create a new node, and remove the previous ones
-  (converge {javanode 1 mynode 0} service)
-&lt;/pre&gt;
-
-&lt;p&gt;This would stop the two nodes that were created before, and create a new one, with the specified ubuntu version.  On first boot, it would create a user account with your current username, authorize your id_rsa key on that account, and give it sudo permissions.  Every time converge is run, it also ensures that the openjdk JDK is installed.&lt;/p&gt;
-
-&lt;p&gt;The configuration to be applied is specified as a call to a crate -
-automated-admin-user and java in the example above. Crates are just clojure
-functions that specify some configuration or other action on the nodes (they&#39;re
-equivalent to Chef&#39;s recipes, which Pallet can also execute using
-chef-solo). Pallet can be extended with your own crates, and crates can specify
-general actions, not just configuration.  &lt;code&gt;lift&lt;/code&gt; is a companion to
-&lt;code&gt;converge&lt;/code&gt;, and can be used to apply crates to existing nodes
-(including local VM&#39;s).  The hypothetical example below would execute
-&lt;code&gt;my-backup-crate&lt;/code&gt; on all the &#34;mynode&#34; nodes.&lt;/p&gt;
-
-&lt;pre class=&#34;clojure&#34;&gt;
-  (defnode mynode [] :backup [(my-backup-crate)])
-  (lift mynode service :backup)
-&lt;/pre&gt;
-
-&lt;p&gt;This was just a quick overview of Pallet, to give you an idea of what it is. One big area of Pallet not demonstrated here is its command line tool. But that is a topic for another post.&lt;/p&gt;
-
-&lt;h2&gt;Why Write another Tool?&lt;/h2&gt;
-
-&lt;p&gt;Now you&#39;ve seen some examples, I&#39;ll try and explain the features that make Pallet distinct from other configuration tools out there.&lt;/p&gt;
-
-&lt;h3&gt;No Dependencies&lt;/h3&gt;
-
-&lt;p&gt;The machines being managed require no special dependencies to be installed. As long as they have bash and ssh running, they can be used with pallet.  For me this was important - it means that you can use pretty much any image out there, which is great for ad-hoc testing and development.&lt;/p&gt;
-
-&lt;h3&gt;No Server&lt;/h3&gt;
-
-&lt;p&gt;Pallet has no central server to set up and maintain - it simply runs on demand. You can run it from anywhere, even over a remote REPL connection.&lt;/p&gt;
-
-&lt;h3&gt;Everything in Version Control&lt;/h3&gt;
-
-&lt;p&gt;In pallet, all your configuration is handled in SCM controlled files - there is no database involved.  This means that your configuration can always be kept in step with the development of your crates, and the versions of the external crates that you use.&lt;/p&gt;
-
-&lt;h3&gt;Jar File Distribution of Crates&lt;/h3&gt;
-
-&lt;p&gt;Custom crates can be distributed as jar files, and so can be published in maven repositories, and be consumed in a version controlled manner.  Hopefully this will promote shared crates.&lt;/p&gt;
-
-&lt;h3&gt;Provisioning, Configuration and Administration&lt;/h3&gt;
-
-&lt;p&gt;Pallet aims quite wide. You can use it for starting an stopping nodes, for configuring nodes, deploying projects and also for running administration tasks.  To be honest, this wasn&#39;t an initial design goal, but has come out of the wash that way.&lt;/p&gt;
-
-&lt;h2&gt;Interested?&lt;/h2&gt;
-
-&lt;p&gt;Hopefully this has whetted your appetite, and you&#39;ll give pallet a try.  You can get support via &lt;a href=&#34;http://groups.google.com/group/pallet-clj&#34;&gt;the Google Group&lt;/a&gt;, or #pallet on freenode irc.&lt;/p&gt;
-</content></entry>
-
-<entry xml:base="http://hugoduncan.github.com/post/shell_scripting_in_clojure_with_pallet"><title>Shell Scripting in Clojure with Pallet</title><link href="http://hugoduncan.github.com/post/shell_scripting_in_clojure_with_pallet"/><id>http://hugoduncan.github.com/post/shell_scripting_in_clojure_with_pallet</id><published>2010-05-03T00:00:00Z</published><updated>2010-05-03T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;Let&#39;s face it, many of us hate writing shell scripts, and with good
-reason. Personally, it&#39;s not so much the shell language itself that puts me off,
-but organising everything around it; how do you deploy your scripts, how do you
-arrange to call other scripts, how do you manage the dependencies between your
-scripts?  &lt;a href=&#34;http://github.com/hugoduncan/pallet&#34;&gt;Pallet&lt;/a&gt; aims to solve
-these problems by embedding shell script in &lt;a href=&#34;http://clojure.org/&#34;&gt;clojure&lt;/a&gt;.&lt;/p&gt;
-
-&lt;h2&gt;Embedding in Clojure&lt;/h2&gt;
-
-&lt;p&gt;Embedding other languages in lisp is not a new idea; &lt;a href=&#34;http://common-lisp.net/project/parenscript/&#34;&gt;parenscript&lt;/a&gt;, &lt;a href=&#34;http://github.com/arohner/scriptjure&#34;&gt;scriptjure&lt;/a&gt; (which Pallet&#39;s
-embedding is based on), and &lt;a href=&#34;http://www.gitorious.org/clojureql/&#34;&gt;ClojureQL&lt;/a&gt; all do this.&lt;/p&gt;
-
-&lt;p&gt;So what does shell script in clojure look like? Some examples:&lt;/p&gt;
-&lt;pre class=&#34;clojure&#34;&gt;(script
-  (ls &#34;/some/path&#34;)
-  (defvar x 1)
-  (println @x)
-  (defn foo [x] (ls @x))
-  (foo 1)
-  (if (= a a)
-    (println &#34;Reassuring&#34;)
-    (println &#34;Ooops&#34;))
-  (println &#34;I am&#34; @(whomai))&lt;/pre&gt;
-
-&lt;p&gt;which generates:&lt;/p&gt;
-
-&lt;pre&gt;ls /some/path
-x=1
-echo ${x}
-function foo(x) {
-ls ${x}
- }
-foo 1
-if [ \\( \&#34;a\&#34; == \&#34;a\&#34; \\) ]; then echo Reassuring;else echo Ooops;fi
-echo I am $(whomai)
-&lt;/pre&gt;
-
-&lt;p&gt;The aim is to make writing shell script similar to writing Clojure, but there
-are obvious differences in the language that limit how far that can be taken. To
-run the code above at the REPL, you&#39;ll have to use the
-&lt;code&gt;pallet.stevedore&lt;/code&gt; package.&lt;/p&gt;
-
-&lt;h2&gt;Escaping back to Clojure&lt;/h2&gt;
-
-&lt;p&gt;Escaping allows us to embed Clojure values and expressions inside our scripts, in much the same way as symbols can be unquoted when writing macros.&lt;/p&gt;
-
-&lt;pre class=&#34;clojure&#34;&gt;(let [path &#34;/some/path&#34;]
-  (script
-    (ls ~path)
-    (ls ~(.replace path &#34;some&#34; &#34;other)))&lt;/pre&gt;
-
-&lt;p&gt;We can now write Clojure functions that produce shell scripts.  Writing
-scripts as clojure functions allows you to use the Clojure namespace facilities,
-and allows you to distribute you scripts in jar files (which can be deployed in
-a versioned manner with maven)&lt;/p&gt;
-
-&lt;pre class=&#34;clojure&#34;&gt;(defn list-path [path]
-  (script
-    (ls ~path)
-    (ls ~(.replace path &#34;some&#34; &#34;other)))&lt;/pre&gt;
-
-&lt;h2&gt;Composing scripts&lt;/h2&gt;
-
-&lt;p&gt;Pallet allows the scripts to be combined. &lt;code&gt;do-script&lt;/code&gt; concatenates
-the code pieces together.&lt;/p&gt;
-
-&lt;pre class=&#34;clojure&#34;&gt;(do-script
-  (list-path &#34;path1&#34;)
-  (list-path &#34;path2&#34;))
-&lt;/pre&gt;
-
-&lt;p&gt;&lt;code&gt;chain-script&lt;/code&gt; chains the scripts together with &#39;&amp;amp;&amp;amp;&#39;.&lt;/p&gt;
-
-&lt;pre class=&#34;clojure&#34;&gt;(chain-script
-  (list-path &#34;path1&#34;)
-  (list-path &#34;path2&#34;))
-&lt;/pre&gt;
-
-&lt;p&gt;&lt;code&gt;checked-script&lt;/code&gt; finally allows the chaining of scripts, and calls
-exit if the chain fails.&lt;/p&gt;
-
-&lt;pre class=&#34;clojure&#34;&gt;(checked-script &#34;Message&#34;
-  (list-path &#34;path1&#34;)
-  (list-path &#34;path2&#34;))
-&lt;/pre&gt;
-
-&lt;h2&gt;Conclusion&lt;/h2&gt;
-
-&lt;p&gt;Writing shell script in Clojure gives access to Clojure&#39;s namespace facility
-allowing modularised shell script, and to Clojure&#39;s packaging as jar files,
-which allows reuse and distribution.  The ability to compose script fragments
-leads to being able to macro-like functions, such &lt;code&gt;checked-script&lt;/code&gt;,
-and you could even use Clojure macros to generate script (but I haven&#39;t thought
-of a use for that, yet).&lt;/p&gt;
-
-&lt;p&gt;The syntax for the embedding has arisen out of practical usage, so is far
-from complete, and can definitely be improved. I look forward to hearing your
-feedback!&lt;/p&gt;
-
-&lt;p&gt;UPDATE: stevedore now requires a binding for *template*, to specify the target for the script generation.  This should be a vector containing one of :ubuntu, :centos, or :darwin, and one of :aptitude, :yum, :brew.&lt;/p&gt;
-</content></entry>
-
+              {:contact<i>name "hugo"
+               :service</i>notification<i>period "24x7"
+               :host</i>notification<i>period "24x7"
+               :service</i>notification<i>options
+                  "w,u,c,r"
+               :host</i>notification<i>options
+                  "d,r"
+               :service</i>notification<i>commands
+                 "notify-service-by-email"
+               :host</i>notification_commands
+                  "notify-host-by-email"
+               :email "my.email@my.domain"
+               :contactgroups [:admins]})]   :restart-nagios [(service/service "nagios3"
+                     :action :restart)]) </pre></p><p><h2>Trying it out</h2> <p>That's it. To fire up both machines, we use pallet's <code>converge</code> command.</p></p><p><pre class="clojure"> (pallet.core/converge   {monitored 1 nagios 1} service   :configure :restart-nagios) </pre></p><p><p>The nagios web interface is then accessible on the <code>nagios</code> node with the <code>nagiosadmin</code> user and specified password.  Real world usage would probably have several different monitored configurations, and restricted access to the <code>nagios</code> node.</p></p><p><h2>Still to do...</h2> <p>Support for nagios is not complete (e.g. remote command configuration still needs to be added, and it has only been tested on Ubuntu), but I would appreciate any feedback on the general approach.</p></p>]]>
+    </content>
+  </entry>
+  <entry>
+    <id>http://hugoduncan.org/post/provisioning_cloud_nodes_with_pallet.html</id>
+    <link href="http://hugoduncan.org/post/provisioning_cloud_nodes_with_pallet.html"/>
+    <title>Provisioning Cloud Nodes with Pallet</title>
+    <summary>I recently needed to move a server from dedicated hosting to a cloud server. The existing server had been configured over time by several people, with little documentation.  I want to make sure that this time everything was documented, and what better way than doing that than using an automated configuration tool.</summary>
+    <updated>2010-05-12T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p><p>I recently needed to move a server from dedicated hosting to a cloud server. The existing server had been configured over time by several people, with little documentation.  I want to make sure that this time everything was documented, and what better way than doing that than using an automated configuration tool.</p> <p>Looking around at the configuration tools, I couldn't find one I really liked, so I started <a href="http://github.com/hugoduncan/pallet">Pallet</a>. I'll explain why I didn't use an existing tool below, but first I wanted to show how to manage nodes in Pallet.</p></p><p><pre class="clojure">   ;; Pull in the pallet namespaces   (require 'pallet.repl)   (pallet.repl/use-pallet)</p><p>  ;; Define a default node   (defnode mynode [])</p><p>  ;; Define the cloud account to use   (def service<pre><code>&#40;compute-service &quot;provider&quot; &quot;user&quot; &quot;password&quot;
+                  :log4j :ssh&#41;&#41; </code></pre>  ;; Create 2 nodes   (converge {mynode 2} service) </pre></p><p><p>This example would create two nodes (cloud vm instances) with the tag "mynode" in your cloud account, as specified in the <code>service</code>.  This would give you the smallest size, ubuntu image on most clouds.  Of course, to do anything serious, you would want to specify the image you would like, and you would probably like some configuration of the nodes.  So carrying on the above example: </p> <pre class="clojure">   ;; Pull in the needed crates   (use 'pallet.crate.automated-admin-user)   (use 'pallet.crate.java)</p><p>  ;; Define a new node that will use the Java JDK   (defnode javanode<pre><code>&#91;:ubuntu :X86&#95;64 :smallest
+     :os-description-matches &quot;&#91;&#94;J&#93;+9.10&#91;&#94;32&#93;+&quot;&#93;
+:bootstrap &#91;&#40;automated-admin-user&#41;&#93;
+:configure &#91;&#40;java :openjdk :jdk&#41;&#93;&#41; </code></pre>  ;; Create a new node, and remove the previous ones   (converge {javanode 1 mynode 0} service) </pre></p><p><p>This would stop the two nodes that were created before, and create a new one, with the specified ubuntu version.  On first boot, it would create a user account with your current username, authorize your id_rsa key on that account, and give it sudo permissions.  Every time converge is run, it also ensures that the openjdk JDK is installed.</p></p><p><p>The configuration to be applied is specified as a call to a crate - automated-admin-user and java in the example above. Crates are just clojure functions that specify some configuration or other action on the nodes (they're equivalent to Chef's recipes, which Pallet can also execute using chef-solo). Pallet can be extended with your own crates, and crates can specify general actions, not just configuration.  <code>lift</code> is a companion to <code>converge</code>, and can be used to apply crates to existing nodes (including local VM's).  The hypothetical example below would execute <code>my-backup-crate</code> on all the "mynode" nodes.</p></p><p><pre class="clojure">   (defnode mynode [] :backup [(my-backup-crate)])   (lift mynode service :backup) </pre></p><p><p>This was just a quick overview of Pallet, to give you an idea of what it is. One big area of Pallet not demonstrated here is its command line tool. But that is a topic for another post.</p></p><p><h2>Why Write another Tool?</h2></p><p><p>Now you've seen some examples, I'll try and explain the features that make Pallet distinct from other configuration tools out there.</p></p><p><h3>No Dependencies</h3></p><p><p>The machines being managed require no special dependencies to be installed. As long as they have bash and ssh running, they can be used with pallet.  For me this was important - it means that you can use pretty much any image out there, which is great for ad-hoc testing and development.</p></p><p><h3>No Server</h3></p><p><p>Pallet has no central server to set up and maintain - it simply runs on demand. You can run it from anywhere, even over a remote REPL connection.</p></p><p><h3>Everything in Version Control</h3></p><p><p>In pallet, all your configuration is handled in SCM controlled files - there is no database involved.  This means that your configuration can always be kept in step with the development of your crates, and the versions of the external crates that you use.</p></p><p><h3>Jar File Distribution of Crates</h3></p><p><p>Custom crates can be distributed as jar files, and so can be published in maven repositories, and be consumed in a version controlled manner.  Hopefully this will promote shared crates.</p></p><p><h3>Provisioning, Configuration and Administration</h3></p><p><p>Pallet aims quite wide. You can use it for starting an stopping nodes, for configuring nodes, deploying projects and also for running administration tasks.  To be honest, this wasn't an initial design goal, but has come out of the wash that way.</p></p><p><h2>Interested?</h2></p><p><p>Hopefully this has whetted your appetite, and you'll give pallet a try.  You can get support via <a href="http://groups.google.com/group/pallet-clj">the Google Group</a>, or #pallet on freenode irc.</p></p>]]>
+    </content>
+  </entry>
+  <entry>
+    <id>http://hugoduncan.org/post/shell_scripting_in_clojure_with_pallet.html</id>
+    <link href="http://hugoduncan.org/post/shell_scripting_in_clojure_with_pallet.html"/>
+    <title>Shell Scripting in Clojure with Pallet</title>
+    <summary>Let's face it, many of us hate writing shell scripts, and with good reason. Personally, it's not so much the shell language itself that puts me off, but organising everything around it; how do you deploy your scripts, how do you arrange to call other scripts, how do you manage the dependencies between your scripts?  Pallet aims to solve these problems by embedding shell script in clojure.</summary>
+    <updated>2010-05-03T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p><p>Let's face it, many of us hate writing shell scripts, and with good reason. Personally, it's not so much the shell language itself that puts me off, but organising everything around it; how do you deploy your scripts, how do you arrange to call other scripts, how do you manage the dependencies between your scripts?  <a href="http://github.com/hugoduncan/pallet">Pallet</a> aims to solve these problems by embedding shell script in <a href="http://clojure.org/">clojure</a>.</p></p><p><h2>Embedding in Clojure</h2></p><p><p>Embedding other languages in lisp is not a new idea; <a href="http://common-lisp.net/project/parenscript/">parenscript</a>, <a href="http://github.com/arohner/scriptjure">scriptjure</a> (which Pallet's embedding is based on), and <a href="http://www.gitorious.org/clojureql/">ClojureQL</a> all do this.</p></p><p><p>So what does shell script in clojure look like? Some examples:</p> <pre class="clojure">(script   (ls "/some/path")   (defvar x 1)   (println @x)   (defn foo [x] (ls @x))   (foo 1)   (if (= a a)<pre><code>&#40;println &quot;Reassuring&quot;&#41;
+&#40;println &quot;Ooops&quot;&#41;&#41; </code></pre>  (println "I am" @(whomai))</pre></p><p><p>which generates:</p></p><p><pre>ls /some/path x=1 echo ${x} function foo(x) { ls ${x}  } foo 1 if [ &#92;( \"a\" == \"a\" &#92;) ]; then echo Reassuring;else echo Ooops;fi echo I am $(whomai) </pre></p><p><p>The aim is to make writing shell script similar to writing Clojure, but there are obvious differences in the language that limit how far that can be taken. To run the code above at the REPL, you'll have to use the <code>pallet.stevedore</code> package.</p></p><p><h2>Escaping back to Clojure</h2></p><p><p>Escaping allows us to embed Clojure values and expressions inside our scripts, in much the same way as symbols can be unquoted when writing macros.</p></p><p><pre class="clojure">(let [path "/some/path"]   (script<pre><code>&#40;ls &#126;path&#41;
+&#40;ls &#126;&#40;.replace path &quot;some&quot; &quot;other&#41;&#41;&#41;&lt;/pre&gt; </code></pre><p>We can now write Clojure functions that produce shell scripts.  Writing scripts as clojure functions allows you to use the Clojure namespace facilities, and allows you to distribute you scripts in jar files (which can be deployed in a versioned manner with maven)</p></p><p><pre class="clojure">(defn list-path [path]   (script<pre><code>&#40;ls &#126;path&#41;
+&#40;ls &#126;&#40;.replace path &quot;some&quot; &quot;other&#41;&#41;&#41;&lt;/pre&gt; </code></pre><h2>Composing scripts</h2></p><p><p>Pallet allows the scripts to be combined. <code>do-script</code> concatenates the code pieces together.</p></p><p><pre class="clojure">(do-script   (list-path "path1")   (list-path "path2")) </pre></p><p><p><code>chain-script</code> chains the scripts together with '&amp;&amp;'.</p></p><p><pre class="clojure">(chain-script   (list-path "path1")   (list-path "path2")) </pre></p><p><p><code>checked-script</code> finally allows the chaining of scripts, and calls exit if the chain fails.</p></p><p><pre class="clojure">(checked-script "Message"   (list-path "path1")   (list-path "path2")) </pre></p><p><h2>Conclusion</h2></p><p><p>Writing shell script in Clojure gives access to Clojure's namespace facility allowing modularised shell script, and to Clojure's packaging as jar files, which allows reuse and distribution.  The ability to compose script fragments leads to being able to macro-like functions, such <code>checked-script</code>, and you could even use Clojure macros to generate script (but I haven't thought of a use for that, yet).</p></p><p><p>The syntax for the embedding has arisen out of practical usage, so is far from complete, and can definitely be improved. I look forward to hearing your feedback!</p></p><p><p>UPDATE: stevedore now requires a binding for <em>template</em>, to specify the target for the script generation.  This should be a vector containing one of :ubuntu, :centos, or :darwin, and one of :aptitude, :yum, :brew.</p></p>]]>
+    </content>
+  </entry>
 </feed>

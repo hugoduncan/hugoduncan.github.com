@@ -1,78 +1,81 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
   <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
-    <link rel="stylesheet" 
-      href="//netdna.bootstrapcdn.com/bootstrap/3.0.0-rc1/css/bootstrap.min.css"
-      media="screen">
-<link rel="stylesheet" href="/css/pelure.css">
-
+    <title>pgp</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta charset="utf-8"/>
+    <meta name="description"
+          content="Pelure - ephemeral writing surface?"/>
+    <meta name="author" content="Hugo Duncan"/>
+    <link type="application/atom+xml" rel="alternate" href="../../index.xml" title="Pelure">
+    <link rel="stylesheet" href="../../style.css">
   </head>
   <body>
-    <div class="container">
-      <div class="row">
-  <div class="col-0 col-sm-2 col-lg-2"></div>
-  <div class="col-12 col-sm-8 col-lg-8">
-    <div class="navbar">
-      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
-      <span class="icon-bar"></span>
-      <span class="icon-bar"></span>
-      <span class="icon-bar"></span>
-    </button>
-    <a class="navbar-brand" href="/meta/pelure">Pelure</a>
-    <div class="nav-collapse collapse">
-      <ul class="nav navbar-nav">
-        <li><a href="/post">Posts</a></li>
-        <li><a href="/tags">Tags</a></li>
-      </ul>
-      <ul class="nav navbar-nav pull-right">
-        <li><a href="/meta/contact">Contact</a></li>
-      </ul>
-    </div>
-    </div>
-  </div>
-</div>
 
-      <div class="row"> 
-  <div class="col-0 col-sm-2 col-lg-2"></div>
-  <div id="top" class="col-12 col-sm-8 col-lg-8">
-     
-      <h1>Pgp<a href="http://hugoduncan.github.com/tags/pgp/index.xml">&nbsp;<img src="/images/feed_mini.gif"></a></h1>
-      
-        <li class="list-unstyled">
-           <span class="post-date">25 August 2013</span>
-            &nbsp;<a href="http://hugoduncan.github.com/post/snarf-pgp-keys-in-emacs-mu4e">Snarf PGP Keys from Signed Messages in Emacs mu4e</a>
-        </li>
-      
+    <div class="site-header">
+      <div class="wrapper">
+        <div class="site-nav">
+          <a class="page-link" href="../../archive.html">All Posts</a>
+          <a class="page-link" href="https://github.com/hugoduncan/hugoduncan.github.com/discussions/categories/posts">Discuss</a>
+          <a class="page-link" href="../../meta/pelure.html">About</a>
+          <a class="page-link" href="../../meta/contact.html">Contact</a>
+          <a class="page-link" href="index.xml">
+            <img class="page-icon"
+                 src="https://www.svgrepo.com/show/362316/feed.svg"
+                 width="30px"/>
+          </a>
+          <a class="page-link" href="https://twitter.com/hugoduncan">
+            <img class="page-icon"
+                 src="https://www.svgrepo.com/show/11841/twitter.svg"
+                 width="30px"/>
+          </a>
         </div>
-</div>
-<script src='http://www.google-analytics.com/ga.js' type='text/javascript'>
-</script>
-<script type="text/javascript">
-try {
-var pageTracker = _gat._getTracker("UA-3688366-1");
-pageTracker._trackPageview();
-} catch(err) {}</script>
-     
+        <div>
+          <h1 class="site-title">
+            <a class="page-link" href="../../index.html">Pelure</a>
+          </h1>
+          <p>Ephemeral musings, often about Clojure</p>
+        </div>
+      </div>
     </div>
-    <div class="row"> 
-  <div class="col-0 col-sm-2 col-lg-2"></div>
-  <div id="top" class="col-12 col-sm-8 col-lg-8">
-     
-<footer id="footer">
-  <p class="pull-right"><a href="#top">Back to top</a></p>
-</footer>
-  </div>
-</div>
-<script src='http://www.google-analytics.com/ga.js' type='text/javascript'>
-</script>
-<script type="text/javascript">
-try {
-var pageTracker = _gat._getTracker("UA-3688366-1");
-pageTracker._trackPageview();
-} catch(err) {}</script>
-     
 
-   </body>
+    <div class="wrapper">
+
+      <div><h1><a href="post/snarf-pgp-keys-in-emacs-mu4e.html">Snarf PGP Keys from Signed Messages in Emacs mu4e</a></h1><p>I just moved to [mu][mu] for reading my email.  One feature I was missing was the ability to receive [PGP][pgp] keys for signed messages.</p><p>When you receive a signed message, <code>mu</code> shows the verification status in the <code>Signature</code> field in the message view (see [MSGV-Crypto][mucrypto]).  If you don't have the sender's PGP key on your keyring, this will show <code>unverified</code>.  Click on the <code>Details</code> link within field will show the sender's key id.  To manually import the key you can use [<code>gpg</code>][gpg]:</p><pre><code>$ gpg --recv &lt;the-key-id&gt;
+</code></pre><p>This seemed a little labourious, so some automation was in order. <code>mu4e</code> allows you to define actions that can be run on messages (or attachments), so I just wrote an action to do this.</p><pre><code class="lisp">&#40;defun mu4e-view-snarf-pgp-key &#40;&amp;optional msg&#41;
+  &quot;Snarf the pgp key for the specified message.&quot;
+  &#40;interactive&#41;
+  &#40;let&#42; &#40;&#40;msg &#40;or msg &#40;mu4e-message-at-point&#41;&#41;&#41;
+          &#40;path &#40;mu4e-message-field msg :path&#41;&#41;
+          &#40;cmd &#40;format &quot;%s verify --verbose %s&quot;
+                 mu4e-mu-binary
+                 &#40;shell-quote-argument path&#41;&#41;&#41;
+          &#40;output &#40;shell-command-to-string cmd&#41;&#41;&#41;
+    &#40;let &#40;&#40;case-fold-search nil&#41;&#41;
+      &#40;when &#40;string-match &quot;key:\\&#40;&#91;A-F0-9&#93;+\\&#41;&quot; output&#41;
+        &#40;let&#42; &#40;&#40;cmd &#40;format &quot;%s --recv %s&quot;
+                            epg-gpg-program &#40;match-string 1 output&#41;&#41;&#41;
+               &#40;output &#40;shell-command-to-string cmd&#41;&#41;&#41;
+          &#40;message output&#41;&#41;&#41;&#41;&#41;&#41;
+
+</code></pre><p>This works by parsing the output of the <code>mu</code> program itself, as displayed in the <code>Details</code> window, to obtain the PGP key id.  It then executes the <code>gpg --recv</code> command, parsing in the parsed key id.</p><p>To install the action, we simply add it to <code>mu4e-view-actions</code>:</p><pre><code class="lisp">&#40;add-to-list 'mu4e-view-actions
+             '&#40;&quot;Snarf PGP keys&quot; . mu4e-view-snarf-pgp-key&#41; t&#41;
+</code></pre><p>[pgp]: <a href='http://en.wikipedia.org/wiki/Pretty_Good_Privacy'>http://en.wikipedia.org/wiki/Pretty<i>Good</i>Privacy</a> "Pretty Good Privacy" [gpg]: <a href='http://www.gnupg.org/'>http://www.gnupg.org/</a> "GNU Privacy Guard" [mu]: <a href='http://www.djcbsoftware.nl/code/mu/'>http://www.djcbsoftware.nl/code/mu/</a> "mu mail reader" [mucrypto]: <a href='http://www.djcbsoftware.nl/code/mu/mu4e/MSGV-Crypto.html#MSGV-Crypto'>http://www.djcbsoftware.nl/code/mu/mu4e/MSGV-Crypto.html#MSGV-Crypto</a> "mu message cryptography"</p><p>Discuss this post <a href="https://github.com/hugoduncan/hugoduncan.github.com/discussions/categories/posts">here</a>.</p><p><i>Published: 2013-08-25</i></p></div>
+
+      
+      <div style="margin-bottom: 20px; float: right;">
+        <a class="page-link" href="archive.html">Archive</a>
+      </div>
+      
+    </div>
+    <script>
+      document.addEventListener('DOMContentLoaded', (event) => {
+        document.querySelectorAll('pre code').forEach((el) => {
+          if (!el.classList.contains('clojure')) {
+            hljs.highlightElement(el);
+          }
+        });
+      });
+    </script>
+  </body>
 </html>

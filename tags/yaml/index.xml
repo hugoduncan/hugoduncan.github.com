@@ -1,18 +1,21 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<feed xmlns='http://www.w3.org/2005/Atom' xml:lang='en-us'>
- <title>pelure</title>
- <id>http://hugoduncan.github.com/</id>
- <link href='./' />
- <link rel='self' href='' />
- <logo>rsslogo.jpg</logo>
- <icon>/favicon.ico</icon>
- <author><name>Hugo Duncan</name></author>
- <subtitle>Pelure </subtitle>
- <rights>All content written by Hugo Duncan and photos by Hugo Duncan Copyright Hugo Duncan, all rights reserved.</rights> 
- <updated>2013-10-28T00:00:00Z</updated>
-
-
-<entry xml:base="http://hugoduncan.github.com/post/parsing_yaml_dates_in_rails_gives_surprising_results"><title>Parsing YAML Dates in Rails Gives Surprising Results</title><link href="http://hugoduncan.github.com/post/parsing_yaml_dates_in_rails_gives_surprising_results"/><id>http://hugoduncan.github.com/post/parsing_yaml_dates_in_rails_gives_surprising_results</id><published>2009-03-07T00:00:00Z</published><updated>2009-03-07T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;Today&#39;s surprise was that &#34;2009-01-01&#34; and &#34;2009-1-1&#34; get parsed differently by the &lt;a href=&#34;http://www.yaml.org/&#34;&gt;YAML&lt;/a&gt; parser in &lt;a href=&#34;http://rubyonrails.org/&#34;&gt;Rails&lt;/a&gt;.  The former gets converted to a &lt;code&gt;Date&lt;/code&gt;, while the latter becomes a &lt;code&gt;String&lt;/code&gt;.  It confused me for a while, as the problem only showed up when I wanted to send the dates to a &lt;a href=&#34;http://code.google.com/p/flot/&#34;&gt;Flot&lt;/a&gt; chart.  Looking at the standard, it&#39;s conforming behaviour.   Must be me that is non-conforming then...&lt;/p&gt;
-</content></entry>
-
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Pelure</title>
+  <link href="http://hugoduncan.org/index.xml" rel="self"/>
+  <link href="http://hugoduncan.org/"/>
+  <updated>2021-11-15T01:45:47+00:00</updated>
+  <id>http://hugoduncan.org/</id>
+  <author>
+    <name>Hugo Duncan</name>
+  </author>
+  <entry>
+    <id>http://hugoduncan.org/post/parsing_yaml_dates_in_rails_gives_surprising_results.html</id>
+    <link href="http://hugoduncan.org/post/parsing_yaml_dates_in_rails_gives_surprising_results.html"/>
+    <title>Parsing YAML Dates in Rails Gives Surprising Results</title>
+    <summary>Today's surprise was that "2009-01-01" and "2009-1-1" get parsed differently by the YAML parser in Rails.  The former gets converted to a Date&gt;, while the latter becomes a String.  It confused me for a while, as the problem only showed up when I wanted to send the dates to a Flot chart.  Looking at the standard, it's conforming behaviour.   Must be me that is non-conforming then...</summary>
+    <updated>2009-03-07T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p><p>Today's surprise was that "2009-01-01" and "2009-1-1" get parsed differently by the <a href="http://www.yaml.org/">YAML</a> parser in <a href="http://rubyonrails.org/">Rails</a>.  The former gets converted to a <code>Date</code>, while the latter becomes a <code>String</code>.  It confused me for a while, as the problem only showed up when I wanted to send the dates to a <a href="http://code.google.com/p/flot/">Flot</a> chart.  Looking at the standard, it's conforming behaviour.   Must be me that is non-conforming then...</p></p>]]>
+    </content>
+  </entry>
 </feed>

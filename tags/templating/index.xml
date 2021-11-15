@@ -1,176 +1,82 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<feed xmlns='http://www.w3.org/2005/Atom' xml:lang='en-us'>
- <title>pelure</title>
- <id>http://hugoduncan.github.com/</id>
- <link href='./' />
- <link rel='self' href='' />
- <logo>rsslogo.jpg</logo>
- <icon>/favicon.ico</icon>
- <author><name>Hugo Duncan</name></author>
- <subtitle>Pelure </subtitle>
- <rights>All content written by Hugo Duncan and photos by Hugo Duncan Copyright Hugo Duncan, all rights reserved.</rights> 
- <updated>2013-10-28T00:00:00Z</updated>
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Pelure</title>
+  <link href="http://hugoduncan.org/index.xml" rel="self"/>
+  <link href="http://hugoduncan.org/"/>
+  <updated>2021-11-15T01:45:47+00:00</updated>
+  <id>http://hugoduncan.org/</id>
+  <author>
+    <name>Hugo Duncan</name>
+  </author>
+  <entry>
+    <id>http://hugoduncan.org/post/webapp_with_core.async.html</id>
+    <link href="http://hugoduncan.org/post/webapp_with_core.async.html"/>
+    <title>Exploring a todo app with core.async</title>
+    <summary>Builds the equivalent of the angularJS TODO example with core.async</summary>
+    <updated>2013-08-15T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p>We're going to build an equivalent of the [AngularJS TODO example][angulartodo] using core.async, and a templating library, [papadom][papadom], that I've written to help in this.</p><p>[Clojurescript][clojurescript] recently gained a [CSP][csp] implemetation via [core.async][core.async], similar to [Go's channels][golangchannel], or [CML's channels][cmlchannel] (CML also has a nice select).  Bruce Haumann started exploring this with [ClojureScript Core.Async Todos][brucetodo], and David Nolen has been looking at how to use core.async for [responsive design][cspresponsive].  In this post, we'll take the TODO example, and take it a little further.</p><h2>Basic Display</h2><p>We'll start with just displaying a list of todo items.  For this we'll need a template, so we'll just write this in HTML, and add a <code>t-template</code> attribute, which enables us to use mustache style templating of values to display.  This doesn't use mustache sections for looping, in order to preserve valid HTML markup.</p><pre><code class="html">&lt;h1&gt;TODOS&lt;/h1&gt;
+&lt;ul class=&quot;unstyled&quot;&gt;
+  &lt;li t-template=&quot;todos&quot;&gt;{{text}}&lt;/li&gt;
+&lt;/ul&gt;
+</code></pre><p>To get this to show something we'll need some code:</p><pre><code class="clj">&#40;ns app
+  &#40;:require
+   &#91;papadom.template :refer &#91;compile-templates render&#93;&#93;&#41;&#41;
 
-
-<entry xml:base="http://hugoduncan.github.com/post/webapp_with_core.async"><title>Exploring a todo app with core.async</title><link href="http://hugoduncan.github.com/post/webapp_with_core.async"/><id>http://hugoduncan.github.com/post/webapp_with_core.async</id><published>2013-08-15T00:00:00Z</published><updated>2013-08-15T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;We&amp;rsquo;re going to build an equivalent of the &lt;a href=&#34;http://angularjs.org/#add-some-control&#34; title=&#34;Angular TODO example&#34;&gt;AngularJS TODO example&lt;/a&gt;
-using core.async, and a templating library, &lt;a href=&#34;https://github.com/hugoduncan/papadom&#34; title=&#34;Papadom templating library&#34;&gt;papadom&lt;/a&gt;, that I&amp;rsquo;ve
-written to help in this.&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&#34;https://github.com/clojure/clojurescript&#34; title=&#34;Clojurescript&#34;&gt;Clojurescript&lt;/a&gt; recently gained a &lt;a href=&#34;http://en.wikipedia.org/wiki/Communicating_sequential_processes&#34; title=&#34;Communicating Sequential Processes&#34;&gt;CSP&lt;/a&gt; implemetation via
-&lt;a href=&#34;http://clojure.com/blog/2013/06/28/clojure-core-async-channels.html&#34; title=&#34;Clojure core.async Channels&#34;&gt;core.async&lt;/a&gt;, similar to &lt;a href=&#34;http://golang.org/ref/spec#Channel_types&#34; title=&#34;Go Channels&#34;&gt;Go&amp;rsquo;s channels&lt;/a&gt;, or
-&lt;a href=&#34;http://www.cs.cornell.edu/Courses/cs312/2006fa/recitations/rec24.html&#34; title=&#34;CML Channels&#34;&gt;CML&amp;rsquo;s channels&lt;/a&gt; (CML also has a nice select).  Bruce Haumann
-started exploring this with &lt;a href=&#34;http://rigsomelight.com/2013/07/18/clojurescript-core-async-todos.html&#34; title=&#34;Bruce Haumann&#39;s &#39;ClojureScript Core.Async Todos&#39;&#34;&gt;ClojureScript Core.Async Todos&lt;/a&gt;, and
-David Nolen has been looking at how to use core.async for
-&lt;a href=&#34;http://swannodette.github.io/2013/07/31/extracting-processes/&#34; title=&#34;David Nolan&#39;s &#39;CSP is Responsive Design&#39;&#34;&gt;responsive design&lt;/a&gt;.  In this post, we&amp;rsquo;ll take the TODO example,
-and take it a little further.&lt;/p&gt;
-
-&lt;h2&gt;Basic Display&lt;/h2&gt;
-
-&lt;p&gt;We&amp;rsquo;ll start with just displaying a list of todo items.  For this we&amp;rsquo;ll need a
-template, so we&amp;rsquo;ll just write this in HTML, and add a &lt;code&gt;t-template&lt;/code&gt; attribute,
-which enables us to use mustache style templating of values to display.  This
-doesn&amp;rsquo;t use mustache sections for looping, in order to preserve valid HTML
-markup.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;html&#34;&gt;&amp;lt;h1&amp;gt;TODOS&amp;lt;/h1&amp;gt;
-&amp;lt;ul class=&amp;quot;unstyled&amp;quot;&amp;gt;
-  &amp;lt;li t-template=&amp;quot;todos&amp;quot;&amp;gt;{{text}}&amp;lt;/li&amp;gt;
-&amp;lt;/ul&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;To get this to show something we&amp;rsquo;ll need some code:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;clj&#34;&gt;(ns app
-  (:require
-   [papadom.template :refer [compile-templates render]]))
-
-(defn start []
-  (compile-templates)
-  (render {:todos [{:text &amp;quot;learn papadom&amp;quot; :done false}
-                   {:text &amp;quot;write a papadom app&amp;quot; :done false}]}))
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;When you call &lt;code&gt;app.start()&lt;/code&gt; from the page containing the above template, you&amp;rsquo;ll
-see a list of two todo entries.&lt;/p&gt;
-
-&lt;h2&gt;Adding an event&lt;/h2&gt;
-
-&lt;p&gt;Now we have something displayed, lets add a checkbox to mark todo items as done:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;html&#34;&gt;&amp;lt;ul class=&amp;quot;unstyled&amp;quot;&amp;gt;
-  &amp;lt;li t-template=&amp;quot;todos&amp;quot;&amp;gt;
-    &amp;lt;input type=&amp;quot;checkbox&amp;quot; t-prop=&amp;quot;done&amp;quot; t-event=&amp;quot;done&amp;quot;
-           t-id=&amp;quot;index&amp;quot; index=&amp;quot;{{@index}}&amp;quot;&amp;gt;
-    &amp;lt;span&amp;gt;{{text}}&amp;lt;/span&amp;gt;
-  &amp;lt;/li&amp;gt;
-&amp;lt;/ul&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The &lt;code&gt;t-prop&lt;/code&gt; attribute tells the template to which data value to display as the
-checkbox.&lt;/p&gt;
-
-&lt;p&gt;The &lt;code&gt;t-event&lt;/code&gt; attribute specifies that we want an event.  When the checkbox is
-clicked, we will get a core.async message with a &lt;code&gt;:done&lt;/code&gt; event type.  We need to
-know which todo was clicked, so we use the &lt;code&gt;t-id&lt;/code&gt; attribute to list the
-attributes whose values should be sent as the event data &amp;ndash; in this case the
-index, which has a value based on handlebars style &lt;code&gt;@index&lt;/code&gt; property.&lt;/p&gt;
-
-&lt;p&gt;Now we need some code to process the events.  To do this we&amp;rsquo;ll define an
-&lt;code&gt;app&lt;/code&gt; function that will be passed a state atom containing a map with our todos
-state, and a core.async channel from which to read events.  The function will
-loop over events, and dispatch them as required.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;clj&#34;&gt;(defn app
-  [state event-chan]
-  (go
-   (loop [[event event-data] (&amp;lt;! event-chan)]
-     (case event
+&#40;defn start &#91;&#93;
+  &#40;compile-templates&#41;
+  &#40;render {:todos &#91;{:text &quot;learn papadom&quot; :done false}
+                   {:text &quot;write a papadom app&quot; :done false}&#93;}&#41;&#41;
+</code></pre><p>When you call <code>app.start&#40;&#41;</code> from the page containing the above template, you'll see a list of two todo entries.</p><h2>Adding an event</h2><p>Now we have something displayed, lets add a checkbox to mark todo items as done:</p><pre><code class="html">&lt;ul class=&quot;unstyled&quot;&gt;
+  &lt;li t-template=&quot;todos&quot;&gt;
+    &lt;input type=&quot;checkbox&quot; t-prop=&quot;done&quot; t-event=&quot;done&quot;
+           t-id=&quot;index&quot; index=&quot;{{@index}}&quot;&gt;
+    &lt;span&gt;{{text}}&lt;/span&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+</code></pre><p>The <code>t-prop</code> attribute tells the template to which data value to display as the checkbox.</p><p>The <code>t-event</code> attribute specifies that we want an event.  When the checkbox is clicked, we will get a core.async message with a <code>:done</code> event type.  We need to know which todo was clicked, so we use the <code>t-id</code> attribute to list the attributes whose values should be sent as the event data &ndash; in this case the index, which has a value based on handlebars style <code>@index</code> property.</p><p>Now we need some code to process the events.  To do this we'll define an <code>app</code> function that will be passed a state atom containing a map with our todos state, and a core.async channel from which to read events.  The function will loop over events, and dispatch them as required.</p><pre><code class="clj">&#40;defn app
+  &#91;state event-chan&#93;
+  &#40;go
+   &#40;loop &#91;&#91;event event-data&#93; &#40;&lt;! event-chan&#41;&#93;
+     &#40;case event
        :done
-       (let [nv (boolean (:checked event-data))]
-         (swap! state assoc-in [:todos (:index event-data) :done] nv)))
-     (recur (&amp;lt;! event-chan)))))
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;When the &lt;code&gt;app&lt;/code&gt; function receives a &lt;code&gt;:done&lt;/code&gt; event, it will update the state atom
-appropriately.  Now we have our state updating, we&amp;rsquo;ll need to display it, which
-we can again do with the &lt;code&gt;render&lt;/code&gt; function.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;clj&#34;&gt;(defn show-state [state]
-  (render &amp;quot;state&amp;quot; state))
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;We still need to get &lt;code&gt;show-state&lt;/code&gt; called, and we&amp;rsquo;ll arrange this in a modified
-&lt;code&gt;start&lt;/code&gt; function.  This will create an atom for the state, and add a watch on
-the atom that will call &lt;code&gt;show-state&lt;/code&gt;.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;clj&#34;&gt;(defn start
-  []
-  (let [event-chan (chan)
-        state (atom nil)]
-    (compile-templates)
-    (template-events event-chan)
-    (add-watch state :state (fn [key ref old new] (show-state new)))
-    (reset! state {:todos [{:text &amp;quot;Learn papadom&amp;quot; :done false}
-                           {:text &amp;quot;Build a papadom app&amp;quot; :done false}]})
-    (app state event-chan))))
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;We&amp;rsquo;ve also added a core.async channel, &lt;code&gt;event-chan&lt;/code&gt;, which we&amp;rsquo;ve passed to
-&lt;code&gt;template-events&lt;/code&gt; to arrange delivery of the events defined in our template.  We
-pass this channel to the &lt;code&gt;app&lt;/code&gt; function to start processing the events.&lt;/p&gt;
-
-&lt;p&gt;This shows the basic structure of the application.&lt;/p&gt;
-
-&lt;h2&gt;Adding New Todo Elements&lt;/h2&gt;
-
-&lt;p&gt;To allow you to add new todo items, we&amp;rsquo;ll add a form to our template,
-specifying a &lt;code&gt;t-event&lt;/code&gt; attribute, which will cause an event to be sent when the
-form is submitted, with the form&amp;rsquo;s input values as the event data.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;html&#34;&gt;&amp;lt;form t-event=&amp;quot;add-todo&amp;quot;&amp;gt;
-  &amp;lt;input type=&amp;quot;text&amp;quot; t-prop=&amp;quot;text&amp;quot; size=&amp;quot;30&amp;quot; placeholder=&amp;quot;add new todo here&amp;quot;&amp;gt;
-  &amp;lt;input class=&amp;quot;btn btn-primary&amp;quot; type=&amp;quot;submit&amp;quot; value=&amp;quot;add&amp;quot;&amp;gt;
-&amp;lt;/form&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;To process this new event, we&amp;rsquo;ll add a case to the &lt;code&gt;app&lt;/code&gt; function loop&amp;rsquo;s &lt;code&gt;case&lt;/code&gt;
-form.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;clj&#34;&gt;:add-todo
-(swap! state update-in [:todos]
-       conj {:text (:text (input-seq-&amp;gt;map event-data))
-             :done false})
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This uses the &lt;code&gt;input-seq-&amp;gt;map&lt;/code&gt; helper to convert the data from the form into a
-map, and we extract the &lt;code&gt;:text&lt;/code&gt; value (defined by &lt;code&gt;t-prop&lt;/code&gt; in the &lt;code&gt;input&lt;/code&gt;
-element).&lt;/p&gt;
-
-&lt;p&gt;And we&amp;rsquo;re done.  To see a full working example have a look at the
-&lt;a href=&#34;https://github.com/hugoduncan/papadom/blob/master/examples/todo/resources/public/index.html&#34; title=&#34;TODO HTML Template&#34;&gt;template&lt;/a&gt; and &lt;a href=&#34;https://github.com/hugoduncan/papadom/blob/master/examples/todo/src/papadom/example/todo.cljs&#34; title=&#34;TODO Clojurescript Code&#34;&gt;code&lt;/a&gt; in the todo example of papadom.
-To run the example:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;shell&#34;&gt;git clone https://github.com/hugoduncan/papadom.git
+       &#40;let &#91;nv &#40;boolean &#40;:checked event-data&#41;&#41;&#93;
+         &#40;swap! state assoc-in &#91;:todos &#40;:index event-data&#41; :done&#93; nv&#41;&#41;&#41;
+     &#40;recur &#40;&lt;! event-chan&#41;&#41;&#41;&#41;&#41;
+</code></pre><p>When the <code>app</code> function receives a <code>:done</code> event, it will update the state atom appropriately.  Now we have our state updating, we'll need to display it, which we can again do with the <code>render</code> function.</p><pre><code class="clj">&#40;defn show-state &#91;state&#93;
+  &#40;render &quot;state&quot; state&#41;&#41;
+</code></pre><p>We still need to get <code>show-state</code> called, and we'll arrange this in a modified <code>start</code> function.  This will create an atom for the state, and add a watch on the atom that will call <code>show-state</code>.</p><pre><code class="clj">&#40;defn start
+  &#91;&#93;
+  &#40;let &#91;event-chan &#40;chan&#41;
+        state &#40;atom nil&#41;&#93;
+    &#40;compile-templates&#41;
+    &#40;template-events event-chan&#41;
+    &#40;add-watch state :state &#40;fn &#91;key ref old new&#93; &#40;show-state new&#41;&#41;&#41;
+    &#40;reset! state {:todos &#91;{:text &quot;Learn papadom&quot; :done false}
+                           {:text &quot;Build a papadom app&quot; :done false}&#93;}&#41;
+    &#40;app state event-chan&#41;&#41;&#41;&#41;
+</code></pre><p>We've also added a core.async channel, <code>event-chan</code>, which we've passed to <code>template-events</code> to arrange delivery of the events defined in our template.  We pass this channel to the <code>app</code> function to start processing the events.</p><p>This shows the basic structure of the application.</p><h2>Adding New Todo Elements</h2><p>To allow you to add new todo items, we'll add a form to our template, specifying a <code>t-event</code> attribute, which will cause an event to be sent when the form is submitted, with the form's input values as the event data.</p><pre><code class="html">&lt;form t-event=&quot;add-todo&quot;&gt;
+  &lt;input type=&quot;text&quot; t-prop=&quot;text&quot; size=&quot;30&quot; placeholder=&quot;add new todo here&quot;&gt;
+  &lt;input class=&quot;btn btn-primary&quot; type=&quot;submit&quot; value=&quot;add&quot;&gt;
+&lt;/form&gt;
+</code></pre><p>To process this new event, we'll add a case to the <code>app</code> function loop's <code>case</code> form.</p><pre><code class="clj">:add-todo
+&#40;swap! state update-in &#91;:todos&#93;
+       conj {:text &#40;:text &#40;input-seq-&gt;map event-data&#41;&#41;
+             :done false}&#41;
+</code></pre><p>This uses the <code>input-seq-&gt;map</code> helper to convert the data from the form into a map, and we extract the <code>:text</code> value (defined by <code>t-prop</code> in the <code>input</code> element).</p><p>And we're done.  To see a full working example have a look at the [template][todotemplate] and [code][todocode] in the todo example of papadom. To run the example:</p><pre><code class="shell">git clone &#91;https://github.com/hugoduncan/papadom.git&#93;&#40;https://github.com/hugoduncan/papadom.git&#41;
 cd papadom/examples/todo
 lein ring server
-&lt;/code&gt;&lt;/pre&gt;
-</content></entry>
-
-<entry xml:base="http://hugoduncan.github.com/post/configuration_in_templates_is_not_configuration_as_code"><title>Configuration in Templates is not Configuration as Code</title><link href="http://hugoduncan.github.com/post/configuration_in_templates_is_not_configuration_as_code"/><id>http://hugoduncan.github.com/post/configuration_in_templates_is_not_configuration_as_code</id><published>2010-10-04T00:00:00Z</published><updated>2010-10-04T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;If you have configuration that uses template configuration files, you are practising neither configuration as code nor configuration as data.  Having configuration locked away in template files reduces its visibility, and makes it hard for you to query it. It might be easier to write configuration code to use templates, but it will come back to bite you.&lt;/p&gt;
-
-&lt;p&gt;One of the first things I implemented in &lt;a href=&#34;http://github.com/hugoduncan/pallet&#34;&gt;pallet&lt;/a&gt; was a templating mechanism, because configuration management tools use templates, right?  I even built a template selection mechanism, just like &lt;a href=&#34;http://wiki.opscode.com/display/chef/Templates&#34;&gt;Chef&#39;s&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;I have come to realise however, that having configuration in template files is not particularly useful. There are three major problems you are likely to encounter.  Firstly template files are not visible, secondly you can not query the data in the template files, and lastly you will need to touch multiple files to add or modify parameters.&lt;/p&gt;
-
-&lt;p&gt;Visibility at the point of usage is important, especially in a team environment.  If you have to find the template file and look at its content when reading your configuration code, then the chances are you assume it hasn&#39;t changed, and skip the contents. Making an analogy to the world of software development, templates are like global variables in one sense. You can change the operation of a program with a global variable modified in some obscure place, and in the same way, you can change your system configuration by changing a template file, tucked away in some folder, and not visible from where you are actually calling your configuration crate/recipe.&lt;/p&gt;
-
-&lt;p&gt;The ability to query configuration settings allows not just finding out, for example,  which directory a log file is in, but also enables you to put tools on top of your configuration data.  Template configuration files suffer on two counts here - they are separate text files that require parsing to be read, and the format of each configuration file is different.&lt;/p&gt;
-
-&lt;p&gt;The last point concerns the flexibility of your configuration. If you have used template files, with hard coded parameter values, and you then want to modify your configuration to dynamically set one of those hard coded values, you have to modify all the specialised versions of the existing templates, and specify the value in code. You have to touch multiple files - lots of room for making typos.&lt;/p&gt;
-
-&lt;p&gt;My goal for pallet then, is to have all configuration supplied as arguments to crates.  For most packages a hash map is sufficient an abstraction for providing the data, but when this gets too cumbersome, we&#39;ll use a DSL that mirrors the original configuration file language.&lt;/p&gt;
-
-&lt;p&gt;Goodbye hidden configuration!&lt;/p&gt;
-</content></entry>
-
+</code></pre><p>[angulartodo]: <a href='http://angularjs.org/#add-some-control'>http://angularjs.org/#add-some-control</a> "Angular TODO example"</p><p>[brucetodo]: <a href='http://rigsomelight.com/2013/07/18/clojurescript-core-async-todos.html'>http://rigsomelight.com/2013/07/18/clojurescript-core-async-todos.html</a> "Bruce Haumann's 'ClojureScript Core.Async Todos'"</p><p>[clojurescript]: <a href='https://github.com/clojure/clojurescript'>https://github.com/clojure/clojurescript</a> "Clojurescript"</p><p>[cmlchannel]: <a href='http://www.cs.cornell.edu/Courses/cs312/2006fa/recitations/rec24.html'>http://www.cs.cornell.edu/Courses/cs312/2006fa/recitations/rec24.html</a> "CML Channels"</p><p>[core.async]:  <a href='http://clojure.com/blog/2013/06/28/clojure-core-async-channels.html'>http://clojure.com/blog/2013/06/28/clojure-core-async-channels.html</a> "Clojure core.async Channels"</p><p>[csp]: <a href='http://en.wikipedia.org/wiki/Communicating_sequential_processes'>http://en.wikipedia.org/wiki/Communicating<i>sequential</i>processes</a> "Communicating Sequential Processes"</p><p>[cspresponsive]: <a href='http://swannodette.github.io/2013/07/31/extracting-processes/'>http://swannodette.github.io/2013/07/31/extracting-processes/</a> "David Nolan's 'CSP is Responsive Design'"</p><p>[golangchannel]: <a href='http://golang.org/ref/spec#Channel_types'>http://golang.org/ref/spec#Channel_types</a> "Go Channels"</p><p>[kemingweather]: <a href='http://keminglabs.com/blog/angular-cljs-weather-app/'>http://keminglabs.com/blog/angular-cljs-weather-app/</a> "Kevin Lynagh's 'Building an iOS weather app with Angular and ClojureScript'"</p><p>[purnam]: <a href='https://github.com/zcaudate/purnam'>https://github.com/zcaudate/purnam</a> "purnam" [clang]: <a href='https://github.com/pangloss/clang/'>https://github.com/pangloss/clang/</a> "clang"</p><p>[todotemplate]: <a href='https://github.com/hugoduncan/papadom/blob/master/examples/todo/resources/public/index.html'>https://github.com/hugoduncan/papadom/blob/master/examples/todo/resources/public/index.html</a> "TODO HTML Template" [todocode]: <a href='https://github.com/hugoduncan/papadom/blob/master/examples/todo/src/papadom/example/todo.cljs'>https://github.com/hugoduncan/papadom/blob/master/examples/todo/src/papadom/example/todo.cljs</a> "TODO Clojurescript Code"</p><p>[papadom]: <a href='https://github.com/hugoduncan/papadom'>https://github.com/hugoduncan/papadom</a> "Papadom templating library"</p>]]>
+    </content>
+  </entry>
+  <entry>
+    <id>http://hugoduncan.org/post/configuration_in_templates_is_not_configuration_as_code.html</id>
+    <link href="http://hugoduncan.org/post/configuration_in_templates_is_not_configuration_as_code.html"/>
+    <title>Configuration in Templates is not Configuration as Code</title>
+    <summary>If you have configuration that uses template configuration files, you are practising neither configuration as code nor configuration as data.  Having configuration locked away in template files reduces its visibility, and makes it hard for you to query it. It might be easier to write configuration code to use templates, but it will come back to bite you.</summary>
+    <updated>2010-10-04T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p><p>If you have configuration that uses template configuration files, you are practising neither configuration as code nor configuration as data.  Having configuration locked away in template files reduces its visibility, and makes it hard for you to query it. It might be easier to write configuration code to use templates, but it will come back to bite you.</p></p><p><p>One of the first things I implemented in <a href="http://github.com/hugoduncan/pallet">pallet</a> was a templating mechanism, because configuration management tools use templates, right?  I even built a template selection mechanism, just like <a href="http://wiki.opscode.com/display/chef/Templates">Chef's</a>.</p></p><p><p>I have come to realise however, that having configuration in template files is not particularly useful. There are three major problems you are likely to encounter.  Firstly template files are not visible, secondly you can not query the data in the template files, and lastly you will need to touch multiple files to add or modify parameters.</p></p><p><p>Visibility at the point of usage is important, especially in a team environment.  If you have to find the template file and look at its content when reading your configuration code, then the chances are you assume it hasn't changed, and skip the contents. Making an analogy to the world of software development, templates are like global variables in one sense. You can change the operation of a program with a global variable modified in some obscure place, and in the same way, you can change your system configuration by changing a template file, tucked away in some folder, and not visible from where you are actually calling your configuration crate/recipe.</p></p><p><p>The ability to query configuration settings allows not just finding out, for example,  which directory a log file is in, but also enables you to put tools on top of your configuration data.  Template configuration files suffer on two counts here - they are separate text files that require parsing to be read, and the format of each configuration file is different.</p></p><p><p>The last point concerns the flexibility of your configuration. If you have used template files, with hard coded parameter values, and you then want to modify your configuration to dynamically set one of those hard coded values, you have to modify all the specialised versions of the existing templates, and specify the value in code. You have to touch multiple files - lots of room for making typos.</p></p><p><p>My goal for pallet then, is to have all configuration supplied as arguments to crates.  For most packages a hash map is sufficient an abstraction for providing the data, but when this gets too cumbersome, we'll use a DSL that mirrors the original configuration file language.</p></p><p><p>Goodbye hidden configuration!</p></p>]]>
+    </content>
+  </entry>
 </feed>

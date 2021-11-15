@@ -1,48 +1,23 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<feed xmlns='http://www.w3.org/2005/Atom' xml:lang='en-us'>
- <title>pelure</title>
- <id>http://hugoduncan.github.com/</id>
- <link href='./' />
- <link rel='self' href='' />
- <logo>rsslogo.jpg</logo>
- <icon>/favicon.ico</icon>
- <author><name>Hugo Duncan</name></author>
- <subtitle>Pelure </subtitle>
- <rights>All content written by Hugo Duncan and photos by Hugo Duncan Copyright Hugo Duncan, all rights reserved.</rights> 
- <updated>2013-10-28T00:00:00Z</updated>
-
-
-<entry xml:base="http://hugoduncan.github.com/post/alembic_reloads_your_project_clj_dependencies"><title>Alembic Reloads your Leiningen project.clj Dependencies</title><link href="http://hugoduncan.github.com/post/alembic_reloads_your_project_clj_dependencies"/><id>http://hugoduncan.github.com/post/alembic_reloads_your_project_clj_dependencies</id><published>2013-08-29T00:00:00Z</published><updated>2013-08-29T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;You&amp;rsquo;re working away in a Clojure REPL, when you realise you need to
-add a dependency.  You add the dependency to your &lt;a href=&#34;http://leiningen.org&#34; title=&#34;Leiningen&#34;&gt;leiningen&lt;/a&gt;
-&lt;code&gt;project.clj&lt;/code&gt; file and then?  Instead of shutting down your REPL,
-loosing whatever state you have built up, you can use
-&lt;a href=&#34;https://github.com/pallet/alembic#alembic&#34; title=&#34;Alembic&#34;&gt;Alembic&lt;/a&gt; to load the new dependencies.  Simply call
-&lt;code&gt;(alembic.still/load-project)&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;Of course, it still has to work within the confines of the JVM&amp;rsquo;s
-classloaders, so you can only add dependencies, and not modify
-versions or remove dependencies, but this should still cover a lot of
-use cases.&lt;/p&gt;
-
-&lt;p&gt;To use alembic on a single project, simply add it as a dependency in
-your &lt;code&gt;:dev&lt;/code&gt; profile in &lt;code&gt;project.clj&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;clj&#34;&gt;:profiles {:dev {:dependencies [[alembic &amp;quot;0.2.0&amp;quot;]]}}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;To make alembic available in all your projects, and it to the &lt;code&gt;:user&lt;/code&gt;
-profile in &lt;code&gt;~/.lein/profiles.clj&lt;/code&gt; instead:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;clj&#34;&gt;{:user {:dependencies [[alembic &amp;quot;0.2.0&amp;quot;]]}}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Alembic also allows you to directly add dependencies without editing
-your &lt;code&gt;project.clj&lt;/code&gt; file, using the &lt;code&gt;distill&lt;/code&gt; function.  Use this if you
-are just exploring libraries, for example.&lt;/p&gt;
-
-&lt;p&gt;Finally a big thank you to &lt;a href=&#34;http://blog.raynes.me/&#34; title=&#34;Raynes&#34;&gt;Anthony Grimes&lt;/a&gt; and the other
-&lt;a href=&#34;https://github.com/flatland/&#34; title=&#34;flatland&#34;&gt;flatland&lt;/a&gt; developers for removing classlojure&amp;rsquo;s dependency
-on &lt;code&gt;useful&lt;/code&gt;, which should make this all much more robust.&lt;/p&gt;
-</content></entry>
-
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Pelure</title>
+  <link href="http://hugoduncan.org/index.xml" rel="self"/>
+  <link href="http://hugoduncan.org/"/>
+  <updated>2021-11-15T01:45:47+00:00</updated>
+  <id>http://hugoduncan.org/</id>
+  <author>
+    <name>Hugo Duncan</name>
+  </author>
+  <entry>
+    <id>http://hugoduncan.org/post/alembic_reloads_your_project_clj_dependencies.html</id>
+    <link href="http://hugoduncan.org/post/alembic_reloads_your_project_clj_dependencies.html"/>
+    <title>Alembic Reloads your Leiningen project.clj Dependencies</title>
+    <summary>When working on a project, you sometime need to add a dependency.  Using Alembic you can add the dependency in your project.clj file, and then call alembic.still/load-project to load the dependency into a running repl, without loosing your repl state.</summary>
+    <updated>2013-08-29T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p>You're working away in a Clojure REPL, when you realise you need to add a dependency.  You add the dependency to your [leiningen][lein] <code>project.clj</code> file and then?  Instead of shutting down your REPL, loosing whatever state you have built up, you can use [Alembic][alembic] to load the new dependencies.  Simply call <code>&#40;alembic.still/load-project&#41;</code>.</p><p>Of course, it still has to work within the confines of the JVM's classloaders, so you can only add dependencies, and not modify versions or remove dependencies, but this should still cover a lot of use cases.</p><p>To use alembic on a single project, simply add it as a dependency in your <code>:dev</code> profile in <code>project.clj</code>:</p><pre><code class="clj">:profiles {:dev {:dependencies &#91;&#91;alembic &quot;0.2.0&quot;&#93;&#93;}}
+</code></pre><p>To make alembic available in all your projects, and it to the <code>:user</code> profile in <code>&#126;/.lein/profiles.clj</code> instead:</p><pre><code class="clj">{:user {:dependencies &#91;&#91;alembic &quot;0.2.0&quot;&#93;&#93;}}
+</code></pre><p>Alembic also allows you to directly add dependencies without editing your <code>project.clj</code> file, using the <code>distill</code> function.  Use this if you are just exploring libraries, for example.</p><p>Finally a big thank you to [Anthony Grimes][raynes] and the other [flatland][flatland] developers for removing classlojure's dependency on <code>useful</code>, which should make this all much more robust.</p><p>[alembic]: <a href='https://github.com/pallet/alembic#alembic'>https://github.com/pallet/alembic#alembic</a> "Alembic" [lein]: <a href='http://leiningen.org'>http://leiningen.org</a> "Leiningen" [raynes]: <a href='http://blog.raynes.me/'>http://blog.raynes.me/</a> "Raynes" [flatland]: <a href='https://github.com/flatland/'>https://github.com/flatland/</a> "flatland"</p>]]>
+    </content>
+  </entry>
 </feed>

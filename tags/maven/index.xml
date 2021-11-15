@@ -1,21 +1,21 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<feed xmlns='http://www.w3.org/2005/Atom' xml:lang='en-us'>
- <title>pelure</title>
- <id>http://hugoduncan.github.com/</id>
- <link href='./' />
- <link rel='self' href='' />
- <logo>rsslogo.jpg</logo>
- <icon>/favicon.ico</icon>
- <author><name>Hugo Duncan</name></author>
- <subtitle>Pelure </subtitle>
- <rights>All content written by Hugo Duncan and photos by Hugo Duncan Copyright Hugo Duncan, all rights reserved.</rights> 
- <updated>2013-10-28T00:00:00Z</updated>
-
-
-<entry xml:base="http://hugoduncan.github.com/post/setting_up_clojure_and_compojure_with_maven"><title>Setting up clojure and compojure with maven</title><link href="http://hugoduncan.github.com/post/setting_up_clojure_and_compojure_with_maven"/><id>http://hugoduncan.github.com/post/setting_up_clojure_and_compojure_with_maven</id><published>2009-09-06T00:00:00Z</published><updated>2009-09-06T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;I wanted to experiment with building a webapp using &lt;a href=&#34;http://clojure.org&#34;&gt;Clojure&lt;/a&gt;, so I tried setting up the &lt;a href=&#34;http://en.wikibooks.org/wiki/Compojure&#34;&gt;Compojure&lt;/a&gt; web framework.  I am new to clojure, so I am not sure if this is the preferred way of doing things, but here goes anyway.&lt;/p&gt;
-&lt;p&gt;There seem to be several ways to set up clojure in emacs.  I ended up following &lt;a href=&#34;http://bc.tech.coop/blog/081205.html&#34;&gt;Bill Clementson&#39;s instructions&lt;/a&gt;. A couple of years ago I had some experience using maven, so decided to use this to manage my classpath.  Installing maven on my mac was simple with macports (&lt;code&gt;sudo port install maven&lt;/code&gt;).&lt;/p&gt;
-&lt;p&gt;Setting up a POM for maven took longer than expected.  &lt;a href=&#34;http://stuartsierra.com/2009/09/04/cutting-edge-clojure-development-with-maven&#34;&gt;Stuart Sierra&#39;s post&lt;/a&gt; pointed me to the formos maven repository containing the clojure snapshots.  With some help from google, I also found the &lt;a href=&#34;http://github.com/talios/clojure-maven-plugin/tree/master&#34;&gt;maven-clojure-plugin&lt;/a&gt;, which is a maven plugin for compiling clojure, and the &lt;a href=&#34;http://github.com/fred-o/clojureshell-maven-plugin/tree/master&#34;&gt;clojureshell-maven-plugin&lt;/a&gt; which will start a swank session (or bare REPL) using the pom information.&lt;/p&gt;
-&lt;p&gt;With the basic clojure and maven setup in place, it was time to move on to compojure. I added the &lt;a href=&#34;http://github.com/weavejester/compojure/tree/master&#34;&gt;Compojure git repository&lt;/a&gt; into Bill Clementson&#39;s clj-build script, ran it to clone the repository, and then built it using ant (&lt;code&gt;ant deps; ant&lt;/code&gt;).  &lt;a href=&#34;http://jimdowning.wordpress.com/2009/07/30/compojure-maven/&#34;&gt;Jim Downing&lt;/a&gt; instructions for installing compojure into your local maven repository (&lt;code&gt;mvn install:install-file -DgroupId=org.clojure -DartifactId=compojure -Dversion=1.0-SNAPSHOT -Dfile=compojure.jar -Dpackaging=jar&lt;/code&gt;) work smoothly.&lt;/p&gt;
-</content></entry>
-
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Pelure</title>
+  <link href="http://hugoduncan.org/index.xml" rel="self"/>
+  <link href="http://hugoduncan.org/"/>
+  <updated>2021-11-15T01:45:47+00:00</updated>
+  <id>http://hugoduncan.org/</id>
+  <author>
+    <name>Hugo Duncan</name>
+  </author>
+  <entry>
+    <id>http://hugoduncan.org/post/setting_up_clojure_and_compojure_with_maven.html</id>
+    <link href="http://hugoduncan.org/post/setting_up_clojure_and_compojure_with_maven.html"/>
+    <title>Setting up clojure and compojure with maven</title>
+    <summary>I wanted to experiment with building a webapp using Clojure, so I tried setting up the Compojure web framework.  I am new to clojure, so I am not sure if this is the preferred way of doing things, but here goes anyway.</summary>
+    <updated>2009-09-06T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p><p>I wanted to experiment with building a webapp using <a href="http://clojure.org">Clojure</a>, so I tried setting up the <a href="http://en.wikibooks.org/wiki/Compojure">Compojure</a> web framework.  I am new to clojure, so I am not sure if this is the preferred way of doing things, but here goes anyway.</p> <p>There seem to be several ways to set up clojure in emacs.  I ended up following <a href="http://bc.tech.coop/blog/081205.html">Bill Clementson's instructions</a>. A couple of years ago I had some experience using maven, so decided to use this to manage my classpath.  Installing maven on my mac was simple with macports (<code>sudo port install maven</code>).</p> <p>Setting up a POM for maven took longer than expected.  <a href="http://stuartsierra.com/2009/09/04/cutting-edge-clojure-development-with-maven">Stuart Sierra's post</a> pointed me to the formos maven repository containing the clojure snapshots.  With some help from google, I also found the <a href="http://github.com/talios/clojure-maven-plugin/tree/master">maven-clojure-plugin</a>, which is a maven plugin for compiling clojure, and the <a href="http://github.com/fred-o/clojureshell-maven-plugin/tree/master">clojureshell-maven-plugin</a> which will start a swank session (or bare REPL) using the pom information.</p> <p>With the basic clojure and maven setup in place, it was time to move on to compojure. I added the <a href="http://github.com/weavejester/compojure/tree/master">Compojure git repository</a> into Bill Clementson's clj-build script, ran it to clone the repository, and then built it using ant (<code>ant deps; ant</code>).  <a href="http://jimdowning.wordpress.com/2009/07/30/compojure-maven/">Jim Downing</a> instructions for installing compojure into your local maven repository (<code>mvn install:install-file -DgroupId=org.clojure -DartifactId=compojure -Dversion=1.0-SNAPSHOT -Dfile=compojure.jar -Dpackaging=jar</code>) work smoothly.</p></p>]]>
+    </content>
+  </entry>
 </feed>

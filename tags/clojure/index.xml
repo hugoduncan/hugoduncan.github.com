@@ -1,525 +1,164 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<feed xmlns='http://www.w3.org/2005/Atom' xml:lang='en-us'>
- <title>pelure</title>
- <id>http://hugoduncan.github.com/</id>
- <link href='./' />
- <link rel='self' href='' />
- <logo>rsslogo.jpg</logo>
- <icon>/favicon.ico</icon>
- <author><name>Hugo Duncan</name></author>
- <subtitle>Pelure </subtitle>
- <rights>All content written by Hugo Duncan and photos by Hugo Duncan Copyright Hugo Duncan, all rights reserved.</rights> 
- <updated>2013-10-28T00:00:00Z</updated>
-
-
-<entry xml:base="http://hugoduncan.github.com/post/generating_source_with_leiningen"><title>Generating Source Files with Leiningen</title><link href="http://hugoduncan.github.com/post/generating_source_with_leiningen"/><id>http://hugoduncan.github.com/post/generating_source_with_leiningen</id><published>2013-10-28T00:00:00Z</published><updated>2013-10-28T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;Recently, we needed to include some generated source files in a
-project.  The source code generation was project specific, so we
-didn&amp;rsquo;t want to have to create a leiningen plugin specifically for it.
-To get this to work required using quite a few of
-&lt;a href=&#34;https://github.com/technomancy/leiningen#leiningen&#34;&gt;leiningen&amp;rsquo;s&lt;/a&gt;
-features.&lt;/p&gt;
-
-&lt;p&gt;This post will explain how to use lein to customise you build to
-generates a source file, but many of the steps are useful to
-implement any form of lein build customisation.&lt;/p&gt;
-
-&lt;h3&gt;The Generator&lt;/h3&gt;
-
-&lt;p&gt;The source code generator is going to live in the &lt;code&gt;my.src-generator&lt;/code&gt;
-namespace.  Here&amp;rsquo;s an example, that just generates a namespace
-declaration for the &lt;code&gt;my.gen&lt;/code&gt; namespace under
-&lt;code&gt;target/generated/my/gen.clj&lt;/code&gt;.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;clj&#34;&gt;(ns my.src-generator
-  (:require [clojure.java.io :refer [file]]))
-
-(defn generate []
-  (doto (file &amp;quot;target&amp;quot; &amp;quot;generated&amp;quot; &amp;quot;my&amp;quot; &amp;quot;gen.clj&amp;quot;)
-    (-&amp;gt; #(.getParentFile) #(.mkdirs))
-    (spit &amp;quot;(ns my.gen)&amp;quot;)))
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3&gt;Development only code&lt;/h3&gt;
-
-&lt;p&gt;The source generation code should not be packaged in the jar, so we
-place it in &lt;code&gt;dev-src/my/src_generator.clj&lt;/code&gt;, and add &lt;code&gt;dev-src&lt;/code&gt; and the
-generated source directories to the &lt;code&gt;:dev&lt;/code&gt; profile&amp;rsquo;s &lt;code&gt;:source-paths&lt;/code&gt;.
-The &lt;code&gt;:dev&lt;/code&gt; profile is automatically used by leiningen unless it is
-producing a jar file.  When producing the jar, the &lt;code&gt;dev&lt;/code&gt; profile will
-not be used, so &lt;code&gt;dev-src&lt;/code&gt; will not be on the &lt;code&gt;:source-path&lt;/code&gt; (we add
-the generated directory to the base &lt;code&gt;:source-path&lt;/code&gt; below).&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;clj&#34;&gt;:profiles {:dev {:source-paths [&amp;quot;src&amp;quot; &amp;quot;dev-src&amp;quot; &amp;quot;target/generated&amp;quot;]}}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3&gt;Running project specific code with leininingen&lt;/h3&gt;
-
-&lt;p&gt;The &lt;code&gt;run&lt;/code&gt; task can be used to invoke code in your project.  To use
-lein&amp;rsquo;s &lt;code&gt;run&lt;/code&gt; task we need to add a &lt;code&gt;-main&lt;/code&gt; function to the
-&lt;code&gt;my.src-generator&lt;/code&gt; namespace.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;clj&#34;&gt;(defn -main [&amp;amp; args]
-  (generate))
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;In the &lt;code&gt;project.clj&lt;/code&gt; file we also tell lein about the main namespace.
-In order to avoid AOT compilation of the main namespace, we mark it
-with &lt;code&gt;:skip-aot&lt;/code&gt; metadata.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;clj&#34;&gt;:main ^:skip-aot my.src-generator
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3&gt;Customising the jar contents&lt;/h3&gt;
-
-&lt;p&gt;The generated files need to end up in the jar (and possibly be
-compiled), so we put them on the &lt;code&gt;:source-paths&lt;/code&gt; in the project.  If
-we had wanted to include the sources without further processing, we
-could have added the generated directory to &lt;code&gt;:resource-paths&lt;/code&gt; instead.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;clj&#34;&gt;:source-paths [&amp;quot;src&amp;quot; &amp;quot;target/generated&amp;quot;]
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3&gt;Extending the build process&lt;/h3&gt;
-
-&lt;p&gt;Now we can tell lein to generate the source files whenever we use the
-project.  We do this by adding the &lt;code&gt;run&lt;/code&gt; task to the &lt;code&gt;:prep-tasks&lt;/code&gt;
-key.  Leiningen runs all the tasks in &lt;code&gt;:prep-tasks&lt;/code&gt; before any task
-invoked by the lein command line.&lt;/p&gt;
-
-&lt;p&gt;The tricky bit here is that the &lt;code&gt;run&lt;/code&gt; task will itself invoke the
-&lt;code&gt;:prep-tasks&lt;/code&gt;, so we want to make sure we don&amp;rsquo;t end up calling the
-task recursively and generating a stack overflow.  To solve this, add
-a &lt;code&gt;gen&lt;/code&gt; profile, and disable the prep tasks in it.  We use the
-&lt;code&gt;:replace&lt;/code&gt; metadata to ensure this definition takes precedence.  See
-the
-&lt;a href=&#34;https://github.com/technomancy/leiningen/blob/master/doc/PROFILES.md#merging&#34;&gt;leiningen profile documentation&lt;/a&gt;
-for more information on &lt;code&gt;:replace&lt;/code&gt; and it&amp;rsquo;s sibling &lt;code&gt;:displace&lt;/code&gt;.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;clj&#34;&gt;:gen {:prep-tasks ^:replace []}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Then use this profile when setting the &lt;code&gt;:prep-tasks&lt;/code&gt; key in the project.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;clj&#34;&gt;:prep-tasks [[&amp;quot;with-profile&amp;quot; &amp;quot;+gen,+dev&amp;quot; &amp;quot;run&amp;quot;]  &amp;quot;compile&amp;quot;]
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now when we run any command, the sources are generated.&lt;/p&gt;
-
-&lt;h3&gt;Adding an alias&lt;/h3&gt;
-
-&lt;p&gt;Finally we may want to just invoke the source generation, so let&amp;rsquo;s
-create an alias to make &lt;code&gt;lein gen&lt;/code&gt; run the generator.  We need the
-&lt;code&gt;gen&lt;/code&gt; profile for this, or otherwise the generator will run twice.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;clj&#34;&gt;:aliases {&amp;quot;gen&amp;quot; [&amp;quot;with-profile&amp;quot; &amp;quot;+gen,+dev&amp;quot; &amp;quot;run&amp;quot;]}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3&gt;The final project.clj&lt;/h3&gt;
-
-&lt;p&gt;For reference, the final project.clj looks like this:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;clj&#34;&gt;(defproject my-proj &amp;quot;0.1.0-SNAPSHOT&amp;quot;
-  :dependencies [[org.clojure/clojure &amp;quot;1.4.0&amp;quot;]]
-  :source-paths [&amp;quot;src&amp;quot; &amp;quot;target/generated&amp;quot;]
-  :main ^:skip-aot my.src-generator
-  :prep-tasks [[&amp;quot;with-profile&amp;quot; &amp;quot;+gen,+dev&amp;quot; &amp;quot;run&amp;quot;]  &amp;quot;compile&amp;quot;]
-  :profiles {:dev {:source-paths [&amp;quot;src&amp;quot; &amp;quot;dev-src&amp;quot; &amp;quot;target/generated&amp;quot;]}
-             :gen {:prep-tasks ^:replace []}}
-  :aliases {&amp;quot;gen&amp;quot; [&amp;quot;with-profile&amp;quot; &amp;quot;+gen,+dev&amp;quot; &amp;quot;run&amp;quot;]})
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3&gt;Conclusion&lt;/h3&gt;
-
-&lt;p&gt;This required using many of lein&amp;rsquo;s features to get working - hopefully
-you&amp;rsquo;ll find a use for some of them.&lt;/p&gt;
-</content></entry>
-
-<entry xml:base="http://hugoduncan.github.com/post/alembic_reloads_your_project_clj_dependencies"><title>Alembic Reloads your Leiningen project.clj Dependencies</title><link href="http://hugoduncan.github.com/post/alembic_reloads_your_project_clj_dependencies"/><id>http://hugoduncan.github.com/post/alembic_reloads_your_project_clj_dependencies</id><published>2013-08-29T00:00:00Z</published><updated>2013-08-29T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;You&amp;rsquo;re working away in a Clojure REPL, when you realise you need to
-add a dependency.  You add the dependency to your &lt;a href=&#34;http://leiningen.org&#34; title=&#34;Leiningen&#34;&gt;leiningen&lt;/a&gt;
-&lt;code&gt;project.clj&lt;/code&gt; file and then?  Instead of shutting down your REPL,
-loosing whatever state you have built up, you can use
-&lt;a href=&#34;https://github.com/pallet/alembic#alembic&#34; title=&#34;Alembic&#34;&gt;Alembic&lt;/a&gt; to load the new dependencies.  Simply call
-&lt;code&gt;(alembic.still/load-project)&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;Of course, it still has to work within the confines of the JVM&amp;rsquo;s
-classloaders, so you can only add dependencies, and not modify
-versions or remove dependencies, but this should still cover a lot of
-use cases.&lt;/p&gt;
-
-&lt;p&gt;To use alembic on a single project, simply add it as a dependency in
-your &lt;code&gt;:dev&lt;/code&gt; profile in &lt;code&gt;project.clj&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;clj&#34;&gt;:profiles {:dev {:dependencies [[alembic &amp;quot;0.2.0&amp;quot;]]}}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;To make alembic available in all your projects, and it to the &lt;code&gt;:user&lt;/code&gt;
-profile in &lt;code&gt;~/.lein/profiles.clj&lt;/code&gt; instead:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;clj&#34;&gt;{:user {:dependencies [[alembic &amp;quot;0.2.0&amp;quot;]]}}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Alembic also allows you to directly add dependencies without editing
-your &lt;code&gt;project.clj&lt;/code&gt; file, using the &lt;code&gt;distill&lt;/code&gt; function.  Use this if you
-are just exploring libraries, for example.&lt;/p&gt;
-
-&lt;p&gt;Finally a big thank you to &lt;a href=&#34;http://blog.raynes.me/&#34; title=&#34;Raynes&#34;&gt;Anthony Grimes&lt;/a&gt; and the other
-&lt;a href=&#34;https://github.com/flatland/&#34; title=&#34;flatland&#34;&gt;flatland&lt;/a&gt; developers for removing classlojure&amp;rsquo;s dependency
-on &lt;code&gt;useful&lt;/code&gt;, which should make this all much more robust.&lt;/p&gt;
-</content></entry>
-
-<entry xml:base="http://hugoduncan.github.com/post/evaluate_clojure_in_emacs_markdown_buffers"><title>Evaluate and Format Clojure in Emacs Markdown Buffers</title><link href="http://hugoduncan.github.com/post/evaluate_clojure_in_emacs_markdown_buffers"/><id>http://hugoduncan.github.com/post/evaluate_clojure_in_emacs_markdown_buffers</id><published>2013-08-26T00:00:00Z</published><updated>2013-08-26T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;When writing documentation or blog posts about Clojure code, it is
-very useful to be able to format Clojure code blocks using
-&lt;a href=&#34;https://github.com/clojure-emacs/clojure-mode&#34; title=&#34;clojure-mode&#34;&gt;&lt;code&gt;clojure-mode&lt;/code&gt;&lt;/a&gt; and evaluate code with &lt;a href=&#34;https://github.com/clojure-emacs/nrepl.el&#34; title=&#34;nrepl.el&#34;&gt;&lt;code&gt;nrepl.el&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;This can be enabled using &lt;a href=&#34;https://github.com/purcell/mmm-mode/&#34; title=&#34;mmm-mode&#34;&gt;&lt;code&gt;mmm-mode&lt;/code&gt;&lt;/a&gt;, which
-allows a single buffer to use different major modes for different
-sections of the buffer (and is not limited to just web modes).
-Install &lt;code&gt;mmm-mode&lt;/code&gt; using &lt;code&gt;M-x package-install mmm-mode&lt;/code&gt;,
-or using &lt;code&gt;M-x el-get-install mmm-mode&lt;/code&gt; from the excellent
-&lt;a href=&#34;http://tapoueh.org/emacs/el-get.html&#34; title=&#34;el-get&#34;&gt;&lt;code&gt;el-get&lt;/code&gt;&lt;/a&gt;, or by checking the project from github and
-installing manually.&lt;/p&gt;
-
-&lt;p&gt;To configure this for clojure and markdown, add this in your &lt;code&gt;init.el&lt;/code&gt;
-or &lt;code&gt;.emacs&lt;/code&gt; file.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;lisp&#34;&gt;(require &#39;mmm-auto)
-(mmm-add-classes
- &#39;((markdown-clojure
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Pelure</title>
+  <link href="http://hugoduncan.org/index.xml" rel="self"/>
+  <link href="http://hugoduncan.org/"/>
+  <updated>2021-11-15T01:45:47+00:00</updated>
+  <id>http://hugoduncan.org/</id>
+  <author>
+    <name>Hugo Duncan</name>
+  </author>
+  <entry>
+    <id>http://hugoduncan.org/post/back_to_blogging.html</id>
+    <link href="http://hugoduncan.org/post/back_to_blogging.html"/>
+    <title>Back to blogging</title>
+    <summary>My road back to a working blogging environment, thoughts on comments and blogging framworks</summary>
+    <updated>2021-11-14T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<blockquote><p> “My mind turned by anxiety, or other cause, from its scrutiny of blank  paper, is like a lost child–wandering the house, sitting on the bottom  step to cry.”  — Virginia Woolf </p></blockquote><p>I was inspired to write some blog posts, which led me to realise my current blog and blogging setup were completely broken.</p><p>Michiel Borkent (<a href='https://twitter.com/borkdude'>@borkdude</a>) recently wrote about his <a href='https://blog.michielborkent.nl/migrating-octopress-to-babashka.html'>migration from Octopress</a>. His requirements were very similar to mine, so I copied and modified. Thank you Michiel!</p><p>His blog, <a href='https://blog.michielborkent.nl/'>REPL adventures</a>, is well worth the read.</p><h2>Blog Post Discussions</h2><p>With a static web site, the perennial problem is how to enable discussions.  Some people just punt pn this, and point to reddit, but Michiel's solution is to use github discussions.  As a way of owning the discussion, this has a lot of appeal.</p><p>I think it could be taken further.  It would be great if we could automate the creation of a blog post topic when creating a blog post. Unfortunately the <a href='https://cli.github.com/'><code>gh</code></a> command line client doesn't support discussions yet, so that would require using Github's GraphQL API - more work than I wanted to do for now.</p><p>One downside though, is that the discussions are not visible on the blog pages, where discussion could easily engender more discussion. I wonder if a Github Action could be triggered by conversation activity, and automatically republish the post with the discussion to date at the end of the post.</p><h2>Blogging Frameworks vs Tasks</h2><p>There are many blog site generators (I used <a href='https://gohugo.io/'>Hugo</a>, of course), even if we limit ourselves to clojure:- <a href='https://github.com/retrogradeorbit/bootleg'>bootleg</a>, <a href='https://github.com/rafaeldelboni/nota'>nota</a>, <a href='https://github.com/cryogen-project/cryogen'>cryogen</a>, and <a href='https://github.com/nakkaya/static'>static</a> to name a few.</p><p>These are usually feature rich.  The price for those features though, is extra complexity.</p><p>Michiel's blog uses <a href='https://book.babashka.org/'>babashka</a> tasks to add a post, render posts, etc. These are extremely quick to run and make maintaining the blog simple.  it does just what he needs, and no more.</p><p>This reminds me of project automation, and the <a href='https://clojure.org/guides/tools_build'><code>tools.build</code></a> approach of using composable code tasks to build just what is needed.</p><p>Maybe there is an opportunity to take the same approach for building a blog or static site. If we could pick from a selection of configurable tasks, maybe we wouldn't need to write our own.</p><p>Speaking of which, I have tried writing my own before, in common-lisp: <a href='http://github.com/hugoduncan/cl-blog-generator'>cl-blog-generator</a>.</p><h2>And…</h2><p>So I have a blogging setup.  Now I just need to write something.</p><p><!&mdash; [borkdude-octopress][https://blog.michielborkent.nl/migrating-octopress-to-babashka.html] [borkdude-blog][https://blog.michielborkent.nl/] [cryogen][https://github.com/cryogen-project/cryogen] [static][https://github.com/nakkaya/static] [nota][https://github.com/rafaeldelboni/nota] [hugo][https://gohugo.io/] [babashka][https://book.babashka.org/] [tools.build][https://clojure.org/guides/tools_build] [gh][https://cli.github.com/] [bootleg][https://github.com/retrogradeorbit/bootleg] &mdash;></p>]]>
+    </content>
+  </entry>
+  <entry>
+    <id>http://hugoduncan.org/post/generating_source_with_leiningen.html</id>
+    <link href="http://hugoduncan.org/post/generating_source_with_leiningen.html"/>
+    <title>Generating Source Files with Leiningen</title>
+    <summary>Generating source files with the leiningen run task.  Adds project specific source generation to prep-tasks.</summary>
+    <updated>2013-10-28T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p>Recently, we needed to include some generated source files in a project.  The source code generation was project specific, so we didn't want to have to create a leiningen plugin specifically for it. To get this to work required using quite a few of <a href='https://github.com/technomancy/leiningen#leiningen'>leiningen's</a> features.</p><p>This post will explain how to use lein to customise you build to generates a source file, but many of the steps are useful to implement any form of lein build customisation.</p><h3>The Generator</h3><p>The source code generator is going to live in the <code>my.src-generator</code> namespace.  Here's an example, that just generates a namespace declaration for the <code>my.gen</code> namespace under <code>target/generated/my/gen.clj</code>.</p><p><pre><code class="clojure hljs"><span class="forms"><span class="list">(<span class="symbol">ns</span> <span class="symbol">my.src-generator</span><br>  <span class="list">(<span class="keyword">:require</span> <span class="vector">&#91;<span class="symbol">clojure.java.io</span> <span class="keyword">:refer</span> <span class="vector">&#91;<span class="symbol">file</span>&#93;</span>&#93;</span>)</span>)</span><br><br><span class="list">(<span class="symbol">defn</span> <span class="def">generate</span> <span class="vector">&#91;&#93;</span><br>  <span class="list">(<span class="symbol">doto</span> <span class="list">(<span class="symbol">file</span> <span class="string">&quot;target&quot;</span> <span class="string">&quot;generated&quot;</span> <span class="string">&quot;my&quot;</span> <span class="string">&quot;gen.clj&quot;</span>)</span><br>    <span class="list">(<span class="symbol">-&gt;</span> <span class="fn">#(<span class="symbol">.getParentFile</span>)</span> <span class="fn">#(<span class="symbol">.mkdirs</span>)</span>)</span><br>    <span class="list">(<span class="symbol">spit</span> <span class="string">&quot;(ns my.gen)&quot;</span>)</span>)</span>)</span></span></code></pre></p><h3>Development only code</h3><p>The source generation code should not be packaged in the jar, so we place it in <code>dev-src/my/src&#95;generator.clj</code>, and add <code>dev-src</code> and the generated source directories to the <code>:dev</code> profile's <code>:source-paths</code>. The <code>:dev</code> profile is automatically used by leiningen unless it is producing a jar file.  When producing the jar, the <code>dev</code> profile will not be used, so <code>dev-src</code> will not be on the <code>:source-path</code> (we add the generated directory to the base <code>:source-path</code> below).</p><p><pre><code class="clojure hljs"><span class="forms"><span class="keyword">:profiles</span> <span class="map">{<span class="keyword">:dev</span> <span class="map">{<span class="keyword">:source-paths</span> <span class="vector">&#91;<span class="string">&quot;src&quot;</span> <span class="string">&quot;dev-src&quot;</span> <span class="string">&quot;target/generated&quot;</span>&#93;</span>}</span>}</span></span></code></pre></p><h3>Running project specific code with leininingen</h3><p>The <code>run</code> task can be used to invoke code in your project.  To use lein's <code>run</code> task we need to add a <code>-main</code> function to the <code>my.src-generator</code> namespace.</p><p><pre><code class="clojure hljs"><span class="forms"><span class="list">(<span class="symbol">defn</span> <span class="def">-main</span> <span class="vector">&#91;<span class="symbol">&amp;</span> <span class="local">args</span>&#93;</span><br>  <span class="list">(<span class="symbol">generate</span>)</span>)</span></span></code></pre></p><p>In the <code>project.clj</code> file we also tell lein about the main namespace. In order to avoid AOT compilation of the main namespace, we mark it with <code>:skip-aot</code> metadata.</p><p><pre><code class="clojure hljs"><span class="forms"><span class="keyword">:main</span> <span class="meta">&#94;<span class="keyword">:skip-aot</span> <span class="symbol">my.src-generator</span></span></span></code></pre></p><h3>Customising the jar contents</h3><p>The generated files need to end up in the jar (and possibly be compiled), so we put them on the <code>:source-paths</code> in the project.  If we had wanted to include the sources without further processing, we could have added the generated directory to <code>:resource-paths</code> instead.</p><p><pre><code class="clojure hljs"><span class="forms"><span class="keyword">:source-paths</span> <span class="vector">&#91;<span class="string">&quot;src&quot;</span> <span class="string">&quot;target/generated&quot;</span>&#93;</span></span></code></pre></p><h3>Extending the build process</h3><p>Now we can tell lein to generate the source files whenever we use the project.  We do this by adding the <code>run</code> task to the <code>:prep-tasks</code> key.  Leiningen runs all the tasks in <code>:prep-tasks</code> before any task invoked by the lein command line.</p><p>The tricky bit here is that the <code>run</code> task will itself invoke the <code>:prep-tasks</code>, so we want to make sure we don't end up calling the task recursively and generating a stack overflow.  To solve this, add a <code>gen</code> profile, and disable the prep tasks in it.  We use the <code>:replace</code> metadata to ensure this definition takes precedence.  See the <a href='https://github.com/technomancy/leiningen/blob/master/doc/PROFILES.md#merging'>leiningen profile documentation</a> for more information on <code>:replace</code> and it's sibling <code>:displace</code>.</p><p><pre><code class="clojure hljs"><span class="forms"><span class="keyword">:gen</span> <span class="map">{<span class="keyword">:prep-tasks</span> <span class="meta">&#94;<span class="keyword">:replace</span> <span class="vector">&#91;&#93;</span></span>}</span></span></code></pre></p><p>Then use this profile when setting the <code>:prep-tasks</code> key in the project.</p><p><pre><code class="clojure hljs"><span class="forms"><span class="keyword">:prep-tasks</span> <span class="vector">&#91;<span class="vector">&#91;<span class="string">&quot;with-profile&quot;</span> <span class="string">&quot;+gen,+dev&quot;</span> <span class="string">&quot;run&quot;</span>&#93;</span>  <span class="string">&quot;compile&quot;</span>&#93;</span></span></code></pre></p><p>Now when we run any command, the sources are generated.</p><h3>Adding an alias</h3><p>Finally we may want to just invoke the source generation, so let's create an alias to make <code>lein gen</code> run the generator.  We need the <code>gen</code> profile for this, or otherwise the generator will run twice.</p><p><pre><code class="clojure hljs"><span class="forms"><span class="keyword">:aliases</span> <span class="map">{<span class="string">&quot;gen&quot;</span> <span class="vector">&#91;<span class="string">&quot;with-profile&quot;</span> <span class="string">&quot;+gen,+dev&quot;</span> <span class="string">&quot;run&quot;</span>&#93;</span>}</span></span></code></pre></p><h3>The final project.clj</h3><p>For reference, the final project.clj looks like this:</p><p><pre><code class="clojure hljs"><span class="forms"><span class="list">(<span class="symbol">defproject</span> <span class="symbol">my-proj</span> <span class="string">&quot;0.1.0-SNAPSHOT&quot;</span><br>  <span class="keyword">:dependencies</span> <span class="vector">&#91;<span class="vector">&#91;<span class="symbol">org.clojure/clojure</span> <span class="string">&quot;1.4.0&quot;</span>&#93;</span>&#93;</span><br>  <span class="keyword">:source-paths</span> <span class="vector">&#91;<span class="string">&quot;src&quot;</span> <span class="string">&quot;target/generated&quot;</span>&#93;</span><br>  <span class="keyword">:main</span> <span class="meta">&#94;<span class="keyword">:skip-aot</span> <span class="symbol">my.src-generator</span></span><br>  <span class="keyword">:prep-tasks</span> <span class="vector">&#91;<span class="vector">&#91;<span class="string">&quot;with-profile&quot;</span> <span class="string">&quot;+gen,+dev&quot;</span> <span class="string">&quot;run&quot;</span>&#93;</span>  <span class="string">&quot;compile&quot;</span>&#93;</span><br>  <span class="keyword">:profiles</span> <span class="map">{<span class="keyword">:dev</span> <span class="map">{<span class="keyword">:source-paths</span> <span class="vector">&#91;<span class="string">&quot;src&quot;</span> <span class="string">&quot;dev-src&quot;</span> <span class="string">&quot;target/generated&quot;</span>&#93;</span>}</span><br>             <span class="keyword">:gen</span> <span class="map">{<span class="keyword">:prep-tasks</span> <span class="meta">&#94;<span class="keyword">:replace</span> <span class="vector">&#91;&#93;</span></span>}</span>}</span><br>  <span class="keyword">:aliases</span> <span class="map">{<span class="string">&quot;gen&quot;</span> <span class="vector">&#91;<span class="string">&quot;with-profile&quot;</span> <span class="string">&quot;+gen,+dev&quot;</span> <span class="string">&quot;run&quot;</span>&#93;</span>}</span>)</span></span></code></pre></p><h3>Conclusion</h3><p>This required using many of lein's features to get working - hopefully you'll find a use for some of them.</p>]]>
+    </content>
+  </entry>
+  <entry>
+    <id>http://hugoduncan.org/post/alembic_reloads_your_project_clj_dependencies.html</id>
+    <link href="http://hugoduncan.org/post/alembic_reloads_your_project_clj_dependencies.html"/>
+    <title>Alembic Reloads your Leiningen project.clj Dependencies</title>
+    <summary>When working on a project, you sometime need to add a dependency.  Using Alembic you can add the dependency in your project.clj file, and then call alembic.still/load-project to load the dependency into a running repl, without loosing your repl state.</summary>
+    <updated>2013-08-29T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p>You're working away in a Clojure REPL, when you realise you need to add a dependency.  You add the dependency to your [leiningen][lein] <code>project.clj</code> file and then?  Instead of shutting down your REPL, loosing whatever state you have built up, you can use [Alembic][alembic] to load the new dependencies.  Simply call <code>&#40;alembic.still/load-project&#41;</code>.</p><p>Of course, it still has to work within the confines of the JVM's classloaders, so you can only add dependencies, and not modify versions or remove dependencies, but this should still cover a lot of use cases.</p><p>To use alembic on a single project, simply add it as a dependency in your <code>:dev</code> profile in <code>project.clj</code>:</p><pre><code class="clj">:profiles {:dev {:dependencies &#91;&#91;alembic &quot;0.2.0&quot;&#93;&#93;}}
+</code></pre><p>To make alembic available in all your projects, and it to the <code>:user</code> profile in <code>&#126;/.lein/profiles.clj</code> instead:</p><pre><code class="clj">{:user {:dependencies &#91;&#91;alembic &quot;0.2.0&quot;&#93;&#93;}}
+</code></pre><p>Alembic also allows you to directly add dependencies without editing your <code>project.clj</code> file, using the <code>distill</code> function.  Use this if you are just exploring libraries, for example.</p><p>Finally a big thank you to [Anthony Grimes][raynes] and the other [flatland][flatland] developers for removing classlojure's dependency on <code>useful</code>, which should make this all much more robust.</p><p>[alembic]: <a href='https://github.com/pallet/alembic#alembic'>https://github.com/pallet/alembic#alembic</a> "Alembic" [lein]: <a href='http://leiningen.org'>http://leiningen.org</a> "Leiningen" [raynes]: <a href='http://blog.raynes.me/'>http://blog.raynes.me/</a> "Raynes" [flatland]: <a href='https://github.com/flatland/'>https://github.com/flatland/</a> "flatland"</p>]]>
+    </content>
+  </entry>
+  <entry>
+    <id>http://hugoduncan.org/post/evaluate_clojure_in_emacs_markdown_buffers.html</id>
+    <link href="http://hugoduncan.org/post/evaluate_clojure_in_emacs_markdown_buffers.html"/>
+    <title>Evaluate and Format Clojure in Emacs Markdown Buffers</title>
+    <summary>When editing Clojure blocks in mardown or asciidoc documents, allow formating and evaluation of code blocks with clojure-mode.  Using mmm-mode, you can mix whichever major modes you want.</summary>
+    <updated>2013-08-26T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p>When writing documentation or blog posts about Clojure code, it is very useful to be able to format Clojure code blocks using [<code>clojure-mode</code>][clojure-mode] and evaluate code with [<code>nrepl.el</code>][nrepl].</p><p>This can be enabled using [<code>mmm-mode</code>][mmm-mode], which allows a single buffer to use different major modes for different sections of the buffer (and is not limited to just web modes). Install <code>mmm-mode</code> using <code>M-x package-install mmm-mode</code>, or using <code>M-x el-get-install mmm-mode</code> from the excellent [<code>el-get</code>][el-get], or by checking the project from github and installing manually.</p><p>To configure this for clojure and markdown, add this in your <code>init.el</code> or <code>.emacs</code> file.</p><pre><code class="lisp">&#40;require 'mmm-auto&#41;
+&#40;mmm-add-classes
+ '&#40;&#40;markdown-clojure
     :submode clojure-mode
     :face mmm-declaration-submode-face
-    :front &amp;quot;^```clj[\n\r]+&amp;quot;
-    :back &amp;quot;^```$&amp;quot;)))
+    :front &quot;&#94;```clj&#91;\n\r&#93;+&quot;
+    :back &quot;&#94;```$&quot;&#41;&#41;&#41;
 
-(setq mmm-global-mode &#39;maybe)
-(mmm-add-mode-ext-class &#39;markdown-mode nil &#39;markdown-clojure)
-&lt;/code&gt;&lt;/pre&gt;
+&#40;setq mmm-global-mode 'maybe&#41;
+&#40;mmm-add-mode-ext-class 'markdown-mode nil 'markdown-clojure&#41;
+</code></pre><p>After evaluating the above, or restarting emacs, you can test multi-mode support by opening a markdown document, or creating a new one, and adding a clojure source block, e.g.:</p><p><pre><pre><code class="clj">&#40;defn my-fn &#91;x&#93;
+  &#40;inc x&#41;&#41;
 
-&lt;p&gt;After evaluating the above, or restarting emacs, you can test
-multi-mode support by opening a markdown document, or creating a new
-one, and adding a clojure source block, e.g.:&lt;/p&gt;
-
-&lt;pre&gt;
-```clj
-(defn my-fn [x]
-  (inc x))
-
-(my-fn 1)
-```
-&lt;/pre&gt;
-
-&lt;p&gt;Inside the code block you can format and evaluate your code as in any
-&lt;code&gt;clojure-mode&lt;/code&gt; buffer, and the code will display exactly as in a
-&lt;code&gt;.clj&lt;/code&gt; file.  By default the evaluation uses a running inferior lisp
-process, which you must start yourself.  To use a running
-&lt;a href=&#34;https://github.com/clojure-emacs/nrepl.el&#34; title=&#34;nrepl.el&#34;&gt;nrepl&lt;/a&gt; session instead, use &lt;code&gt;M-x nrepl-interaction-mode&lt;/code&gt;
-inside the code block.&lt;/p&gt;
-
-&lt;h2&gt;Using with AsciiDoc&lt;/h2&gt;
-
-&lt;p&gt;This technique is not limited to clojure and markdown, but could be
-made to work whenever you would like differing major modes in distinct
-parts of your Emacs buffers.  You can add class to &lt;code&gt;mmm-mode&lt;/code&gt;
-appropriately, for as many major mode combinations as you need.  The
-regions for each major mode are detected using regular expressions (or
-by some function).&lt;/p&gt;
-
-&lt;p&gt;For example, if you&amp;rsquo;re writing asciidoc, you might use:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;lisp&#34;&gt;(mmm-add-classes
- &#39;((asciidoc-clojure
+&#40;my-fn 1&#41;
+</code></pre></p><p></pre></p><p>Inside the code block you can format and evaluate your code as in any <code>clojure-mode</code> buffer, and the code will display exactly as in a <code>.clj</code> file.  By default the evaluation uses a running inferior lisp process, which you must start yourself.  To use a running [nrepl][nrepl] session instead, use <code>M-x nrepl-interaction-mode</code> inside the code block.</p><h2>Using with AsciiDoc</h2><p>This technique is not limited to clojure and markdown, but could be made to work whenever you would like differing major modes in distinct parts of your Emacs buffers.  You can add class to <code>mmm-mode</code> appropriately, for as many major mode combinations as you need.  The regions for each major mode are detected using regular expressions (or by some function).</p><p>For example, if you're writing asciidoc, you might use:</p><pre><code class="lisp">&#40;mmm-add-classes
+ '&#40;&#40;asciidoc-clojure
     :submode clojure
     :face mmm-declaration-submode-face
-    :front &amp;quot;\\[source, clojure\\][\n\r]+----[\n\r]+&amp;quot;
-    :back &amp;quot;^----$&amp;quot;)))
-(mmm-add-mode-ext-class &#39;adoc-mode nil &#39;asciidoc-clojure)
-(mmm-add-mode-ext-class &#39;doc-mode nil &#39;asciidoc-clojure)
-&lt;/code&gt;&lt;/pre&gt;
+    :front &quot;\\&#91;source, clojure\\&#93;&#91;\n\r&#93;+----&#91;\n\r&#93;+&quot;
+    :back &quot;&#94;----$&quot;&#41;&#41;&#41;
+&#40;mmm-add-mode-ext-class 'adoc-mode nil 'asciidoc-clojure&#41;
+&#40;mmm-add-mode-ext-class 'doc-mode nil 'asciidoc-clojure&#41;
+</code></pre><h2>Summary</h2><p><code>mmm-mode</code> allows you to flexibly use multiple major modes in different parts of a single emacs buffer.  Here we have shown how to use it for <code>clojure-mode</code> code blocks in markdown or asciidoc, but it is in no way limited to this, and it allows some fine grained customisation to the appearance and behaviour of each major mode block. I'm sure you'll find your own uses for <code>mmm-mode</code>.</p><p>[dirlocals]: <a href='http://www.gnu.org/software/emacs/manual/html_node/emacs/Directory-Variables.html'>http://www.gnu.org/software/emacs/manual/html_node/emacs/Directory-Variables.html</a> "Emacs Directory variales" [nrepl]: <a href='https://github.com/clojure-emacs/nrepl.el'>https://github.com/clojure-emacs/nrepl.el</a> "nrepl.el" [clojure-mode]: <a href='https://github.com/clojure-emacs/clojure-mode'>https://github.com/clojure-emacs/clojure-mode</a> "clojure-mode" [el-get]: <a href='http://tapoueh.org/emacs/el-get.html'>http://tapoueh.org/emacs/el-get.html</a> "el-get" [mmm-mode]: <a href='https://github.com/purcell/mmm-mode/'>https://github.com/purcell/mmm-mode/</a> "mmm-mode"</p>]]>
+    </content>
+  </entry>
+  <entry>
+    <id>http://hugoduncan.org/post/clojurescript-libs-with-js-dependencies.html</id>
+    <link href="http://hugoduncan.org/post/clojurescript-libs-with-js-dependencies.html"/>
+    <title>How to Build Clojurescript Libs with JavaScript Dependencies</title>
+    <summary>A summary of different strategies for packaging JavaScipt dependencies in a Clojurescript library</summary>
+    <updated>2013-08-16T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p>Using JavaScript dependencies in a Clojurescript library seems to be hard.  It took me many hours to understand how it should work.  A big thanks to [Chas Emerick][cemerick] for setting me straight on most of this.</p><p>Luke Vanderhart [posted][lukespost] a general introduction to using Javascript libraries in Clojurescript.  Go read it if you haven't already - this post assumes you have.</p><p>While that post is an excellent description of using JavaScript in a Clojurescript application, it doesn't really address JavaScript in Clojurescript libraries, which has the additional problem of how to ensure the JavaScript dependency is available in the consumer of the library.  A Clojurescript library should definitely be capable of providing it's dependencies, but should also allow the consumer to override the version of these dependencies.</p><h2>Don't package the JavaScript</h2><p>The first approach is to simply not provide the JavaScript at all.  This is the approach taken by [jayq][jayq] for example.  The consumer of jayq, or any library that uses jayq, is required to provide jQuery through the JavaScript runtime.  This can take the form of a <code>&amp;lt;script&amp;gt;</code> link in the browser page, or a call to <code>webPage#injectJs</code> in phantomJS.  The compile <code>:libs</code> or <code>:foreign-libs</code> options can not be used to provide the dependency, as there is no way for the compiler to know that jayq depends on the namespace provided by these options.</p><p>For the consumer of the library to use compiler<code>:optimizations</code> other than <code>:whitespace</code>, they will need to provide an <code>:externs</code> file.</p><h2>Package JavaScript</h2><p>The second approach is to package the JavaScript via a Clojurescript namespace. This involves adding a <code>require</code> on a namespace to the code that directly depends on the JavaScript, and arranging for that Clojurescript namespace to load the JavaScript, using either of the compiler<code>:libs</code> or <code>:foreign-libs</code> options.</p><p>The Clojurescript library can make the JavaScript library available in its resources.  The library consumer can then use resource via the <code>:libs</code> or <code>:foreign-libs</code> options, depending on whether or not the JavaScript contains a <code>goog.provides</code> call.</p><p>If the library is packaged with a <code>goog.provides</code> call, then the consumer can not replace the version using <code>:libs &#91;&quot;&quot;&#93;</code> - the use of an explicit prefix in <code>:libs</code> is needed to prevent more than one JavaScript implementation trying to provide the clojure namespace, or the use of <code>:foreign-libs</code> where the namespace is explicitly mapped.</p><p>For examples, the [pprng][pprng] library packages its dependency with a <code>goog.provides</code> call, allowing the use of <code>:libs &#91;&quot;&quot;&#93;</code> to pull in the dependency.  The [papadom][papadom] library on the other hand provides vanilla javascript dependencies, and requires the use of the more verbose <code>:foreign-libs</code> option.</p><p>If the JavaScript is to be provided in the runtime, then the consumer will have to provide an empty namespace definition to satisfy the require in the Clojurescript library, and the<code>:externs</code> file as in the first case.</p><h2>Postscript</h2><p>There are several assumptions in much of the documentation that I didn't see explicitly explained.  I'll record these here for posterity.</p><p>A clojurescript library is always a source code library.  There is no such thing as the linking of compiled clojurescript artifacts.</p><p>Neither<code>:libs</code> nor<code>:foreign-libs</code> actually changes how the JavaScript is accessed within the clojurescript code.  If you include jQuery via a <code>:libs</code>, and a <code>require</code>, you still access it through <code>js/jQuery</code>.  The <code>require</code> of the namespace specified by <code>goog.provide</code>, or the namespace specified in the <code>:foreign-libs</code>' <code>:provides</code> key, simply ensures the JavaScript is loaded.</p><p>The choice of compiler <code>:optimizations</code> affects what information you need to provide, and this differs depending on whether you are providing javascript libraries through the runtime (e.g. $lt;script&gt; tags in the browser), or through <code>:libs</code> or <code>:foreign-libs</code> compiler options.  The simplest here is to use the compiler options.  When providing the JavaScript via the runtime, then everything should also just work if you are using no optimisation, or just <code>:whitespace</code>, but as soon as you try anything else, you will need to provide an :externs definition for the JavaScript libraries.</p><p>[lukespost]: <a href='http://lukevanderhart.com/2011/09/30/using-javascript-and-clojurescript.html'>http://lukevanderhart.com/2011/09/30/using-javascript-and-clojurescript.html</a> "Luke Vanderhart's post on JavaScript libs"</p><p>[jayq]: <a href='https://github.com/ibdknox/jayq'>https://github.com/ibdknox/jayq</a> "jayq"</p><p>[cemerick]: <a href='http://cemerick.com'>http://cemerick.com</a> "Chas Emerick"</p><p>[pprng]: <a href='https://github.com/cemerick/pprng'>https://github.com/cemerick/pprng</a> "pprng" [papadom]: <a href='https://github.com/hugoduncan/papadom'>https://github.com/hugoduncan/papadom</a> "papadom"</p>]]>
+    </content>
+  </entry>
+  <entry>
+    <id>http://hugoduncan.org/post/webapp_with_core.async.html</id>
+    <link href="http://hugoduncan.org/post/webapp_with_core.async.html"/>
+    <title>Exploring a todo app with core.async</title>
+    <summary>Builds the equivalent of the angularJS TODO example with core.async</summary>
+    <updated>2013-08-15T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p>We're going to build an equivalent of the [AngularJS TODO example][angulartodo] using core.async, and a templating library, [papadom][papadom], that I've written to help in this.</p><p>[Clojurescript][clojurescript] recently gained a [CSP][csp] implemetation via [core.async][core.async], similar to [Go's channels][golangchannel], or [CML's channels][cmlchannel] (CML also has a nice select).  Bruce Haumann started exploring this with [ClojureScript Core.Async Todos][brucetodo], and David Nolen has been looking at how to use core.async for [responsive design][cspresponsive].  In this post, we'll take the TODO example, and take it a little further.</p><h2>Basic Display</h2><p>We'll start with just displaying a list of todo items.  For this we'll need a template, so we'll just write this in HTML, and add a <code>t-template</code> attribute, which enables us to use mustache style templating of values to display.  This doesn't use mustache sections for looping, in order to preserve valid HTML markup.</p><pre><code class="html">&lt;h1&gt;TODOS&lt;/h1&gt;
+&lt;ul class=&quot;unstyled&quot;&gt;
+  &lt;li t-template=&quot;todos&quot;&gt;{{text}}&lt;/li&gt;
+&lt;/ul&gt;
+</code></pre><p>To get this to show something we'll need some code:</p><pre><code class="clj">&#40;ns app
+  &#40;:require
+   &#91;papadom.template :refer &#91;compile-templates render&#93;&#93;&#41;&#41;
 
-&lt;h2&gt;Summary&lt;/h2&gt;
-
-&lt;p&gt;&lt;code&gt;mmm-mode&lt;/code&gt; allows you to flexibly use multiple major modes in
-different parts of a single emacs buffer.  Here we have shown how to
-use it for &lt;code&gt;clojure-mode&lt;/code&gt; code blocks in markdown or asciidoc, but it
-is in no way limited to this, and it allows some fine grained
-customisation to the appearance and behaviour of each major mode
-block. I&amp;rsquo;m sure you&amp;rsquo;ll find your own uses for &lt;code&gt;mmm-mode&lt;/code&gt;.&lt;/p&gt;
-</content></entry>
-
-<entry xml:base="http://hugoduncan.github.com/post/clojurescript-libs-with-js-dependencies"><title>How to Build Clojurescript Libs with JavaScript Dependencies</title><link href="http://hugoduncan.github.com/post/clojurescript-libs-with-js-dependencies"/><id>http://hugoduncan.github.com/post/clojurescript-libs-with-js-dependencies</id><published>2013-08-16T00:00:00Z</published><updated>2013-08-16T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;Using JavaScript dependencies in a Clojurescript library seems to be hard.  It
-took me many hours to understand how it should work.  A big thanks to
-&lt;a href=&#34;http://cemerick.com&#34; title=&#34;Chas Emerick&#34;&gt;Chas Emerick&lt;/a&gt; for setting me straight on most of this.&lt;/p&gt;
-
-&lt;p&gt;Luke Vanderhart &lt;a href=&#34;http://lukevanderhart.com/2011/09/30/using-javascript-and-clojurescript.html&#34; title=&#34;Luke Vanderhart&#39;s post on JavaScript libs&#34;&gt;posted&lt;/a&gt; a general introduction to using Javascript
-libraries in Clojurescript.  Go read it if you haven&amp;rsquo;t already - this post
-assumes you have.&lt;/p&gt;
-
-&lt;p&gt;While that post is an excellent description of using JavaScript in
-a Clojurescript application, it doesn&amp;rsquo;t really address JavaScript in
-Clojurescript libraries, which has the additional problem of how to ensure the
-JavaScript dependency is available in the consumer of the library.  A
-Clojurescript library should definitely be capable of providing it&amp;rsquo;s
-dependencies, but should also allow the consumer to override the version of
-these dependencies.&lt;/p&gt;
-
-&lt;h2&gt;Don&amp;rsquo;t package the JavaScript&lt;/h2&gt;
-
-&lt;p&gt;The first approach is to simply not provide the JavaScript at all.  This is the
-approach taken by &lt;a href=&#34;https://github.com/ibdknox/jayq&#34; title=&#34;jayq&#34;&gt;jayq&lt;/a&gt; for example.  The consumer of jayq, or any
-library that uses jayq, is required to provide jQuery through the JavaScript
-runtime.  This can take the form of a &lt;code&gt;&amp;amp;lt;script&amp;amp;gt;&lt;/code&gt; link in the browser page,
-or a call to &lt;code&gt;webPage#injectJs&lt;/code&gt; in phantomJS.  The compile &lt;code&gt;:libs&lt;/code&gt; or
-&lt;code&gt;:foreign-libs&lt;/code&gt; options can not be used to provide the dependency, as there is
-no way for the compiler to know that jayq depends on the namespace provided by
-these options.&lt;/p&gt;
-
-&lt;p&gt;For the consumer of the library to use compiler&lt;code&gt;:optimizations&lt;/code&gt; other than
-&lt;code&gt;:whitespace&lt;/code&gt;, they will need to provide an &lt;code&gt;:externs&lt;/code&gt; file.&lt;/p&gt;
-
-&lt;h2&gt;Package JavaScript&lt;/h2&gt;
-
-&lt;p&gt;The second approach is to package the JavaScript via a Clojurescript namespace.
-This involves adding a &lt;code&gt;require&lt;/code&gt; on a namespace to the code that directly
-depends on the JavaScript, and arranging for that Clojurescript namespace to
-load the JavaScript, using either of the compiler&lt;code&gt;:libs&lt;/code&gt; or &lt;code&gt;:foreign-libs&lt;/code&gt;
-options.&lt;/p&gt;
-
-&lt;p&gt;The Clojurescript library can make the JavaScript library available in its
-resources.  The library consumer can then use resource via the &lt;code&gt;:libs&lt;/code&gt; or
-&lt;code&gt;:foreign-libs&lt;/code&gt; options, depending on whether or not the JavaScript contains a
-&lt;code&gt;goog.provides&lt;/code&gt; call.&lt;/p&gt;
-
-&lt;p&gt;If the library is packaged with a &lt;code&gt;goog.provides&lt;/code&gt; call, then the consumer can
-not replace the version using &lt;code&gt;:libs [&amp;quot;&amp;quot;]&lt;/code&gt; - the use of an explicit prefix in
-&lt;code&gt;:libs&lt;/code&gt; is needed to prevent more than one JavaScript implementation trying to
-provide the clojure namespace, or the use of &lt;code&gt;:foreign-libs&lt;/code&gt; where the namespace
-is explicitly mapped.&lt;/p&gt;
-
-&lt;p&gt;For examples, the &lt;a href=&#34;https://github.com/cemerick/pprng&#34; title=&#34;pprng&#34;&gt;pprng&lt;/a&gt; library packages its dependency with a
-&lt;code&gt;goog.provides&lt;/code&gt; call, allowing the use of &lt;code&gt;:libs [&amp;quot;&amp;quot;]&lt;/code&gt; to pull in the
-dependency.  The &lt;a href=&#34;https://github.com/hugoduncan/papadom&#34; title=&#34;papadom&#34;&gt;papadom&lt;/a&gt; library on the other hand provides vanilla
-javascript dependencies, and requires the use of the more verbose
-&lt;code&gt;:foreign-libs&lt;/code&gt; option.&lt;/p&gt;
-
-&lt;p&gt;If the JavaScript is to be provided in the runtime, then the consumer will have
-to provide an empty namespace definition to satisfy the require in the
-Clojurescript library, and the&lt;code&gt;:externs&lt;/code&gt; file as in the first case.&lt;/p&gt;
-
-&lt;h2&gt;Postscript&lt;/h2&gt;
-
-&lt;p&gt;There are several assumptions in much of the documentation that I didn&amp;rsquo;t see
-explicitly explained.  I&amp;rsquo;ll record these here for posterity.&lt;/p&gt;
-
-&lt;p&gt;A clojurescript library is always a source code library.  There is no such thing
-as the linking of compiled clojurescript artifacts.&lt;/p&gt;
-
-&lt;p&gt;Neither&lt;code&gt;:libs&lt;/code&gt; nor&lt;code&gt;:foreign-libs&lt;/code&gt; actually changes how the JavaScript is
-accessed within the clojurescript code.  If you include jQuery via a &lt;code&gt;:libs&lt;/code&gt;,
-and a &lt;code&gt;require&lt;/code&gt;, you still access it through &lt;code&gt;js/jQuery&lt;/code&gt;.  The &lt;code&gt;require&lt;/code&gt; of the
-namespace specified by &lt;code&gt;goog.provide&lt;/code&gt;, or the namespace specified in the
-&lt;code&gt;:foreign-libs&lt;/code&gt;&amp;rsquo; &lt;code&gt;:provides&lt;/code&gt; key, simply ensures the JavaScript is loaded.&lt;/p&gt;
-
-&lt;p&gt;The choice of compiler &lt;code&gt;:optimizations&lt;/code&gt; affects what information you need to
-provide, and this differs depending on whether you are providing javascript
-libraries through the runtime (e.g. $lt;script&amp;gt; tags in the browser), or
-through &lt;code&gt;:libs&lt;/code&gt; or &lt;code&gt;:foreign-libs&lt;/code&gt; compiler options.  The simplest here is to
-use the compiler options.  When providing the JavaScript via the runtime, then
-everything should also just work if you are using no optimisation, or
-just &lt;code&gt;:whitespace&lt;/code&gt;, but as soon as you try anything else, you will need to
-provide an :externs definition for the JavaScript libraries.&lt;/p&gt;
-</content></entry>
-
-<entry xml:base="http://hugoduncan.github.com/post/webapp_with_core.async"><title>Exploring a todo app with core.async</title><link href="http://hugoduncan.github.com/post/webapp_with_core.async"/><id>http://hugoduncan.github.com/post/webapp_with_core.async</id><published>2013-08-15T00:00:00Z</published><updated>2013-08-15T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;We&amp;rsquo;re going to build an equivalent of the &lt;a href=&#34;http://angularjs.org/#add-some-control&#34; title=&#34;Angular TODO example&#34;&gt;AngularJS TODO example&lt;/a&gt;
-using core.async, and a templating library, &lt;a href=&#34;https://github.com/hugoduncan/papadom&#34; title=&#34;Papadom templating library&#34;&gt;papadom&lt;/a&gt;, that I&amp;rsquo;ve
-written to help in this.&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&#34;https://github.com/clojure/clojurescript&#34; title=&#34;Clojurescript&#34;&gt;Clojurescript&lt;/a&gt; recently gained a &lt;a href=&#34;http://en.wikipedia.org/wiki/Communicating_sequential_processes&#34; title=&#34;Communicating Sequential Processes&#34;&gt;CSP&lt;/a&gt; implemetation via
-&lt;a href=&#34;http://clojure.com/blog/2013/06/28/clojure-core-async-channels.html&#34; title=&#34;Clojure core.async Channels&#34;&gt;core.async&lt;/a&gt;, similar to &lt;a href=&#34;http://golang.org/ref/spec#Channel_types&#34; title=&#34;Go Channels&#34;&gt;Go&amp;rsquo;s channels&lt;/a&gt;, or
-&lt;a href=&#34;http://www.cs.cornell.edu/Courses/cs312/2006fa/recitations/rec24.html&#34; title=&#34;CML Channels&#34;&gt;CML&amp;rsquo;s channels&lt;/a&gt; (CML also has a nice select).  Bruce Haumann
-started exploring this with &lt;a href=&#34;http://rigsomelight.com/2013/07/18/clojurescript-core-async-todos.html&#34; title=&#34;Bruce Haumann&#39;s &#39;ClojureScript Core.Async Todos&#39;&#34;&gt;ClojureScript Core.Async Todos&lt;/a&gt;, and
-David Nolen has been looking at how to use core.async for
-&lt;a href=&#34;http://swannodette.github.io/2013/07/31/extracting-processes/&#34; title=&#34;David Nolan&#39;s &#39;CSP is Responsive Design&#39;&#34;&gt;responsive design&lt;/a&gt;.  In this post, we&amp;rsquo;ll take the TODO example,
-and take it a little further.&lt;/p&gt;
-
-&lt;h2&gt;Basic Display&lt;/h2&gt;
-
-&lt;p&gt;We&amp;rsquo;ll start with just displaying a list of todo items.  For this we&amp;rsquo;ll need a
-template, so we&amp;rsquo;ll just write this in HTML, and add a &lt;code&gt;t-template&lt;/code&gt; attribute,
-which enables us to use mustache style templating of values to display.  This
-doesn&amp;rsquo;t use mustache sections for looping, in order to preserve valid HTML
-markup.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;html&#34;&gt;&amp;lt;h1&amp;gt;TODOS&amp;lt;/h1&amp;gt;
-&amp;lt;ul class=&amp;quot;unstyled&amp;quot;&amp;gt;
-  &amp;lt;li t-template=&amp;quot;todos&amp;quot;&amp;gt;{{text}}&amp;lt;/li&amp;gt;
-&amp;lt;/ul&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;To get this to show something we&amp;rsquo;ll need some code:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;clj&#34;&gt;(ns app
-  (:require
-   [papadom.template :refer [compile-templates render]]))
-
-(defn start []
-  (compile-templates)
-  (render {:todos [{:text &amp;quot;learn papadom&amp;quot; :done false}
-                   {:text &amp;quot;write a papadom app&amp;quot; :done false}]}))
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;When you call &lt;code&gt;app.start()&lt;/code&gt; from the page containing the above template, you&amp;rsquo;ll
-see a list of two todo entries.&lt;/p&gt;
-
-&lt;h2&gt;Adding an event&lt;/h2&gt;
-
-&lt;p&gt;Now we have something displayed, lets add a checkbox to mark todo items as done:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;html&#34;&gt;&amp;lt;ul class=&amp;quot;unstyled&amp;quot;&amp;gt;
-  &amp;lt;li t-template=&amp;quot;todos&amp;quot;&amp;gt;
-    &amp;lt;input type=&amp;quot;checkbox&amp;quot; t-prop=&amp;quot;done&amp;quot; t-event=&amp;quot;done&amp;quot;
-           t-id=&amp;quot;index&amp;quot; index=&amp;quot;{{@index}}&amp;quot;&amp;gt;
-    &amp;lt;span&amp;gt;{{text}}&amp;lt;/span&amp;gt;
-  &amp;lt;/li&amp;gt;
-&amp;lt;/ul&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The &lt;code&gt;t-prop&lt;/code&gt; attribute tells the template to which data value to display as the
-checkbox.&lt;/p&gt;
-
-&lt;p&gt;The &lt;code&gt;t-event&lt;/code&gt; attribute specifies that we want an event.  When the checkbox is
-clicked, we will get a core.async message with a &lt;code&gt;:done&lt;/code&gt; event type.  We need to
-know which todo was clicked, so we use the &lt;code&gt;t-id&lt;/code&gt; attribute to list the
-attributes whose values should be sent as the event data &amp;ndash; in this case the
-index, which has a value based on handlebars style &lt;code&gt;@index&lt;/code&gt; property.&lt;/p&gt;
-
-&lt;p&gt;Now we need some code to process the events.  To do this we&amp;rsquo;ll define an
-&lt;code&gt;app&lt;/code&gt; function that will be passed a state atom containing a map with our todos
-state, and a core.async channel from which to read events.  The function will
-loop over events, and dispatch them as required.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;clj&#34;&gt;(defn app
-  [state event-chan]
-  (go
-   (loop [[event event-data] (&amp;lt;! event-chan)]
-     (case event
+&#40;defn start &#91;&#93;
+  &#40;compile-templates&#41;
+  &#40;render {:todos &#91;{:text &quot;learn papadom&quot; :done false}
+                   {:text &quot;write a papadom app&quot; :done false}&#93;}&#41;&#41;
+</code></pre><p>When you call <code>app.start&#40;&#41;</code> from the page containing the above template, you'll see a list of two todo entries.</p><h2>Adding an event</h2><p>Now we have something displayed, lets add a checkbox to mark todo items as done:</p><pre><code class="html">&lt;ul class=&quot;unstyled&quot;&gt;
+  &lt;li t-template=&quot;todos&quot;&gt;
+    &lt;input type=&quot;checkbox&quot; t-prop=&quot;done&quot; t-event=&quot;done&quot;
+           t-id=&quot;index&quot; index=&quot;{{@index}}&quot;&gt;
+    &lt;span&gt;{{text}}&lt;/span&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+</code></pre><p>The <code>t-prop</code> attribute tells the template to which data value to display as the checkbox.</p><p>The <code>t-event</code> attribute specifies that we want an event.  When the checkbox is clicked, we will get a core.async message with a <code>:done</code> event type.  We need to know which todo was clicked, so we use the <code>t-id</code> attribute to list the attributes whose values should be sent as the event data &ndash; in this case the index, which has a value based on handlebars style <code>@index</code> property.</p><p>Now we need some code to process the events.  To do this we'll define an <code>app</code> function that will be passed a state atom containing a map with our todos state, and a core.async channel from which to read events.  The function will loop over events, and dispatch them as required.</p><pre><code class="clj">&#40;defn app
+  &#91;state event-chan&#93;
+  &#40;go
+   &#40;loop &#91;&#91;event event-data&#93; &#40;&lt;! event-chan&#41;&#93;
+     &#40;case event
        :done
-       (let [nv (boolean (:checked event-data))]
-         (swap! state assoc-in [:todos (:index event-data) :done] nv)))
-     (recur (&amp;lt;! event-chan)))))
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;When the &lt;code&gt;app&lt;/code&gt; function receives a &lt;code&gt;:done&lt;/code&gt; event, it will update the state atom
-appropriately.  Now we have our state updating, we&amp;rsquo;ll need to display it, which
-we can again do with the &lt;code&gt;render&lt;/code&gt; function.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;clj&#34;&gt;(defn show-state [state]
-  (render &amp;quot;state&amp;quot; state))
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;We still need to get &lt;code&gt;show-state&lt;/code&gt; called, and we&amp;rsquo;ll arrange this in a modified
-&lt;code&gt;start&lt;/code&gt; function.  This will create an atom for the state, and add a watch on
-the atom that will call &lt;code&gt;show-state&lt;/code&gt;.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;clj&#34;&gt;(defn start
-  []
-  (let [event-chan (chan)
-        state (atom nil)]
-    (compile-templates)
-    (template-events event-chan)
-    (add-watch state :state (fn [key ref old new] (show-state new)))
-    (reset! state {:todos [{:text &amp;quot;Learn papadom&amp;quot; :done false}
-                           {:text &amp;quot;Build a papadom app&amp;quot; :done false}]})
-    (app state event-chan))))
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;We&amp;rsquo;ve also added a core.async channel, &lt;code&gt;event-chan&lt;/code&gt;, which we&amp;rsquo;ve passed to
-&lt;code&gt;template-events&lt;/code&gt; to arrange delivery of the events defined in our template.  We
-pass this channel to the &lt;code&gt;app&lt;/code&gt; function to start processing the events.&lt;/p&gt;
-
-&lt;p&gt;This shows the basic structure of the application.&lt;/p&gt;
-
-&lt;h2&gt;Adding New Todo Elements&lt;/h2&gt;
-
-&lt;p&gt;To allow you to add new todo items, we&amp;rsquo;ll add a form to our template,
-specifying a &lt;code&gt;t-event&lt;/code&gt; attribute, which will cause an event to be sent when the
-form is submitted, with the form&amp;rsquo;s input values as the event data.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;html&#34;&gt;&amp;lt;form t-event=&amp;quot;add-todo&amp;quot;&amp;gt;
-  &amp;lt;input type=&amp;quot;text&amp;quot; t-prop=&amp;quot;text&amp;quot; size=&amp;quot;30&amp;quot; placeholder=&amp;quot;add new todo here&amp;quot;&amp;gt;
-  &amp;lt;input class=&amp;quot;btn btn-primary&amp;quot; type=&amp;quot;submit&amp;quot; value=&amp;quot;add&amp;quot;&amp;gt;
-&amp;lt;/form&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;To process this new event, we&amp;rsquo;ll add a case to the &lt;code&gt;app&lt;/code&gt; function loop&amp;rsquo;s &lt;code&gt;case&lt;/code&gt;
-form.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;clj&#34;&gt;:add-todo
-(swap! state update-in [:todos]
-       conj {:text (:text (input-seq-&amp;gt;map event-data))
-             :done false})
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This uses the &lt;code&gt;input-seq-&amp;gt;map&lt;/code&gt; helper to convert the data from the form into a
-map, and we extract the &lt;code&gt;:text&lt;/code&gt; value (defined by &lt;code&gt;t-prop&lt;/code&gt; in the &lt;code&gt;input&lt;/code&gt;
-element).&lt;/p&gt;
-
-&lt;p&gt;And we&amp;rsquo;re done.  To see a full working example have a look at the
-&lt;a href=&#34;https://github.com/hugoduncan/papadom/blob/master/examples/todo/resources/public/index.html&#34; title=&#34;TODO HTML Template&#34;&gt;template&lt;/a&gt; and &lt;a href=&#34;https://github.com/hugoduncan/papadom/blob/master/examples/todo/src/papadom/example/todo.cljs&#34; title=&#34;TODO Clojurescript Code&#34;&gt;code&lt;/a&gt; in the todo example of papadom.
-To run the example:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;shell&#34;&gt;git clone https://github.com/hugoduncan/papadom.git
+       &#40;let &#91;nv &#40;boolean &#40;:checked event-data&#41;&#41;&#93;
+         &#40;swap! state assoc-in &#91;:todos &#40;:index event-data&#41; :done&#93; nv&#41;&#41;&#41;
+     &#40;recur &#40;&lt;! event-chan&#41;&#41;&#41;&#41;&#41;
+</code></pre><p>When the <code>app</code> function receives a <code>:done</code> event, it will update the state atom appropriately.  Now we have our state updating, we'll need to display it, which we can again do with the <code>render</code> function.</p><pre><code class="clj">&#40;defn show-state &#91;state&#93;
+  &#40;render &quot;state&quot; state&#41;&#41;
+</code></pre><p>We still need to get <code>show-state</code> called, and we'll arrange this in a modified <code>start</code> function.  This will create an atom for the state, and add a watch on the atom that will call <code>show-state</code>.</p><pre><code class="clj">&#40;defn start
+  &#91;&#93;
+  &#40;let &#91;event-chan &#40;chan&#41;
+        state &#40;atom nil&#41;&#93;
+    &#40;compile-templates&#41;
+    &#40;template-events event-chan&#41;
+    &#40;add-watch state :state &#40;fn &#91;key ref old new&#93; &#40;show-state new&#41;&#41;&#41;
+    &#40;reset! state {:todos &#91;{:text &quot;Learn papadom&quot; :done false}
+                           {:text &quot;Build a papadom app&quot; :done false}&#93;}&#41;
+    &#40;app state event-chan&#41;&#41;&#41;&#41;
+</code></pre><p>We've also added a core.async channel, <code>event-chan</code>, which we've passed to <code>template-events</code> to arrange delivery of the events defined in our template.  We pass this channel to the <code>app</code> function to start processing the events.</p><p>This shows the basic structure of the application.</p><h2>Adding New Todo Elements</h2><p>To allow you to add new todo items, we'll add a form to our template, specifying a <code>t-event</code> attribute, which will cause an event to be sent when the form is submitted, with the form's input values as the event data.</p><pre><code class="html">&lt;form t-event=&quot;add-todo&quot;&gt;
+  &lt;input type=&quot;text&quot; t-prop=&quot;text&quot; size=&quot;30&quot; placeholder=&quot;add new todo here&quot;&gt;
+  &lt;input class=&quot;btn btn-primary&quot; type=&quot;submit&quot; value=&quot;add&quot;&gt;
+&lt;/form&gt;
+</code></pre><p>To process this new event, we'll add a case to the <code>app</code> function loop's <code>case</code> form.</p><pre><code class="clj">:add-todo
+&#40;swap! state update-in &#91;:todos&#93;
+       conj {:text &#40;:text &#40;input-seq-&gt;map event-data&#41;&#41;
+             :done false}&#41;
+</code></pre><p>This uses the <code>input-seq-&gt;map</code> helper to convert the data from the form into a map, and we extract the <code>:text</code> value (defined by <code>t-prop</code> in the <code>input</code> element).</p><p>And we're done.  To see a full working example have a look at the [template][todotemplate] and [code][todocode] in the todo example of papadom. To run the example:</p><pre><code class="shell">git clone &#91;https://github.com/hugoduncan/papadom.git&#93;&#40;https://github.com/hugoduncan/papadom.git&#41;
 cd papadom/examples/todo
 lein ring server
-&lt;/code&gt;&lt;/pre&gt;
-</content></entry>
-
-<entry xml:base="http://hugoduncan.github.com/post/configure_nagios_using_pallet"><title>Configure Nagios using Pallet</title><link href="http://hugoduncan.github.com/post/configure_nagios_using_pallet"/><id>http://hugoduncan.github.com/post/configure_nagios_using_pallet</id><published>2010-08-18T00:00:00Z</published><updated>2010-08-18T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;Basic Nagios support was recently added to &lt;a href=&#34;http://github.com/hugoduncan/pallet&#34;&gt;pallet&lt;/a&gt;, and while very simple to use, this blog post should make it even simpler. The overall philosophy is to configure the nagios service monitoring definitions along with the service itself, rather than have monolithic nagios configuration, divorced from the configuration of the various nodes.&lt;/p&gt;
-
-&lt;p&gt;As an example, we can configure a machine to have it&#39;s ssh service, CPU load, number of processes and number of users monitored. Obviously, you would normally be monitoring several different types of nodes, but there is no difference as far as pallet is concerned.&lt;/p&gt;
-
-&lt;p&gt;We start by requiring various pallet components.  These would normally be part of a &lt;code&gt;ns&lt;/code&gt; declaration, but are provided here for ease of use at the REPL.&lt;/p&gt;
-
-&lt;pre class=&#34;clojure&#34;&gt;
-(require
-  &#39;[pallet.crate.automated-admin-user
-    :as admin-user]
-  &#39;[pallet.crate.iptables :as &#39;iptables]
-  &#39;[pallet.crate.ssh :as ssh]
-  &#39;[pallet.crate.nagios-config
-     :as nagios-config]
-  &#39;[pallet.crate.nagios :as nagios]
-  &#39;[pallet.crate.postfix :as postfix]
-  &#39;[pallet.resource.service :as service])
-&lt;/pre&gt;
-
-&lt;h2&gt;Node to be Monitored by Nagios&lt;/h2&gt;
-
-&lt;p&gt;Now we define the node to be monitored. We set up a machine that has &lt;abbr&gt;SSH&lt;/abbr&gt; running, and configure &lt;code&gt;iptables&lt;/code&gt; to allow access to &lt;abbr&gt;SSH&lt;/abbr&gt;, with a throttled connection rate (six connections/minute by default).&lt;/p&gt;
-
-&lt;pre class=&#34;clojure&#34;&gt;
-(pallet.core/defnode monitored
-  []
-  :bootstrap [(admin-user/automated-admin-user)]
-  :configure [;; set iptables for restricted access
+</code></pre><p>[angulartodo]: <a href='http://angularjs.org/#add-some-control'>http://angularjs.org/#add-some-control</a> "Angular TODO example"</p><p>[brucetodo]: <a href='http://rigsomelight.com/2013/07/18/clojurescript-core-async-todos.html'>http://rigsomelight.com/2013/07/18/clojurescript-core-async-todos.html</a> "Bruce Haumann's 'ClojureScript Core.Async Todos'"</p><p>[clojurescript]: <a href='https://github.com/clojure/clojurescript'>https://github.com/clojure/clojurescript</a> "Clojurescript"</p><p>[cmlchannel]: <a href='http://www.cs.cornell.edu/Courses/cs312/2006fa/recitations/rec24.html'>http://www.cs.cornell.edu/Courses/cs312/2006fa/recitations/rec24.html</a> "CML Channels"</p><p>[core.async]:  <a href='http://clojure.com/blog/2013/06/28/clojure-core-async-channels.html'>http://clojure.com/blog/2013/06/28/clojure-core-async-channels.html</a> "Clojure core.async Channels"</p><p>[csp]: <a href='http://en.wikipedia.org/wiki/Communicating_sequential_processes'>http://en.wikipedia.org/wiki/Communicating<i>sequential</i>processes</a> "Communicating Sequential Processes"</p><p>[cspresponsive]: <a href='http://swannodette.github.io/2013/07/31/extracting-processes/'>http://swannodette.github.io/2013/07/31/extracting-processes/</a> "David Nolan's 'CSP is Responsive Design'"</p><p>[golangchannel]: <a href='http://golang.org/ref/spec#Channel_types'>http://golang.org/ref/spec#Channel_types</a> "Go Channels"</p><p>[kemingweather]: <a href='http://keminglabs.com/blog/angular-cljs-weather-app/'>http://keminglabs.com/blog/angular-cljs-weather-app/</a> "Kevin Lynagh's 'Building an iOS weather app with Angular and ClojureScript'"</p><p>[purnam]: <a href='https://github.com/zcaudate/purnam'>https://github.com/zcaudate/purnam</a> "purnam" [clang]: <a href='https://github.com/pangloss/clang/'>https://github.com/pangloss/clang/</a> "clang"</p><p>[todotemplate]: <a href='https://github.com/hugoduncan/papadom/blob/master/examples/todo/resources/public/index.html'>https://github.com/hugoduncan/papadom/blob/master/examples/todo/resources/public/index.html</a> "TODO HTML Template" [todocode]: <a href='https://github.com/hugoduncan/papadom/blob/master/examples/todo/src/papadom/example/todo.cljs'>https://github.com/hugoduncan/papadom/blob/master/examples/todo/src/papadom/example/todo.cljs</a> "TODO Clojurescript Code"</p><p>[papadom]: <a href='https://github.com/hugoduncan/papadom'>https://github.com/hugoduncan/papadom</a> "Papadom templating library"</p>]]>
+    </content>
+  </entry>
+  <entry>
+    <id>http://hugoduncan.org/post/configure_nagios_using_pallet.html</id>
+    <link href="http://hugoduncan.org/post/configure_nagios_using_pallet.html"/>
+    <title>Configure Nagios using Pallet</title>
+    <summary>Basic Nagios support was recently added to pallet, and while very simple to use, this blog post should make it even simpler. The overall philosophy is to configure the nagios service monitoring definitions along with the service itself, rather than have monolithic nagios configuration, divorced from the configuration of the various nodes.</summary>
+    <updated>2010-08-18T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p><p>Basic Nagios support was recently added to <a href="http://github.com/hugoduncan/pallet">pallet</a>, and while very simple to use, this blog post should make it even simpler. The overall philosophy is to configure the nagios service monitoring definitions along with the service itself, rather than have monolithic nagios configuration, divorced from the configuration of the various nodes.</p></p><p><p>As an example, we can configure a machine to have it's ssh service, CPU load, number of processes and number of users monitored. Obviously, you would normally be monitoring several different types of nodes, but there is no difference as far as pallet is concerned.</p></p><p><p>We start by requiring various pallet components.  These would normally be part of a <code>ns</code> declaration, but are provided here for ease of use at the REPL.</p></p><p><pre class="clojure"> (require   '[pallet.crate.automated-admin-user
+    :as admin-user]   '[pallet.crate.iptables :as 'iptables]   '[pallet.crate.ssh :as ssh]   '[pallet.crate.nagios-config
+     :as nagios-config]   '[pallet.crate.nagios :as nagios]   '[pallet.crate.postfix :as postfix]   '[pallet.resource.service :as service]) </pre></p><p><h2>Node to be Monitored by Nagios</h2></p><p><p>Now we define the node to be monitored. We set up a machine that has <abbr>SSH</abbr> running, and configure <code>iptables</code> to allow access to <abbr>SSH</abbr>, with a throttled connection rate (six connections/minute by default).</p></p><p><pre class="clojure"> (pallet.core/defnode monitored   []   :bootstrap [(admin-user/automated-admin-user)]   :configure [;; set iptables for restricted access
               (iptables/iptables-accept-icmp)
               (iptables/iptables-accept-established)
               ;; allow connections to ssh
               ;; but throttle connection requests
               (ssh/iptables-throttle)
-              (ssh/iptables-accept)])
-&lt;/pre&gt;
-
-&lt;p&gt;Monitoring of the &lt;abbr&gt;SSH&lt;/abbr&gt; service is configured by simply adding
-&lt;code&gt;(ssh/nagios-monitor)&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;Remote monitoring is implemented using nagios&#39; &lt;code&gt;nrpe&lt;/code&gt; plugin, which we add with &lt;code&gt;(nagios-config/nrpe-client)&lt;/code&gt;.  To make nrpe accessible to the nagios server, we open the that the nrpe agent runs on using &lt;code&gt;(nagios-config/nrpe-client-port)&lt;/code&gt;, which restricts access to the nagios server node. We also add a phase, :restart-nagios, that can be used to restart the nrpe agent.&lt;/p&gt;
-
-&lt;p&gt;Pallet comes with some configured nrpe checks, and we add &lt;code&gt;nrpe-check-load&lt;/code&gt;, &lt;code&gt;nrpe-check-total-proces&lt;/code&gt; and &lt;code&gt;nrpe-check-users&lt;/code&gt;. The final configuration looks like this:&lt;/p&gt;
-
-&lt;pre class=&#34;clojure&#34;&gt;
-(pallet.core/defnode monitored
-  []
-  :bootstrap [(admin-user/automated-admin-user)]
-  :configure [;; set iptables for restricted access
+              (ssh/iptables-accept)]) </pre></p><p><p>Monitoring of the <abbr>SSH</abbr> service is configured by simply adding <code>(ssh/nagios-monitor)</code>.</p></p><p><p>Remote monitoring is implemented using nagios' <code>nrpe</code> plugin, which we add with <code>(nagios-config/nrpe-client)</code>.  To make nrpe accessible to the nagios server, we open the that the nrpe agent runs on using <code>(nagios-config/nrpe-client-port)</code>, which restricts access to the nagios server node. We also add a phase, :restart-nagios, that can be used to restart the nrpe agent.</p></p><p><p>Pallet comes with some configured nrpe checks, and we add <code>nrpe-check-load</code>, <code>nrpe-check-total-proces</code> and <code>nrpe-check-users</code>. The final configuration looks like this:</p></p><p><pre class="clojure"> (pallet.core/defnode monitored   []   :bootstrap [(admin-user/automated-admin-user)]   :configure [;; set iptables for restricted access
               (iptables/iptables-accept-icmp)
               (iptables/iptables-accept-established)
               ;; allow connections to ssh
@@ -535,426 +174,136 @@ lein ring server
               ;; add some remote checks
               (nagios-config/nrpe-check-load)
               (nagios-config/nrpe-check-total-procs)
-              (nagios-config/nrpe-check-users)]
-  :restart-nagios [(service/service
-                    &#34;nagios-nrpe-server&#34;
-                    :action :restart)])
-&lt;/pre&gt;
-
-&lt;p&gt;&lt;h2&gt;Nagios Server&lt;/h2&gt;
-&lt;p&gt;We now configure the nagios server node. The nagios server is installed with &lt;code&gt;(nagios/nagios &amp;ldquo;nagiospwd&amp;rdquo;)&lt;/code&gt;, specifying the password for the nagios web interface, and add a phase, :restart-nagios, that can be used to restart nagios.&lt;/p&gt;&lt;/p&gt;
-
-&lt;p&gt;Nagios also requires a &lt;abbr&gt;MTA&lt;/abbr&gt; for notifications, and here we install postfix.  We add a contact, which we make a member of the &#34;admins&#34; contact group, which is notified as part of the default host and service templates.&lt;/p&gt;
-
-&lt;pre class=&#34;clojure&#34;&gt;
-(pallet.core/defnode nagios
-  []
-  :bootstrap [(admin-user/automated-admin-user)]
-  :configure [;; restrict access
+              (nagios-config/nrpe-check-users)]   :restart-nagios [(service/service
+                    "nagios-nrpe-server"
+                    :action :restart)]) </pre></p><p><h2>Nagios Server</h2> <p>We now configure the nagios server node. The nagios server is installed with <code>(nagios/nagios "nagiospwd")</code>, specifying the password for the nagios web interface, and add a phase, :restart-nagios, that can be used to restart nagios.</p></p><p><p>Nagios also requires a <abbr>MTA</abbr> for notifications, and here we install postfix.  We add a contact, which we make a member of the "admins" contact group, which is notified as part of the default host and service templates.</p></p><p><pre class="clojure"> (pallet.core/defnode nagios   []   :bootstrap [(admin-user/automated-admin-user)]   :configure [;; restrict access
               (iptables/iptables-accept-icmp)
               (iptables/iptables-accept-established)
               (ssh/iptables-throttle)
               (ssh/iptables-accept)
               ;; configure MTA
               (postfix/postfix
-               &#34;pallet.org&#34; :internet-site)
+               "pallet.org" :internet-site)
               ;; install nagios
-              (nagios/nagios &#34;nagiospwd&#34;)
+              (nagios/nagios "nagiospwd")
               ;; allow access to nagios web site
               (iptables/iptables-accept-port 80)
               ;; configure notifications
               (nagios/contact
-              {:contact_name &#34;hugo&#34;
-               :service_notification_period &#34;24x7&#34;
-               :host_notification_period &#34;24x7&#34;
-               :service_notification_options
-                  &#34;w,u,c,r&#34;
-               :host_notification_options
-                  &#34;d,r&#34;
-               :service_notification_commands
-                 &#34;notify-service-by-email&#34;
-               :host_notification_commands
-                  &#34;notify-host-by-email&#34;
-               :email &#34;my.email@my.domain&#34;
-               :contactgroups [:admins]})]
-  :restart-nagios [(service/service &#34;nagios3&#34;
-                     :action :restart)])
-&lt;/pre&gt;
-
-&lt;p&gt;&lt;h2&gt;Trying it out&lt;/h2&gt;
-&lt;p&gt;That&amp;rsquo;s it. To fire up both machines, we use pallet&amp;rsquo;s &lt;code&gt;converge&lt;/code&gt; command.&lt;/p&gt;&lt;/p&gt;
-
-&lt;pre class=&#34;clojure&#34;&gt;
-(pallet.core/converge
-  {monitored 1 nagios 1} service
-  :configure :restart-nagios)
-&lt;/pre&gt;
-
-&lt;p&gt;The nagios web interface is then accessible on the &lt;code&gt;nagios&lt;/code&gt; node with the &lt;code&gt;nagiosadmin&lt;/code&gt; user and specified password.  Real world usage would probably have several different monitored configurations, and restricted access to the &lt;code&gt;nagios&lt;/code&gt; node.&lt;/p&gt;
-
-&lt;p&gt;&lt;h2&gt;Still to do&amp;hellip;&lt;/h2&gt;
-&lt;p&gt;Support for nagios is not complete (e.g. remote command configuration still needs to be added, and it has only been tested on Ubuntu), but I would appreciate any feedback on the general approach.&lt;/p&gt;&lt;/p&gt;
-</content></entry>
-
-<entry xml:base="http://hugoduncan.github.com/post/mocking_clojure_functions_with_atticus"><title>Mocking Clojure Functions with Atticus</title><link href="http://hugoduncan.github.com/post/mocking_clojure_functions_with_atticus"/><id>http://hugoduncan.github.com/post/mocking_clojure_functions_with_atticus</id><published>2010-05-18T00:00:00Z</published><updated>2010-05-18T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;&lt;p&gt;I dislike most mocking, and try and avoid it as much as possible. Sometimes
-it is however the only realistic way of testing.  I did a quick survey of
-mocking tools in clojure, and found them very much reflecting the Java mocking
-libraries. Clojure has a few more dynamic capabilities than Java, so I thought a
-little about how these could be used to make a simple mocking facility, and &lt;a href=&#34;http://github.com/hugoduncan/atticus&#34;&gt;atticus&lt;/a&gt; is what I came up
-with.&lt;/p&gt;
-&lt;p&gt;There is a consensus that mocking should be implemented by binding a
-function&amp;rsquo;s var to a new function for the duration of a test, and atticus does
-this too. Atticus&amp;rsquo; premise is that we can do simple mocking by declaring the
-mock function as a local function definition, and have the local function do the
-argument checking, return value setting, etc.  The simplest case would be
-something like below, which checks the value of its argument and specifies a
-return value:&lt;/p&gt;
-&lt;pre class=&#34;clojure&#34;&gt;
-;; pull in namespaces
-(use &amp;lsquo;clojure.test)
-(require &amp;lsquo;atticus.mock)&lt;/p&gt;
-
-&lt;p&gt;;; define test which mocks f
-(deftest mock-test
-  (atticus.mock/expects
-    [(f &lt;a href=&#34;is (= arg 1&#34;&gt;arg&lt;/a&gt; &amp;ldquo;Check argument&amp;rdquo;)
-       arg)] ; set the return value
-    ;; in a real test case this would be called
-    ;; indirectly by some other function
-    (is (= 1 (f 1)) &amp;ldquo;Call mocked function&amp;rdquo;))
-&lt;/pre&gt;
-&lt;p&gt;At the moment, I have added two macros to this.  &lt;code&gt;once&lt;/code&gt;, which
-checks a function is called once, and &lt;code&gt;times&lt;/code&gt;, which checks that a
-function is called a specific number of times. The macros are used to wrap the
-body of the mock function, which keeps the function&amp;rsquo;s expected behaviour in one
-place.&lt;/p&gt;
-&lt;pre class=&#34;clojure&#34;&gt;
-;; define test, that should be called just once
-(deftest mock-test
-  (atticus.mock/expects
-    &lt;a href=&#34;is (= 1 (f 1&#34;&gt;(f &lt;a href=&#34;atticus.mock/once
-         (is (= arg 1&#34;&gt;arg&lt;/a&gt; &amp;ldquo;Check argument&amp;rdquo;)
-         arg))&lt;/a&gt;) &amp;ldquo;Call mocked function&amp;rdquo;))
-&lt;/pre&gt;
-&lt;pre class=&#34;clojure&#34;&gt;
-;; define test, that should be called exactly twice
-(deftest mock-test
-  (atticus.mock/expects
-    &lt;a href=&#34;is (= 1 (f 1&#34;&gt;(f &lt;a href=&#34;atticus.mock/times 2
-         (is (= arg 1&#34;&gt;arg&lt;/a&gt; &amp;ldquo;Check argument&amp;rdquo;)
-         arg))&lt;/a&gt;) &amp;ldquo;Call mocked function&amp;rdquo;)
-    (is (= 1 (f 1)) &amp;ldquo;Call mocked function&amp;rdquo;))
-&lt;/pre&gt;
-&lt;p&gt;So what do you think, is this a reasonable approach? Not having the explicit
-calls to &lt;code&gt;returns&lt;/code&gt;, etc, might be seen as a loss of declarative
-clarity, but I for one prefer this, as it gives you the full power of the
-language to test the arguments and set the return value.&lt;/p&gt;
-&lt;h3&gt;References&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;http://s-expressions.com/2010/01/24/conjure-simple-mocking-and-stubbing-for-clojure-unit-tests/&#34;&gt;conjure – simple mocking and stubbing for Clojure unit-tests&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;http://richhickey.github.com/clojure-contrib/mock-api.html&#34;&gt;clojure.contrib.mock&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;http://code.google.com/p/test-expect/&#34;&gt;test-expect&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;http://blog.n01se.net/?p=134&#34;&gt;Using binding to mock out even “direct linked” functions in Clojure&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;&lt;/p&gt;
-</content></entry>
-
-<entry xml:base="http://hugoduncan.github.com/post/provisioning_cloud_nodes_with_pallet"><title>Provisioning Cloud Nodes with Pallet</title><link href="http://hugoduncan.github.com/post/provisioning_cloud_nodes_with_pallet"/><id>http://hugoduncan.github.com/post/provisioning_cloud_nodes_with_pallet</id><published>2010-05-12T00:00:00Z</published><updated>2010-05-12T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;I recently needed to move a server from dedicated hosting to a cloud server. The existing server had been configured over time by several people, with little documentation.  I want to make sure that this time everything was documented, and what better way than doing that than using an automated configuration tool.&lt;/p&gt;
-&lt;p&gt;Looking around at the configuration tools, I couldn&#39;t find one I really liked, so I started &lt;a href=&#34;http://github.com/hugoduncan/pallet&#34;&gt;Pallet&lt;/a&gt;. I&#39;ll explain why I didn&#39;t use an existing tool below, but first I wanted to show how to manage nodes in Pallet.&lt;/p&gt;
-
-&lt;pre class=&#34;clojure&#34;&gt;
-  ;; Pull in the pallet namespaces
-  (require &#39;pallet.repl)
-  (pallet.repl/use-pallet)
-
-  ;; Define a default node
-  (defnode mynode [])
-
-  ;; Define the cloud account to use
-  (def service
-    (compute-service &#34;provider&#34; &#34;user&#34; &#34;password&#34;
-                      :log4j :ssh))
-
-  ;; Create 2 nodes
-  (converge {mynode 2} service)
-&lt;/pre&gt;
-
-&lt;p&gt;This example would create two nodes (cloud vm instances) with the tag &#34;mynode&#34; in your cloud account, as specified in the &lt;code&gt;service&lt;/code&gt;.  This would give you the smallest size, ubuntu image on most clouds.  Of course, to do anything serious, you would want to specify the image you would like, and you would probably like some configuration of the nodes.  So carrying on the above example:
-&lt;/p&gt;
-&lt;pre class=&#34;clojure&#34;&gt;
-  ;; Pull in the needed crates
-  (use &#39;pallet.crate.automated-admin-user)
-  (use &#39;pallet.crate.java)
-
-  ;; Define a new node that will use the Java JDK
-  (defnode javanode
-    [:ubuntu :X86_64 :smallest
-     :os-description-matches &#34;[^J]+9.10[^32]+&#34;]
-    :bootstrap [(automated-admin-user)]
-    :configure [(java :openjdk :jdk)])
-
-  ;; Create a new node, and remove the previous ones
-  (converge {javanode 1 mynode 0} service)
-&lt;/pre&gt;
-
-&lt;p&gt;This would stop the two nodes that were created before, and create a new one, with the specified ubuntu version.  On first boot, it would create a user account with your current username, authorize your id_rsa key on that account, and give it sudo permissions.  Every time converge is run, it also ensures that the openjdk JDK is installed.&lt;/p&gt;
-
-&lt;p&gt;The configuration to be applied is specified as a call to a crate -
-automated-admin-user and java in the example above. Crates are just clojure
-functions that specify some configuration or other action on the nodes (they&#39;re
-equivalent to Chef&#39;s recipes, which Pallet can also execute using
-chef-solo). Pallet can be extended with your own crates, and crates can specify
-general actions, not just configuration.  &lt;code&gt;lift&lt;/code&gt; is a companion to
-&lt;code&gt;converge&lt;/code&gt;, and can be used to apply crates to existing nodes
-(including local VM&#39;s).  The hypothetical example below would execute
-&lt;code&gt;my-backup-crate&lt;/code&gt; on all the &#34;mynode&#34; nodes.&lt;/p&gt;
-
-&lt;pre class=&#34;clojure&#34;&gt;
-  (defnode mynode [] :backup [(my-backup-crate)])
-  (lift mynode service :backup)
-&lt;/pre&gt;
-
-&lt;p&gt;This was just a quick overview of Pallet, to give you an idea of what it is. One big area of Pallet not demonstrated here is its command line tool. But that is a topic for another post.&lt;/p&gt;
-
-&lt;h2&gt;Why Write another Tool?&lt;/h2&gt;
-
-&lt;p&gt;Now you&#39;ve seen some examples, I&#39;ll try and explain the features that make Pallet distinct from other configuration tools out there.&lt;/p&gt;
-
-&lt;h3&gt;No Dependencies&lt;/h3&gt;
-
-&lt;p&gt;The machines being managed require no special dependencies to be installed. As long as they have bash and ssh running, they can be used with pallet.  For me this was important - it means that you can use pretty much any image out there, which is great for ad-hoc testing and development.&lt;/p&gt;
-
-&lt;h3&gt;No Server&lt;/h3&gt;
-
-&lt;p&gt;Pallet has no central server to set up and maintain - it simply runs on demand. You can run it from anywhere, even over a remote REPL connection.&lt;/p&gt;
-
-&lt;h3&gt;Everything in Version Control&lt;/h3&gt;
-
-&lt;p&gt;In pallet, all your configuration is handled in SCM controlled files - there is no database involved.  This means that your configuration can always be kept in step with the development of your crates, and the versions of the external crates that you use.&lt;/p&gt;
-
-&lt;h3&gt;Jar File Distribution of Crates&lt;/h3&gt;
-
-&lt;p&gt;Custom crates can be distributed as jar files, and so can be published in maven repositories, and be consumed in a version controlled manner.  Hopefully this will promote shared crates.&lt;/p&gt;
-
-&lt;h3&gt;Provisioning, Configuration and Administration&lt;/h3&gt;
-
-&lt;p&gt;Pallet aims quite wide. You can use it for starting an stopping nodes, for configuring nodes, deploying projects and also for running administration tasks.  To be honest, this wasn&#39;t an initial design goal, but has come out of the wash that way.&lt;/p&gt;
-
-&lt;h2&gt;Interested?&lt;/h2&gt;
-
-&lt;p&gt;Hopefully this has whetted your appetite, and you&#39;ll give pallet a try.  You can get support via &lt;a href=&#34;http://groups.google.com/group/pallet-clj&#34;&gt;the Google Group&lt;/a&gt;, or #pallet on freenode irc.&lt;/p&gt;
-</content></entry>
-
-<entry xml:base="http://hugoduncan.github.com/post/shell_scripting_in_clojure_with_pallet"><title>Shell Scripting in Clojure with Pallet</title><link href="http://hugoduncan.github.com/post/shell_scripting_in_clojure_with_pallet"/><id>http://hugoduncan.github.com/post/shell_scripting_in_clojure_with_pallet</id><published>2010-05-03T00:00:00Z</published><updated>2010-05-03T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;Let&#39;s face it, many of us hate writing shell scripts, and with good
-reason. Personally, it&#39;s not so much the shell language itself that puts me off,
-but organising everything around it; how do you deploy your scripts, how do you
-arrange to call other scripts, how do you manage the dependencies between your
-scripts?  &lt;a href=&#34;http://github.com/hugoduncan/pallet&#34;&gt;Pallet&lt;/a&gt; aims to solve
-these problems by embedding shell script in &lt;a href=&#34;http://clojure.org/&#34;&gt;clojure&lt;/a&gt;.&lt;/p&gt;
-
-&lt;h2&gt;Embedding in Clojure&lt;/h2&gt;
-
-&lt;p&gt;Embedding other languages in lisp is not a new idea; &lt;a href=&#34;http://common-lisp.net/project/parenscript/&#34;&gt;parenscript&lt;/a&gt;, &lt;a href=&#34;http://github.com/arohner/scriptjure&#34;&gt;scriptjure&lt;/a&gt; (which Pallet&#39;s
-embedding is based on), and &lt;a href=&#34;http://www.gitorious.org/clojureql/&#34;&gt;ClojureQL&lt;/a&gt; all do this.&lt;/p&gt;
-
-&lt;p&gt;So what does shell script in clojure look like? Some examples:&lt;/p&gt;
-&lt;pre class=&#34;clojure&#34;&gt;(script
-  (ls &#34;/some/path&#34;)
-  (defvar x 1)
-  (println @x)
-  (defn foo [x] (ls @x))
-  (foo 1)
-  (if (= a a)
-    (println &#34;Reassuring&#34;)
-    (println &#34;Ooops&#34;))
-  (println &#34;I am&#34; @(whomai))&lt;/pre&gt;
-
-&lt;p&gt;which generates:&lt;/p&gt;
-
-&lt;pre&gt;ls /some/path
-x=1
-echo ${x}
-function foo(x) {
-ls ${x}
- }
-foo 1
-if [ \\( \&#34;a\&#34; == \&#34;a\&#34; \\) ]; then echo Reassuring;else echo Ooops;fi
-echo I am $(whomai)
-&lt;/pre&gt;
-
-&lt;p&gt;The aim is to make writing shell script similar to writing Clojure, but there
-are obvious differences in the language that limit how far that can be taken. To
-run the code above at the REPL, you&#39;ll have to use the
-&lt;code&gt;pallet.stevedore&lt;/code&gt; package.&lt;/p&gt;
-
-&lt;h2&gt;Escaping back to Clojure&lt;/h2&gt;
-
-&lt;p&gt;Escaping allows us to embed Clojure values and expressions inside our scripts, in much the same way as symbols can be unquoted when writing macros.&lt;/p&gt;
-
-&lt;pre class=&#34;clojure&#34;&gt;(let [path &#34;/some/path&#34;]
-  (script
-    (ls ~path)
-    (ls ~(.replace path &#34;some&#34; &#34;other)))&lt;/pre&gt;
-
-&lt;p&gt;We can now write Clojure functions that produce shell scripts.  Writing
-scripts as clojure functions allows you to use the Clojure namespace facilities,
-and allows you to distribute you scripts in jar files (which can be deployed in
-a versioned manner with maven)&lt;/p&gt;
-
-&lt;pre class=&#34;clojure&#34;&gt;(defn list-path [path]
-  (script
-    (ls ~path)
-    (ls ~(.replace path &#34;some&#34; &#34;other)))&lt;/pre&gt;
-
-&lt;h2&gt;Composing scripts&lt;/h2&gt;
-
-&lt;p&gt;Pallet allows the scripts to be combined. &lt;code&gt;do-script&lt;/code&gt; concatenates
-the code pieces together.&lt;/p&gt;
-
-&lt;pre class=&#34;clojure&#34;&gt;(do-script
-  (list-path &#34;path1&#34;)
-  (list-path &#34;path2&#34;))
-&lt;/pre&gt;
-
-&lt;p&gt;&lt;code&gt;chain-script&lt;/code&gt; chains the scripts together with &#39;&amp;amp;&amp;amp;&#39;.&lt;/p&gt;
-
-&lt;pre class=&#34;clojure&#34;&gt;(chain-script
-  (list-path &#34;path1&#34;)
-  (list-path &#34;path2&#34;))
-&lt;/pre&gt;
-
-&lt;p&gt;&lt;code&gt;checked-script&lt;/code&gt; finally allows the chaining of scripts, and calls
-exit if the chain fails.&lt;/p&gt;
-
-&lt;pre class=&#34;clojure&#34;&gt;(checked-script &#34;Message&#34;
-  (list-path &#34;path1&#34;)
-  (list-path &#34;path2&#34;))
-&lt;/pre&gt;
-
-&lt;h2&gt;Conclusion&lt;/h2&gt;
-
-&lt;p&gt;Writing shell script in Clojure gives access to Clojure&#39;s namespace facility
-allowing modularised shell script, and to Clojure&#39;s packaging as jar files,
-which allows reuse and distribution.  The ability to compose script fragments
-leads to being able to macro-like functions, such &lt;code&gt;checked-script&lt;/code&gt;,
-and you could even use Clojure macros to generate script (but I haven&#39;t thought
-of a use for that, yet).&lt;/p&gt;
-
-&lt;p&gt;The syntax for the embedding has arisen out of practical usage, so is far
-from complete, and can definitely be improved. I look forward to hearing your
-feedback!&lt;/p&gt;
-
-&lt;p&gt;UPDATE: stevedore now requires a binding for *template*, to specify the target for the script generation.  This should be a vector containing one of :ubuntu, :centos, or :darwin, and one of :aptitude, :yum, :brew.&lt;/p&gt;
-</content></entry>
-
-<entry xml:base="http://hugoduncan.github.com/post/swank_clojure_gets_a_break_with_the_local_environment"><title>Swank Clojure gets a Break with the Local Environment</title><link href="http://hugoduncan.github.com/post/swank_clojure_gets_a_break_with_the_local_environment"/><id>http://hugoduncan.github.com/post/swank_clojure_gets_a_break_with_the_local_environment</id><published>2010-03-31T00:00:00Z</published><updated>2010-03-31T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;Recently I got fed up with a couple of warts in swank-clojure, so I made a couple of small fixes, and that lead to a couple of new features.  Using SLIME with Clojure has never been as smooth as using it with Common Lisp, and the lack of debug functionality beyond the display of stack traces is particularly onerous.  Recently, George Jahad and Alex Osborne&amp;rsquo;s &lt;a href=&#34;http://github.com/GeorgeJahad/debug-repl&#34;&gt;debug-repl&lt;/a&gt; showed the possibility of adding a break macro to enter the debugger with the call stack intact and local variables visible.  This functionality is now in swank-clojure.&lt;/p&gt;
-
-&lt;p&gt;Consider the following example, adapted from debug-repl:&lt;/p&gt;
-
-&lt;pre&gt;
-  (let [c 1
-        d 2]
-    (defn a [b c]
-      (swank.core/break)
-      d))
-  (a &#34;foo&#34; &#34;bar&#34;)
-&lt;/pre&gt;
-
-&lt;p&gt;Running this now brings up the following SLDB debug frame:&lt;/p&gt;
-
-&lt;pre&gt;
-BREAK:
-  [Thrown class java.lang.Exception]
-
-Restarts:
- 0: [QUIT] Quit to the SLIME top level
- 1: [CONTINUE] Continue from breakpoint
-
-Backtrace:
-  0: user$eval__1666$a__1667.invoke(NO_SOURCE_FILE:1)
-  1: user$eval__1670.invoke(NO_SOURCE_FILE:1)
-  2: clojure.lang.Compiler.eval(Compiler.java:5358)
-  3: clojure.lang.Compiler.eval(Compiler.java:5326)
-  4: clojure.core$eval__4157.invoke(core.clj:2139)
-  --more--
-&lt;/pre&gt;
-
-&lt;p&gt;As you can see, the stack trace reflects the location of the breakpoint, and there is a CONTINUE restart. Pressing &#34;1&#34;, or Enter on the CONTINUE line, or clicking the CONTINUE line should all cause the the debugger frame to close, and the result of the function call, 2, to be displayed in the REPL frame.&lt;/p&gt;
-
-&lt;p&gt;Enter, or &#34;t&#34;, on the first line of the stacktrace causes the local variables to be displayed:&lt;/p&gt;
-&lt;pre&gt;
-BREAK:
-  [Thrown class java.lang.Exception]
-
-Restarts:
- 0: [QUIT] Quit to the SLIME top level
- 1: [CONTINUE] Continue from breakpoint
-
-Backtrace:
-  0: user$eval__1666$a__1667.invoke(NO_SOURCE_FILE:1)
-      Locals:
-        b = foo
-        d = 2
-        c = bar
-  1: user$eval__1670.invoke(NO_SOURCE_FILE:1)
-  2: clojure.lang.Compiler.eval(Compiler.java:5358)
-  3: clojure.lang.Compiler.eval(Compiler.java:5326)
-  4: clojure.core$eval__4157.invoke(core.clj:2139)
-  --more--
-&lt;/pre&gt;
-
-&lt;p&gt;Pressing enter on one of the local variable lines will pull up the SLIME inspector with that value. If you go back to the REPL without closing the SLDB frame, there will be no prompt, but pressing enter should give you one.  The local variables are then all be avaiable for evaluation form the REPL.&lt;/p&gt;
-
-&lt;p&gt;Should an error occur while you are using the REPL, you will be placed in a nested debug session, with an &#34;ABORT&#34; restart to return to the previous debug level.&lt;/p&gt;
-
-&lt;p&gt;Finally, restarts are now displayed for each of the exceptions in the exception cause chain.&lt;/p&gt;
-
-&lt;pre&gt;
-  (let [c 1
-        d 2]
-    (defn a [b c]
-      (throw (Exception. &#34;top&#34; (Exception. &#34;nested&#34; (Exception. &#34;bottom&#34;))))
-      d))
-  (a &#34;foo&#34; &#34;bar&#34;)
-&lt;/pre&gt;
-
-&lt;p&gt;This will bring up the debugger with 2 cause restarts, which can be used to examine the related stack traces.&lt;/p&gt;
-
-&lt;pre&gt;
-top
-   [Thrown class java.lang.Exception]
-
-Restarts:
-  0: [QUIT] Quit to the SLIME top level
-  1: [CAUSE1] Invoke debugger on cause  nested [Thrown class java.lang.Exception]
-  2: [CAUSE2] Invoke debugger on cause   bottom [Thrown class java.lang.Exception]
-
-Backtrace:
-   0: user$eval__1752$a__1753.invoke(NO_SOURCE_FILE:1)
-   1: user$eval__1756.invoke(NO_SOURCE_FILE:1)
-   2: clojure.lang.Compiler.eval(Compiler.java:5358)
-   3: clojure.lang.Compiler.eval(Compiler.java:5326)
-   4: clojure.core$eval__4157.invoke(core.clj:2139)
-  --more--
-&lt;/pre&gt;
-
-&lt;p&gt;The break functionality is known only to work from the REPL thread at the moment.  With that small proviso, I hope you enjoy the new functionality - at least it provides a basic debug functionality until full JPDA/JDI integration is tackled.&lt;/p&gt;
-</content></entry>
-
-<entry xml:base="http://hugoduncan.github.com/post/benchmarking_clojure_code_with_criterium"><title>Benchmarking Clojure Code with Criterium</title><link href="http://hugoduncan.github.com/post/benchmarking_clojure_code_with_criterium"/><id>http://hugoduncan.github.com/post/benchmarking_clojure_code_with_criterium</id><published>2010-02-19T00:00:00Z</published><updated>2010-02-19T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;I have released &lt;a href=&#34;http://github.com/hugoduncan/criterium&#34;&gt;Criterium&lt;/a&gt;, a new project for benchmarking code in &lt;a href=&#34;http://clojure.org&#34;&gt;Clojure&lt;/a&gt;.  I found Brent Broyer&#39;s &lt;a href=&#34;http://www.ibm.com/developerworks/java/library/j-benchmark1.html&#34;&gt;article on Java benchmarking&lt;/a&gt; which explains many of the pitfalls of benchmarking on the JVM, and &lt;a href=&#34;http://www.serpentine.com/blog/2009/09/29/criterion-a-new-benchmarking-library-for-haskell&#34;&gt;Criterion&lt;/a&gt;, a benchmarking library in Haskell.&lt;/p&gt;
-
-&lt;p&gt;The main issues with benchmarking on the JVM are associated with garbage collection, and with JIT compilation.  It seems from Broyer&#39;s articles that we can mitigate the effects but not completely eliminate them, and Criterium follows his advice.  Both of the above libraries use the &lt;a href=&#34;http://en.wikipedia.org/wiki/Bootstrapping_(statistics)&#34;&gt;bootstrap&lt;/a&gt; technique to estimate mean execution time and provide a confidence interval, and Criterium does likewise.  At the moment the confidence intervals are biased and I still need to implement BCa or ABC to improve these.&lt;/p&gt;
-
-&lt;p&gt;One of the functions that I wanted to benchmark originally involved reading a file.  Criterium does not yet address clearing I/O buffer cache, and I am not sure on the best way forward on this.  On Mac OS X, the &lt;code&gt;purge&lt;/code&gt; command can be used to clear the caches, and on Linux this can be achieved by writing to /proc/sys/vm/drop_caches.  On the Mac at least, this causes everything to grind to halt for about five seconds, and there are then some file reads as whatever processes are running read things in again. This sort of behaviour doesn&#39;t lend itself to inclusion in a timing loop... Any suggestions?&lt;/p&gt;
-</content></entry>
-
-<entry xml:base="http://hugoduncan.github.com/post/a_clojure_library_for_fluiddb"><title>A Clojure library for FluidDB</title><link href="http://hugoduncan.github.com/post/a_clojure_library_for_fluiddb"/><id>http://hugoduncan.github.com/post/a_clojure_library_for_fluiddb</id><published>2009-09-13T00:00:00Z</published><updated>2009-09-13T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;&lt;a href=&#34;http://fluidinfo.com/&#34;&gt;FluidDB&lt;/a&gt;, a &#34;cloud&#34; based triple-store, where the objects are immutable and can be tagged by anyone, launched about a month ago. As a another step to getting up to speed with &lt;a href=&#34;http://clojure.org&#34;&gt;Clojure&lt;/a&gt;, I decided to write a client library, and &lt;a href=&#34;http://github.com/hugoduncan/clj-fluiddb&#34;&gt;clj-fluiddb&lt;/a&gt; was born.  The code was very simple, especially as I could base the library on &lt;a href=&#34;http://github.com/hdurer/cl-fluiddb&#34;&gt;cl-fluiddb&lt;/a&gt;, a Common-Lisp library.&lt;/p&gt;
-&lt;p&gt;I have some ideas I want to try out using FluidDB.  It&#39;s permission system is one of it&#39;s &lt;a href=&#34;http://abouttag.blogspot.com/2009/09/permissions-worth-getting-excited-about.html&#34;&gt;best features&lt;/a&gt;, together with the ability to &lt;a href=&#34;http://www.xavierllora.net/2009/08/25/liquid-rdf-meandering-in-fluiddb/&#34;&gt;use it for RDF like triples&lt;/a&gt; means that it could provide a usable basis for growing the semantic web.  My ideas are less grandiose, but might take as long to develop, we&#39;ll see...&lt;/p&gt;
-</content></entry>
-
-<entry xml:base="http://hugoduncan.github.com/post/setting_up_clojure_and_compojure_with_maven"><title>Setting up clojure and compojure with maven</title><link href="http://hugoduncan.github.com/post/setting_up_clojure_and_compojure_with_maven"/><id>http://hugoduncan.github.com/post/setting_up_clojure_and_compojure_with_maven</id><published>2009-09-06T00:00:00Z</published><updated>2009-09-06T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;I wanted to experiment with building a webapp using &lt;a href=&#34;http://clojure.org&#34;&gt;Clojure&lt;/a&gt;, so I tried setting up the &lt;a href=&#34;http://en.wikibooks.org/wiki/Compojure&#34;&gt;Compojure&lt;/a&gt; web framework.  I am new to clojure, so I am not sure if this is the preferred way of doing things, but here goes anyway.&lt;/p&gt;
-&lt;p&gt;There seem to be several ways to set up clojure in emacs.  I ended up following &lt;a href=&#34;http://bc.tech.coop/blog/081205.html&#34;&gt;Bill Clementson&#39;s instructions&lt;/a&gt;. A couple of years ago I had some experience using maven, so decided to use this to manage my classpath.  Installing maven on my mac was simple with macports (&lt;code&gt;sudo port install maven&lt;/code&gt;).&lt;/p&gt;
-&lt;p&gt;Setting up a POM for maven took longer than expected.  &lt;a href=&#34;http://stuartsierra.com/2009/09/04/cutting-edge-clojure-development-with-maven&#34;&gt;Stuart Sierra&#39;s post&lt;/a&gt; pointed me to the formos maven repository containing the clojure snapshots.  With some help from google, I also found the &lt;a href=&#34;http://github.com/talios/clojure-maven-plugin/tree/master&#34;&gt;maven-clojure-plugin&lt;/a&gt;, which is a maven plugin for compiling clojure, and the &lt;a href=&#34;http://github.com/fred-o/clojureshell-maven-plugin/tree/master&#34;&gt;clojureshell-maven-plugin&lt;/a&gt; which will start a swank session (or bare REPL) using the pom information.&lt;/p&gt;
-&lt;p&gt;With the basic clojure and maven setup in place, it was time to move on to compojure. I added the &lt;a href=&#34;http://github.com/weavejester/compojure/tree/master&#34;&gt;Compojure git repository&lt;/a&gt; into Bill Clementson&#39;s clj-build script, ran it to clone the repository, and then built it using ant (&lt;code&gt;ant deps; ant&lt;/code&gt;).  &lt;a href=&#34;http://jimdowning.wordpress.com/2009/07/30/compojure-maven/&#34;&gt;Jim Downing&lt;/a&gt; instructions for installing compojure into your local maven repository (&lt;code&gt;mvn install:install-file -DgroupId=org.clojure -DartifactId=compojure -Dversion=1.0-SNAPSHOT -Dfile=compojure.jar -Dpackaging=jar&lt;/code&gt;) work smoothly.&lt;/p&gt;
-</content></entry>
-
+              {:contact<i>name "hugo"
+               :service</i>notification<i>period "24x7"
+               :host</i>notification<i>period "24x7"
+               :service</i>notification<i>options
+                  "w,u,c,r"
+               :host</i>notification<i>options
+                  "d,r"
+               :service</i>notification<i>commands
+                 "notify-service-by-email"
+               :host</i>notification_commands
+                  "notify-host-by-email"
+               :email "my.email@my.domain"
+               :contactgroups [:admins]})]   :restart-nagios [(service/service "nagios3"
+                     :action :restart)]) </pre></p><p><h2>Trying it out</h2> <p>That's it. To fire up both machines, we use pallet's <code>converge</code> command.</p></p><p><pre class="clojure"> (pallet.core/converge   {monitored 1 nagios 1} service   :configure :restart-nagios) </pre></p><p><p>The nagios web interface is then accessible on the <code>nagios</code> node with the <code>nagiosadmin</code> user and specified password.  Real world usage would probably have several different monitored configurations, and restricted access to the <code>nagios</code> node.</p></p><p><h2>Still to do...</h2> <p>Support for nagios is not complete (e.g. remote command configuration still needs to be added, and it has only been tested on Ubuntu), but I would appreciate any feedback on the general approach.</p></p>]]>
+    </content>
+  </entry>
+  <entry>
+    <id>http://hugoduncan.org/post/mocking_clojure_functions_with_atticus.html</id>
+    <link href="http://hugoduncan.org/post/mocking_clojure_functions_with_atticus.html"/>
+    <title>Mocking Clojure Functions with Atticus</title>
+    <summary>I dislike most mocking, and try and avoid it as much as possible. Sometimes it is however the only realistic way of testing.  I did a quick survey of mocking tools in clojure, and found them very much reflecting the Java mocking libraries. Clojure has a few more dynamic capabilities than Java, so I thought a little about how these could be used to make a simple mocking facility, and atticus is what I came up with.</summary>
+    <updated>2010-05-18T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p><p>I dislike most mocking, and try and avoid it as much as possible. Sometimes it is however the only realistic way of testing.  I did a quick survey of mocking tools in clojure, and found them very much reflecting the Java mocking libraries. Clojure has a few more dynamic capabilities than Java, so I thought a little about how these could be used to make a simple mocking facility, and <a href="http://github.com/hugoduncan/atticus">atticus</a> is what I came up with.</p> <p>There is a consensus that mocking should be implemented by binding a function's var to a new function for the duration of a test, and atticus does this too. Atticus' premise is that we can do simple mocking by declaring the mock function as a local function definition, and have the local function do the argument checking, return value setting, etc.  The simplest case would be something like below, which checks the value of its argument and specifies a return value:</p> <pre class="clojure"> ;; pull in namespaces (use 'clojure.test) (require 'atticus.mock)</p><p>;; define test which mocks f (deftest mock-test   (atticus.mock/expects<pre><code>&#91;&#40;f &#91;arg&#93;
+   &#40;is &#40;= arg 1&#41; &quot;Check argument&quot;&#41;
+   arg&#41;&#93; ; set the return value
+;; in a real test case this would be called
+;; indirectly by some other function
+&#40;is &#40;= 1 &#40;f 1&#41;&#41; &quot;Call mocked function&quot;&#41;&#41; </code></pre></pre> <p>At the moment, I have added two macros to this.  <code>once</code>, which checks a function is called once, and <code>times</code>, which checks that a function is called a specific number of times. The macros are used to wrap the body of the mock function, which keeps the function's expected behaviour in one place.</p> <pre class="clojure"> ;; define test, that should be called just once (deftest mock-test   (atticus.mock/expects<pre><code>&#91;&#40;f &#91;arg&#93;
+   &#40;atticus.mock/once
+     &#40;is &#40;= arg 1&#41; &quot;Check argument&quot;&#41;
+     arg&#41;&#41;&#93;
+&#40;is &#40;= 1 &#40;f 1&#41;&#41; &quot;Call mocked function&quot;&#41;&#41; </code></pre></pre> <pre class="clojure"> ;; define test, that should be called exactly twice (deftest mock-test   (atticus.mock/expects<pre><code>&#91;&#40;f &#91;arg&#93;
+   &#40;atticus.mock/times 2
+     &#40;is &#40;= arg 1&#41; &quot;Check argument&quot;&#41;
+     arg&#41;&#41;&#93;
+&#40;is &#40;= 1 &#40;f 1&#41;&#41; &quot;Call mocked function&quot;&#41;
+&#40;is &#40;= 1 &#40;f 1&#41;&#41; &quot;Call mocked function&quot;&#41;&#41; </code></pre></pre> <p>So what do you think, is this a reasonable approach? Not having the explicit calls to <code>returns</code>, etc, might be seen as a loss of declarative clarity, but I for one prefer this, as it gives you the full power of the language to test the arguments and set the return value.</p> <h3>References</h3> <ul> <li><a href="http://s-expressions.com/2010/01/24/conjure-simple-mocking-and-stubbing-for-clojure-unit-tests/">conjure – simple mocking and stubbing for Clojure unit-tests</a></li> <li><a href="http://richhickey.github.com/clojure-contrib/mock-api.html">clojure.contrib.mock</a></li> <li><a href="http://code.google.com/p/test-expect/">test-expect</a></li> <li><a href="http://blog.n01se.net/?p=134">Using binding to mock out even “direct linked” functions in Clojure</a></li> </ul></p>]]>
+    </content>
+  </entry>
+  <entry>
+    <id>http://hugoduncan.org/post/provisioning_cloud_nodes_with_pallet.html</id>
+    <link href="http://hugoduncan.org/post/provisioning_cloud_nodes_with_pallet.html"/>
+    <title>Provisioning Cloud Nodes with Pallet</title>
+    <summary>I recently needed to move a server from dedicated hosting to a cloud server. The existing server had been configured over time by several people, with little documentation.  I want to make sure that this time everything was documented, and what better way than doing that than using an automated configuration tool.</summary>
+    <updated>2010-05-12T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p><p>I recently needed to move a server from dedicated hosting to a cloud server. The existing server had been configured over time by several people, with little documentation.  I want to make sure that this time everything was documented, and what better way than doing that than using an automated configuration tool.</p> <p>Looking around at the configuration tools, I couldn't find one I really liked, so I started <a href="http://github.com/hugoduncan/pallet">Pallet</a>. I'll explain why I didn't use an existing tool below, but first I wanted to show how to manage nodes in Pallet.</p></p><p><pre class="clojure">   ;; Pull in the pallet namespaces   (require 'pallet.repl)   (pallet.repl/use-pallet)</p><p>  ;; Define a default node   (defnode mynode [])</p><p>  ;; Define the cloud account to use   (def service<pre><code>&#40;compute-service &quot;provider&quot; &quot;user&quot; &quot;password&quot;
+                  :log4j :ssh&#41;&#41; </code></pre>  ;; Create 2 nodes   (converge {mynode 2} service) </pre></p><p><p>This example would create two nodes (cloud vm instances) with the tag "mynode" in your cloud account, as specified in the <code>service</code>.  This would give you the smallest size, ubuntu image on most clouds.  Of course, to do anything serious, you would want to specify the image you would like, and you would probably like some configuration of the nodes.  So carrying on the above example: </p> <pre class="clojure">   ;; Pull in the needed crates   (use 'pallet.crate.automated-admin-user)   (use 'pallet.crate.java)</p><p>  ;; Define a new node that will use the Java JDK   (defnode javanode<pre><code>&#91;:ubuntu :X86&#95;64 :smallest
+     :os-description-matches &quot;&#91;&#94;J&#93;+9.10&#91;&#94;32&#93;+&quot;&#93;
+:bootstrap &#91;&#40;automated-admin-user&#41;&#93;
+:configure &#91;&#40;java :openjdk :jdk&#41;&#93;&#41; </code></pre>  ;; Create a new node, and remove the previous ones   (converge {javanode 1 mynode 0} service) </pre></p><p><p>This would stop the two nodes that were created before, and create a new one, with the specified ubuntu version.  On first boot, it would create a user account with your current username, authorize your id_rsa key on that account, and give it sudo permissions.  Every time converge is run, it also ensures that the openjdk JDK is installed.</p></p><p><p>The configuration to be applied is specified as a call to a crate - automated-admin-user and java in the example above. Crates are just clojure functions that specify some configuration or other action on the nodes (they're equivalent to Chef's recipes, which Pallet can also execute using chef-solo). Pallet can be extended with your own crates, and crates can specify general actions, not just configuration.  <code>lift</code> is a companion to <code>converge</code>, and can be used to apply crates to existing nodes (including local VM's).  The hypothetical example below would execute <code>my-backup-crate</code> on all the "mynode" nodes.</p></p><p><pre class="clojure">   (defnode mynode [] :backup [(my-backup-crate)])   (lift mynode service :backup) </pre></p><p><p>This was just a quick overview of Pallet, to give you an idea of what it is. One big area of Pallet not demonstrated here is its command line tool. But that is a topic for another post.</p></p><p><h2>Why Write another Tool?</h2></p><p><p>Now you've seen some examples, I'll try and explain the features that make Pallet distinct from other configuration tools out there.</p></p><p><h3>No Dependencies</h3></p><p><p>The machines being managed require no special dependencies to be installed. As long as they have bash and ssh running, they can be used with pallet.  For me this was important - it means that you can use pretty much any image out there, which is great for ad-hoc testing and development.</p></p><p><h3>No Server</h3></p><p><p>Pallet has no central server to set up and maintain - it simply runs on demand. You can run it from anywhere, even over a remote REPL connection.</p></p><p><h3>Everything in Version Control</h3></p><p><p>In pallet, all your configuration is handled in SCM controlled files - there is no database involved.  This means that your configuration can always be kept in step with the development of your crates, and the versions of the external crates that you use.</p></p><p><h3>Jar File Distribution of Crates</h3></p><p><p>Custom crates can be distributed as jar files, and so can be published in maven repositories, and be consumed in a version controlled manner.  Hopefully this will promote shared crates.</p></p><p><h3>Provisioning, Configuration and Administration</h3></p><p><p>Pallet aims quite wide. You can use it for starting an stopping nodes, for configuring nodes, deploying projects and also for running administration tasks.  To be honest, this wasn't an initial design goal, but has come out of the wash that way.</p></p><p><h2>Interested?</h2></p><p><p>Hopefully this has whetted your appetite, and you'll give pallet a try.  You can get support via <a href="http://groups.google.com/group/pallet-clj">the Google Group</a>, or #pallet on freenode irc.</p></p>]]>
+    </content>
+  </entry>
+  <entry>
+    <id>http://hugoduncan.org/post/shell_scripting_in_clojure_with_pallet.html</id>
+    <link href="http://hugoduncan.org/post/shell_scripting_in_clojure_with_pallet.html"/>
+    <title>Shell Scripting in Clojure with Pallet</title>
+    <summary>Let's face it, many of us hate writing shell scripts, and with good reason. Personally, it's not so much the shell language itself that puts me off, but organising everything around it; how do you deploy your scripts, how do you arrange to call other scripts, how do you manage the dependencies between your scripts?  Pallet aims to solve these problems by embedding shell script in clojure.</summary>
+    <updated>2010-05-03T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p><p>Let's face it, many of us hate writing shell scripts, and with good reason. Personally, it's not so much the shell language itself that puts me off, but organising everything around it; how do you deploy your scripts, how do you arrange to call other scripts, how do you manage the dependencies between your scripts?  <a href="http://github.com/hugoduncan/pallet">Pallet</a> aims to solve these problems by embedding shell script in <a href="http://clojure.org/">clojure</a>.</p></p><p><h2>Embedding in Clojure</h2></p><p><p>Embedding other languages in lisp is not a new idea; <a href="http://common-lisp.net/project/parenscript/">parenscript</a>, <a href="http://github.com/arohner/scriptjure">scriptjure</a> (which Pallet's embedding is based on), and <a href="http://www.gitorious.org/clojureql/">ClojureQL</a> all do this.</p></p><p><p>So what does shell script in clojure look like? Some examples:</p> <pre class="clojure">(script   (ls "/some/path")   (defvar x 1)   (println @x)   (defn foo [x] (ls @x))   (foo 1)   (if (= a a)<pre><code>&#40;println &quot;Reassuring&quot;&#41;
+&#40;println &quot;Ooops&quot;&#41;&#41; </code></pre>  (println "I am" @(whomai))</pre></p><p><p>which generates:</p></p><p><pre>ls /some/path x=1 echo ${x} function foo(x) { ls ${x}  } foo 1 if [ &#92;( \"a\" == \"a\" &#92;) ]; then echo Reassuring;else echo Ooops;fi echo I am $(whomai) </pre></p><p><p>The aim is to make writing shell script similar to writing Clojure, but there are obvious differences in the language that limit how far that can be taken. To run the code above at the REPL, you'll have to use the <code>pallet.stevedore</code> package.</p></p><p><h2>Escaping back to Clojure</h2></p><p><p>Escaping allows us to embed Clojure values and expressions inside our scripts, in much the same way as symbols can be unquoted when writing macros.</p></p><p><pre class="clojure">(let [path "/some/path"]   (script<pre><code>&#40;ls &#126;path&#41;
+&#40;ls &#126;&#40;.replace path &quot;some&quot; &quot;other&#41;&#41;&#41;&lt;/pre&gt; </code></pre><p>We can now write Clojure functions that produce shell scripts.  Writing scripts as clojure functions allows you to use the Clojure namespace facilities, and allows you to distribute you scripts in jar files (which can be deployed in a versioned manner with maven)</p></p><p><pre class="clojure">(defn list-path [path]   (script<pre><code>&#40;ls &#126;path&#41;
+&#40;ls &#126;&#40;.replace path &quot;some&quot; &quot;other&#41;&#41;&#41;&lt;/pre&gt; </code></pre><h2>Composing scripts</h2></p><p><p>Pallet allows the scripts to be combined. <code>do-script</code> concatenates the code pieces together.</p></p><p><pre class="clojure">(do-script   (list-path "path1")   (list-path "path2")) </pre></p><p><p><code>chain-script</code> chains the scripts together with '&amp;&amp;'.</p></p><p><pre class="clojure">(chain-script   (list-path "path1")   (list-path "path2")) </pre></p><p><p><code>checked-script</code> finally allows the chaining of scripts, and calls exit if the chain fails.</p></p><p><pre class="clojure">(checked-script "Message"   (list-path "path1")   (list-path "path2")) </pre></p><p><h2>Conclusion</h2></p><p><p>Writing shell script in Clojure gives access to Clojure's namespace facility allowing modularised shell script, and to Clojure's packaging as jar files, which allows reuse and distribution.  The ability to compose script fragments leads to being able to macro-like functions, such <code>checked-script</code>, and you could even use Clojure macros to generate script (but I haven't thought of a use for that, yet).</p></p><p><p>The syntax for the embedding has arisen out of practical usage, so is far from complete, and can definitely be improved. I look forward to hearing your feedback!</p></p><p><p>UPDATE: stevedore now requires a binding for <em>template</em>, to specify the target for the script generation.  This should be a vector containing one of :ubuntu, :centos, or :darwin, and one of :aptitude, :yum, :brew.</p></p>]]>
+    </content>
+  </entry>
+  <entry>
+    <id>http://hugoduncan.org/post/swank_clojure_gets_a_break_with_the_local_environment.html</id>
+    <link href="http://hugoduncan.org/post/swank_clojure_gets_a_break_with_the_local_environment.html"/>
+    <title>Swank Clojure gets a Break with the Local Environment</title>
+    <summary>Recently I got fed up with a couple of warts in swank-clojure, so I made a couple of small fixes, and that lead to a couple of new features.  Using SLIME with Clojure has never been as smooth as using it with Common Lisp, and the lack of debug functionality beyond the display of stack traces is particularly onerous.  Recently, George Jahad's debug-repl showed the possibility of adding a break macro to enter the debugger with the call stack intact and local variables visible.  This functionality is now in swank-clojure.</summary>
+    <updated>2010-03-31T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p>Recently I got fed up with a couple of warts in swank-clojure, so I made a couple of small fixes, and that lead to a couple of new features.  Using SLIME with Clojure has never been as smooth as using it with Common Lisp, and the lack of debug functionality beyond the display of stack traces is particularly onerous.  Recently, George Jahad and Alex Osborne's <a href="http://github.com/GeorgeJahad/debug-repl">debug-repl</a> showed the possibility of adding a break macro to enter the debugger with the call stack intact and local variables visible.  This functionality is now in swank-clojure.</p><p>Consider the following example, adapted from debug-repl:</p><p><pre>   (let [c 1
+        d 2]<pre><code>&#40;defn a &#91;b c&#93;
+  &#40;swank.core/break&#41;
+  d&#41;&#41; </code></pre>  (a "foo" "bar") </pre></p><p>Running this now brings up the following SLDB debug frame:</p><p><pre> BREAK:   [Thrown class java.lang.Exception]</p><p>Restarts:  0: [QUIT] Quit to the SLIME top level  1: [CONTINUE] Continue from breakpoint</p><p>Backtrace:   0: user$eval<b>1666$a</b>1667.invoke(NO<i>SOURCE</i>FILE:1)   1: user$eval__1670.invoke(NO<i>SOURCE</i>FILE:1)   2: clojure.lang.Compiler.eval(Compiler.java:5358)   3: clojure.lang.Compiler.eval(Compiler.java:5326)   4: clojure.core$eval__4157.invoke(core.clj:2139)   &ndash;more&ndash; </pre></p><p><p>As you can see, the stack trace reflects the location of the breakpoint, and there is a CONTINUE restart. Pressing "1", or Enter on the CONTINUE line, or clicking the CONTINUE line should all cause the the debugger frame to close, and the result of the function call, 2, to be displayed in the REPL frame.</p></p><p><p>Enter, or "t", on the first line of the stacktrace causes the local variables to be displayed:</p> <pre> BREAK:   [Thrown class java.lang.Exception]</p><p>Restarts:  0: [QUIT] Quit to the SLIME top level  1: [CONTINUE] Continue from breakpoint</p><p>Backtrace:   0: user$eval<b>1666$a</b>1667.invoke(NO<i>SOURCE</i>FILE:1)<pre><code>  Locals:
+    b = foo
+    d = 2
+    c = bar </code></pre>  1: user$eval__1670.invoke(NO<i>SOURCE</i>FILE:1)   2: clojure.lang.Compiler.eval(Compiler.java:5358)   3: clojure.lang.Compiler.eval(Compiler.java:5326)   4: clojure.core$eval__4157.invoke(core.clj:2139)   &ndash;more&ndash; </pre></p><p><p>Pressing enter on one of the local variable lines will pull up the SLIME inspector with that value. If you go back to the REPL without closing the SLDB frame, there will be no prompt, but pressing enter should give you one.  The local variables are then all be avaiable for evaluation form the REPL.</p></p><p><p>Should an error occur while you are using the REPL, you will be placed in a nested debug session, with an "ABORT" restart to return to the previous debug level.</p></p><p><p>Finally, restarts are now displayed for each of the exceptions in the exception cause chain.</p></p><p><pre>   (let [c 1
+        d 2]<pre><code>&#40;defn a &#91;b c&#93;
+  &#40;throw &#40;Exception. &quot;top&quot; &#40;Exception. &quot;nested&quot; &#40;Exception. &quot;bottom&quot;&#41;&#41;&#41;&#41;
+  d&#41;&#41; </code></pre>  (a "foo" "bar") </pre></p><p><p>This will bring up the debugger with 2 cause restarts, which can be used to examine the related stack traces.</p></p><p><pre> top    [Thrown class java.lang.Exception]</p><p>Restarts:   0: [QUIT] Quit to the SLIME top level   1: [CAUSE1] Invoke debugger on cause  nested [Thrown class java.lang.Exception]   2: [CAUSE2] Invoke debugger on cause   bottom [Thrown class java.lang.Exception]</p><p>Backtrace:    0: user$eval<b>1752$a</b>1753.invoke(NO<i>SOURCE</i>FILE:1)    1: user$eval__1756.invoke(NO<i>SOURCE</i>FILE:1)    2: clojure.lang.Compiler.eval(Compiler.java:5358)    3: clojure.lang.Compiler.eval(Compiler.java:5326)    4: clojure.core$eval__4157.invoke(core.clj:2139)   &ndash;more&ndash; </pre></p><p><p>The break functionality is known only to work from the REPL thread at the moment.  With that small proviso, I hope you enjoy the new functionality - at least it provides a basic debug functionality until full JPDA/JDI integration is tackled.</p></p>]]>
+    </content>
+  </entry>
+  <entry>
+    <id>http://hugoduncan.org/post/benchmarking_clojure_code_with_criterium.html</id>
+    <link href="http://hugoduncan.org/post/benchmarking_clojure_code_with_criterium.html"/>
+    <title>Benchmarking Clojure Code with Criterium</title>
+    <summary>I have released Criterium, a new project for benchmarking code in Clojure.  I found Brent Broyer's article on Java benchmarking which explains many of the pitfalls of benchmarking on the JVM, and Criterion, a benchmarking library in Haskell.</summary>
+    <updated>2010-02-19T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p><p>I have released <a href="http://github.com/hugoduncan/criterium">Criterium</a>, a new project for benchmarking code in <a href="http://clojure.org">Clojure</a>.  I found Brent Broyer's <a href="http://www.ibm.com/developerworks/java/library/j-benchmark1.html">article on Java benchmarking</a> which explains many of the pitfalls of benchmarking on the JVM, and <a href="http://www.serpentine.com/blog/2009/09/29/criterion-a-new-benchmarking-library-for-haskell">Criterion</a>, a benchmarking library in Haskell.</p></p><p><p>The main issues with benchmarking on the JVM are associated with garbage collection, and with JIT compilation.  It seems from Broyer's articles that we can mitigate the effects but not completely eliminate them, and Criterium follows his advice.  Both of the above libraries use the <a href="http://en.wikipedia.org/wiki/Bootstrapping_(statistics)">bootstrap</a> technique to estimate mean execution time and provide a confidence interval, and Criterium does likewise.  At the moment the confidence intervals are biased and I still need to implement BCa or ABC to improve these.</p></p><p><p>One of the functions that I wanted to benchmark originally involved reading a file.  Criterium does not yet address clearing I/O buffer cache, and I am not sure on the best way forward on this.  On Mac OS X, the <code>purge</code> command can be used to clear the caches, and on Linux this can be achieved by writing to /proc/sys/vm/drop_caches.  On the Mac at least, this causes everything to grind to halt for about five seconds, and there are then some file reads as whatever processes are running read things in again. This sort of behaviour doesn't lend itself to inclusion in a timing loop... Any suggestions?</p></p>]]>
+    </content>
+  </entry>
+  <entry>
+    <id>http://hugoduncan.org/post/a_clojure_library_for_fluiddb.html</id>
+    <link href="http://hugoduncan.org/post/a_clojure_library_for_fluiddb.html"/>
+    <title>A Clojure library for FluidDB</title>
+    <summary>I have released Criterium, a new project for benchmarking code in Clojure.  I found Brent Broyer's article on Java benchmarking which explains many of the pitfalls of benchmarking on the JVM, and Criterion, a benchmarking library in Haskell.</summary>
+    <updated>2009-09-13T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p><p><a href="http://fluidinfo.com/">FluidDB</a>, a "cloud" based triple-store, where the objects are immutable and can be tagged by anyone, launched about a month ago. As a another step to getting up to speed with <a href="http://clojure.org">Clojure</a>, I decided to write a client library, and <a href="http://github.com/hugoduncan/clj-fluiddb">clj-fluiddb</a> was born.  The code was very simple, especially as I could base the library on <a href="http://github.com/hdurer/cl-fluiddb">cl-fluiddb</a>, a Common-Lisp library.</p> <p>I have some ideas I want to try out using FluidDB.  It's permission system is one of it's <a href="http://abouttag.blogspot.com/2009/09/permissions-worth-getting-excited-about.html">best features</a>, together with the ability to <a href="http://www.xavierllora.net/2009/08/25/liquid-rdf-meandering-in-fluiddb/">use it for RDF like triples</a> means that it could provide a usable basis for growing the semantic web.  My ideas are less grandiose, but might take as long to develop, we'll see...</p></p>]]>
+    </content>
+  </entry>
+  <entry>
+    <id>http://hugoduncan.org/post/setting_up_clojure_and_compojure_with_maven.html</id>
+    <link href="http://hugoduncan.org/post/setting_up_clojure_and_compojure_with_maven.html"/>
+    <title>Setting up clojure and compojure with maven</title>
+    <summary>I wanted to experiment with building a webapp using Clojure, so I tried setting up the Compojure web framework.  I am new to clojure, so I am not sure if this is the preferred way of doing things, but here goes anyway.</summary>
+    <updated>2009-09-06T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p><p>I wanted to experiment with building a webapp using <a href="http://clojure.org">Clojure</a>, so I tried setting up the <a href="http://en.wikibooks.org/wiki/Compojure">Compojure</a> web framework.  I am new to clojure, so I am not sure if this is the preferred way of doing things, but here goes anyway.</p> <p>There seem to be several ways to set up clojure in emacs.  I ended up following <a href="http://bc.tech.coop/blog/081205.html">Bill Clementson's instructions</a>. A couple of years ago I had some experience using maven, so decided to use this to manage my classpath.  Installing maven on my mac was simple with macports (<code>sudo port install maven</code>).</p> <p>Setting up a POM for maven took longer than expected.  <a href="http://stuartsierra.com/2009/09/04/cutting-edge-clojure-development-with-maven">Stuart Sierra's post</a> pointed me to the formos maven repository containing the clojure snapshots.  With some help from google, I also found the <a href="http://github.com/talios/clojure-maven-plugin/tree/master">maven-clojure-plugin</a>, which is a maven plugin for compiling clojure, and the <a href="http://github.com/fred-o/clojureshell-maven-plugin/tree/master">clojureshell-maven-plugin</a> which will start a swank session (or bare REPL) using the pom information.</p> <p>With the basic clojure and maven setup in place, it was time to move on to compojure. I added the <a href="http://github.com/weavejester/compojure/tree/master">Compojure git repository</a> into Bill Clementson's clj-build script, ran it to clone the repository, and then built it using ant (<code>ant deps; ant</code>).  <a href="http://jimdowning.wordpress.com/2009/07/30/compojure-maven/">Jim Downing</a> instructions for installing compojure into your local maven repository (<code>mvn install:install-file -DgroupId=org.clojure -DartifactId=compojure -Dversion=1.0-SNAPSHOT -Dfile=compojure.jar -Dpackaging=jar</code>) work smoothly.</p></p>]]>
+    </content>
+  </entry>
 </feed>

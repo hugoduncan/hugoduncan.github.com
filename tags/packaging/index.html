@@ -1,78 +1,62 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
   <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
-    <link rel="stylesheet" 
-      href="//netdna.bootstrapcdn.com/bootstrap/3.0.0-rc1/css/bootstrap.min.css"
-      media="screen">
-<link rel="stylesheet" href="/css/pelure.css">
-
+    <title>packaging</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta charset="utf-8"/>
+    <meta name="description"
+          content="Pelure - ephemeral writing surface?"/>
+    <meta name="author" content="Hugo Duncan"/>
+    <link type="application/atom+xml" rel="alternate" href="../../index.xml" title="Pelure">
+    <link rel="stylesheet" href="../../style.css">
   </head>
   <body>
-    <div class="container">
-      <div class="row">
-  <div class="col-0 col-sm-2 col-lg-2"></div>
-  <div class="col-12 col-sm-8 col-lg-8">
-    <div class="navbar">
-      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
-      <span class="icon-bar"></span>
-      <span class="icon-bar"></span>
-      <span class="icon-bar"></span>
-    </button>
-    <a class="navbar-brand" href="/meta/pelure">Pelure</a>
-    <div class="nav-collapse collapse">
-      <ul class="nav navbar-nav">
-        <li><a href="/post">Posts</a></li>
-        <li><a href="/tags">Tags</a></li>
-      </ul>
-      <ul class="nav navbar-nav pull-right">
-        <li><a href="/meta/contact">Contact</a></li>
-      </ul>
-    </div>
-    </div>
-  </div>
-</div>
 
-      <div class="row"> 
-  <div class="col-0 col-sm-2 col-lg-2"></div>
-  <div id="top" class="col-12 col-sm-8 col-lg-8">
-     
-      <h1>Packaging<a href="http://hugoduncan.github.com/tags/packaging/index.xml">&nbsp;<img src="/images/feed_mini.gif"></a></h1>
-      
-        <li class="list-unstyled">
-           <span class="post-date">16 August 2013</span>
-            &nbsp;<a href="http://hugoduncan.github.com/post/clojurescript-libs-with-js-dependencies">How to Build Clojurescript Libs with JavaScript Dependencies</a>
-        </li>
-      
+    <div class="site-header">
+      <div class="wrapper">
+        <div class="site-nav">
+          <a class="page-link" href="../../archive.html">All Posts</a>
+          <a class="page-link" href="https://github.com/hugoduncan/hugoduncan.github.com/discussions/categories/posts">Discuss</a>
+          <a class="page-link" href="../../meta/pelure.html">About</a>
+          <a class="page-link" href="../../meta/contact.html">Contact</a>
+          <a class="page-link" href="index.xml">
+            <img class="page-icon"
+                 src="https://www.svgrepo.com/show/362316/feed.svg"
+                 width="30px"/>
+          </a>
+          <a class="page-link" href="https://twitter.com/hugoduncan">
+            <img class="page-icon"
+                 src="https://www.svgrepo.com/show/11841/twitter.svg"
+                 width="30px"/>
+          </a>
         </div>
-</div>
-<script src='http://www.google-analytics.com/ga.js' type='text/javascript'>
-</script>
-<script type="text/javascript">
-try {
-var pageTracker = _gat._getTracker("UA-3688366-1");
-pageTracker._trackPageview();
-} catch(err) {}</script>
-     
+        <div>
+          <h1 class="site-title">
+            <a class="page-link" href="../../index.html">Pelure</a>
+          </h1>
+          <p>Ephemeral musings, often about Clojure</p>
+        </div>
+      </div>
     </div>
-    <div class="row"> 
-  <div class="col-0 col-sm-2 col-lg-2"></div>
-  <div id="top" class="col-12 col-sm-8 col-lg-8">
-     
-<footer id="footer">
-  <p class="pull-right"><a href="#top">Back to top</a></p>
-</footer>
-  </div>
-</div>
-<script src='http://www.google-analytics.com/ga.js' type='text/javascript'>
-</script>
-<script type="text/javascript">
-try {
-var pageTracker = _gat._getTracker("UA-3688366-1");
-pageTracker._trackPageview();
-} catch(err) {}</script>
-     
 
-   </body>
+    <div class="wrapper">
+
+      <div><h1><a href="post/clojurescript-libs-with-js-dependencies.html">How to Build Clojurescript Libs with JavaScript Dependencies</a></h1><p>Using JavaScript dependencies in a Clojurescript library seems to be hard.  It took me many hours to understand how it should work.  A big thanks to [Chas Emerick][cemerick] for setting me straight on most of this.</p><p>Luke Vanderhart [posted][lukespost] a general introduction to using Javascript libraries in Clojurescript.  Go read it if you haven't already - this post assumes you have.</p><p>While that post is an excellent description of using JavaScript in a Clojurescript application, it doesn't really address JavaScript in Clojurescript libraries, which has the additional problem of how to ensure the JavaScript dependency is available in the consumer of the library.  A Clojurescript library should definitely be capable of providing it's dependencies, but should also allow the consumer to override the version of these dependencies.</p><h2>Don't package the JavaScript</h2><p>The first approach is to simply not provide the JavaScript at all.  This is the approach taken by [jayq][jayq] for example.  The consumer of jayq, or any library that uses jayq, is required to provide jQuery through the JavaScript runtime.  This can take the form of a <code>&amp;lt;script&amp;gt;</code> link in the browser page, or a call to <code>webPage#injectJs</code> in phantomJS.  The compile <code>:libs</code> or <code>:foreign-libs</code> options can not be used to provide the dependency, as there is no way for the compiler to know that jayq depends on the namespace provided by these options.</p><p>For the consumer of the library to use compiler<code>:optimizations</code> other than <code>:whitespace</code>, they will need to provide an <code>:externs</code> file.</p><h2>Package JavaScript</h2><p>The second approach is to package the JavaScript via a Clojurescript namespace. This involves adding a <code>require</code> on a namespace to the code that directly depends on the JavaScript, and arranging for that Clojurescript namespace to load the JavaScript, using either of the compiler<code>:libs</code> or <code>:foreign-libs</code> options.</p><p>The Clojurescript library can make the JavaScript library available in its resources.  The library consumer can then use resource via the <code>:libs</code> or <code>:foreign-libs</code> options, depending on whether or not the JavaScript contains a <code>goog.provides</code> call.</p><p>If the library is packaged with a <code>goog.provides</code> call, then the consumer can not replace the version using <code>:libs &#91;&quot;&quot;&#93;</code> - the use of an explicit prefix in <code>:libs</code> is needed to prevent more than one JavaScript implementation trying to provide the clojure namespace, or the use of <code>:foreign-libs</code> where the namespace is explicitly mapped.</p><p>For examples, the [pprng][pprng] library packages its dependency with a <code>goog.provides</code> call, allowing the use of <code>:libs &#91;&quot;&quot;&#93;</code> to pull in the dependency.  The [papadom][papadom] library on the other hand provides vanilla javascript dependencies, and requires the use of the more verbose <code>:foreign-libs</code> option.</p><p>If the JavaScript is to be provided in the runtime, then the consumer will have to provide an empty namespace definition to satisfy the require in the Clojurescript library, and the<code>:externs</code> file as in the first case.</p><h2>Postscript</h2><p>There are several assumptions in much of the documentation that I didn't see explicitly explained.  I'll record these here for posterity.</p><p>A clojurescript library is always a source code library.  There is no such thing as the linking of compiled clojurescript artifacts.</p><p>Neither<code>:libs</code> nor<code>:foreign-libs</code> actually changes how the JavaScript is accessed within the clojurescript code.  If you include jQuery via a <code>:libs</code>, and a <code>require</code>, you still access it through <code>js/jQuery</code>.  The <code>require</code> of the namespace specified by <code>goog.provide</code>, or the namespace specified in the <code>:foreign-libs</code>' <code>:provides</code> key, simply ensures the JavaScript is loaded.</p><p>The choice of compiler <code>:optimizations</code> affects what information you need to provide, and this differs depending on whether you are providing javascript libraries through the runtime (e.g. $lt;script&gt; tags in the browser), or through <code>:libs</code> or <code>:foreign-libs</code> compiler options.  The simplest here is to use the compiler options.  When providing the JavaScript via the runtime, then everything should also just work if you are using no optimisation, or just <code>:whitespace</code>, but as soon as you try anything else, you will need to provide an :externs definition for the JavaScript libraries.</p><p>[lukespost]: <a href='http://lukevanderhart.com/2011/09/30/using-javascript-and-clojurescript.html'>http://lukevanderhart.com/2011/09/30/using-javascript-and-clojurescript.html</a> "Luke Vanderhart's post on JavaScript libs"</p><p>[jayq]: <a href='https://github.com/ibdknox/jayq'>https://github.com/ibdknox/jayq</a> "jayq"</p><p>[cemerick]: <a href='http://cemerick.com'>http://cemerick.com</a> "Chas Emerick"</p><p>[pprng]: <a href='https://github.com/cemerick/pprng'>https://github.com/cemerick/pprng</a> "pprng" [papadom]: <a href='https://github.com/hugoduncan/papadom'>https://github.com/hugoduncan/papadom</a> "papadom"</p><p>Discuss this post <a href="https://github.com/hugoduncan/hugoduncan.github.com/discussions/categories/posts">here</a>.</p><p><i>Published: 2013-08-16</i></p></div>
+
+      
+      <div style="margin-bottom: 20px; float: right;">
+        <a class="page-link" href="archive.html">Archive</a>
+      </div>
+      
+    </div>
+    <script>
+      document.addEventListener('DOMContentLoaded', (event) => {
+        document.querySelectorAll('pre code').forEach((el) => {
+          if (!el.classList.contains('clojure')) {
+            hljs.highlightElement(el);
+          }
+        });
+      });
+    </script>
+  </body>
 </html>

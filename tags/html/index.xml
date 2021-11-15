@@ -1,19 +1,21 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<feed xmlns='http://www.w3.org/2005/Atom' xml:lang='en-us'>
- <title>pelure</title>
- <id>http://hugoduncan.github.com/</id>
- <link href='./' />
- <link rel='self' href='' />
- <logo>rsslogo.jpg</logo>
- <icon>/favicon.ico</icon>
- <author><name>Hugo Duncan</name></author>
- <subtitle>Pelure </subtitle>
- <rights>All content written by Hugo Duncan and photos by Hugo Duncan Copyright Hugo Duncan, all rights reserved.</rights> 
- <updated>2013-10-28T00:00:00Z</updated>
-
-
-<entry xml:base="http://hugoduncan.github.com/post/create_a_catalog_for_xhtml_on_os_x"><title>Create a Catalog for XHTML on OS X</title><link href="http://hugoduncan.github.com/post/create_a_catalog_for_xhtml_on_os_x"/><id>http://hugoduncan.github.com/post/create_a_catalog_for_xhtml_on_os_x</id><published>2009-03-11T00:00:00Z</published><updated>2009-03-11T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;While trying to validate the output of &lt;a href=&#34;http://hugoduncan.github.com/cl-blog-generator/content/site/index.xhtml&#34;&gt;cl-blog-generator&lt;/a&gt; I needed a local DTD for XHTML.  The textproc/xmlcatmgr package in Darwin Ports creates a catalog at &lt;code&gt;/opt/local/etc/xml/catalog&lt;/code&gt;, but it does not include XHTML.  A flattened XHTML DTD can be found in &lt;a href=&#34;http://validator.w3.org/sgml-lib.tar.gz&#34;&gt;the w3 validator library&lt;/a&gt; and installed the DTD&#39;s under &lt;code&gt;/opt/local/share/xml/&lt;/code&gt;, but I couldn&#39;t find a catalog file for it.  It turns out it is pretty simple to write the catalog file; the Wikipedia &lt;a href=&#34;http://en.wikipedia.org/wiki/XML_Catalog&#34;&gt;XML Catalog&lt;/a&gt; entry has an example that contains what is needed.  Save the example next to the XHTML DTD&#39;s as &lt;code&gt;catalog.xml&lt;/code&gt; and adjust the paths, then add a &#34;nextCatalog&#34; entry in &lt;code&gt;/opt/local/etc/xml/catalog&lt;/code&gt; pointing at the &lt;code&gt;catalog.xml&lt;/code&gt; file.&lt;/p&gt;
-&lt;p&gt;Now I can use &lt;code&gt;(setf cxml:*catalog* (cxml:make-catalog &#39;(&#34;/opt/local/etc/xml/catalog&#34;)))&lt;/code&gt; and &lt;a href=&#34;http://common-lisp.net/project/cxml/&#34;&gt;CXML&lt;/a&gt; will use the local DTD specified in the catalog.&lt;/p&gt;
-</content></entry>
-
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Pelure</title>
+  <link href="http://hugoduncan.org/index.xml" rel="self"/>
+  <link href="http://hugoduncan.org/"/>
+  <updated>2021-11-15T01:45:47+00:00</updated>
+  <id>http://hugoduncan.org/</id>
+  <author>
+    <name>Hugo Duncan</name>
+  </author>
+  <entry>
+    <id>http://hugoduncan.org/post/create_a_catalog_for_xhtml_on_os_x.html</id>
+    <link href="http://hugoduncan.org/post/create_a_catalog_for_xhtml_on_os_x.html"/>
+    <title>Create a Catalog for XHTML on OS X</title>
+    <summary>While trying to validate the output of cl-blog-generator I needed a local DTD for XHTML.  The textproc/xmlcatmgr package in Darwin Ports creates a catalog at /opt/local/etc/xml/catalog, but it does not include XHTML.  A flattened XHTML DTD can be found in the w3 validator library and installed the DTD's under /opt/local/share/xml/, but I couldn't find a catalog file for it.  It turns out it is pretty simple to write the catalog file; the Wikipedia XML Catalog entry has an example that contains what is needed.  Save the example next to the XHTML DTD's as catalog.xml and adjust the paths, then add a 'nextCatalog' entry in /opt/local/etc/xml/catalog pointing at the catalog.xml file.</summary>
+    <updated>2009-03-11T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p><p>While trying to validate the output of <a href="http://hugoduncan.github.com/cl-blog-generator/content/site/index.xhtml">cl-blog-generator</a> I needed a local DTD for XHTML.  The textproc/xmlcatmgr package in Darwin Ports creates a catalog at <code>/opt/local/etc/xml/catalog</code>, but it does not include XHTML.  A flattened XHTML DTD can be found in <a href="http://validator.w3.org/sgml-lib.tar.gz">the w3 validator library</a> and installed the DTD's under <code>/opt/local/share/xml/</code>, but I couldn't find a catalog file for it.  It turns out it is pretty simple to write the catalog file; the Wikipedia <a href="http://en.wikipedia.org/wiki/XML_Catalog">XML Catalog</a> entry has an example that contains what is needed.  Save the example next to the XHTML DTD's as <code>catalog.xml</code> and adjust the paths, then add a "nextCatalog" entry in <code>/opt/local/etc/xml/catalog</code> pointing at the <code>catalog.xml</code> file.</p> <p>Now I can use <code>(setf cxml:<em>catalog</em> (cxml:make-catalog '("/opt/local/etc/xml/catalog")))</code> and <a href="http://common-lisp.net/project/cxml/">CXML</a> will use the local DTD specified in the catalog.</p></p>]]>
+    </content>
+  </entry>
 </feed>

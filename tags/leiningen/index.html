@@ -1,83 +1,64 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
   <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
-    <link rel="stylesheet" 
-      href="//netdna.bootstrapcdn.com/bootstrap/3.0.0-rc1/css/bootstrap.min.css"
-      media="screen">
-<link rel="stylesheet" href="/css/pelure.css">
-
+    <title>leiningen</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta charset="utf-8"/>
+    <meta name="description"
+          content="Pelure - ephemeral writing surface?"/>
+    <meta name="author" content="Hugo Duncan"/>
+    <link type="application/atom+xml" rel="alternate" href="../../index.xml" title="Pelure">
+    <link rel="stylesheet" href="../../style.css">
   </head>
   <body>
-    <div class="container">
-      <div class="row">
-  <div class="col-0 col-sm-2 col-lg-2"></div>
-  <div class="col-12 col-sm-8 col-lg-8">
-    <div class="navbar">
-      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
-      <span class="icon-bar"></span>
-      <span class="icon-bar"></span>
-      <span class="icon-bar"></span>
-    </button>
-    <a class="navbar-brand" href="/meta/pelure">Pelure</a>
-    <div class="nav-collapse collapse">
-      <ul class="nav navbar-nav">
-        <li><a href="/post">Posts</a></li>
-        <li><a href="/tags">Tags</a></li>
-      </ul>
-      <ul class="nav navbar-nav pull-right">
-        <li><a href="/meta/contact">Contact</a></li>
-      </ul>
-    </div>
-    </div>
-  </div>
-</div>
 
-      <div class="row"> 
-  <div class="col-0 col-sm-2 col-lg-2"></div>
-  <div id="top" class="col-12 col-sm-8 col-lg-8">
-     
-      <h1>Leiningen<a href="http://hugoduncan.github.com/tags/leiningen/index.xml">&nbsp;<img src="/images/feed_mini.gif"></a></h1>
-      
-        <li class="list-unstyled">
-           <span class="post-date">28 October 2013</span>
-            &nbsp;<a href="http://hugoduncan.github.com/post/generating_source_with_leiningen">Generating Source Files with Leiningen</a>
-        </li>
-      
-        <li class="list-unstyled">
-           <span class="post-date">29 August 2013</span>
-            &nbsp;<a href="http://hugoduncan.github.com/post/alembic_reloads_your_project_clj_dependencies">Alembic Reloads your Leiningen project.clj Dependencies</a>
-        </li>
-      
+    <div class="site-header">
+      <div class="wrapper">
+        <div class="site-nav">
+          <a class="page-link" href="../../archive.html">All Posts</a>
+          <a class="page-link" href="https://github.com/hugoduncan/hugoduncan.github.com/discussions/categories/posts">Discuss</a>
+          <a class="page-link" href="../../meta/pelure.html">About</a>
+          <a class="page-link" href="../../meta/contact.html">Contact</a>
+          <a class="page-link" href="index.xml">
+            <img class="page-icon"
+                 src="https://www.svgrepo.com/show/362316/feed.svg"
+                 width="30px"/>
+          </a>
+          <a class="page-link" href="https://twitter.com/hugoduncan">
+            <img class="page-icon"
+                 src="https://www.svgrepo.com/show/11841/twitter.svg"
+                 width="30px"/>
+          </a>
         </div>
-</div>
-<script src='http://www.google-analytics.com/ga.js' type='text/javascript'>
-</script>
-<script type="text/javascript">
-try {
-var pageTracker = _gat._getTracker("UA-3688366-1");
-pageTracker._trackPageview();
-} catch(err) {}</script>
-     
+        <div>
+          <h1 class="site-title">
+            <a class="page-link" href="../../index.html">Pelure</a>
+          </h1>
+          <p>Ephemeral musings, often about Clojure</p>
+        </div>
+      </div>
     </div>
-    <div class="row"> 
-  <div class="col-0 col-sm-2 col-lg-2"></div>
-  <div id="top" class="col-12 col-sm-8 col-lg-8">
-     
-<footer id="footer">
-  <p class="pull-right"><a href="#top">Back to top</a></p>
-</footer>
-  </div>
-</div>
-<script src='http://www.google-analytics.com/ga.js' type='text/javascript'>
-</script>
-<script type="text/javascript">
-try {
-var pageTracker = _gat._getTracker("UA-3688366-1");
-pageTracker._trackPageview();
-} catch(err) {}</script>
-     
 
-   </body>
+    <div class="wrapper">
+
+      <div><h1><a href="post/generating_source_with_leiningen.html">Generating Source Files with Leiningen</a></h1><p>Recently, we needed to include some generated source files in a project.  The source code generation was project specific, so we didn't want to have to create a leiningen plugin specifically for it. To get this to work required using quite a few of <a href='https://github.com/technomancy/leiningen#leiningen'>leiningen's</a> features.</p><p>This post will explain how to use lein to customise you build to generates a source file, but many of the steps are useful to implement any form of lein build customisation.</p><h3>The Generator</h3><p>The source code generator is going to live in the <code>my.src-generator</code> namespace.  Here's an example, that just generates a namespace declaration for the <code>my.gen</code> namespace under <code>target/generated/my/gen.clj</code>.</p><p><pre><code class="clojure hljs"><span class="forms"><span class="list">(<span class="symbol">ns</span> <span class="symbol">my.src-generator</span><br>  <span class="list">(<span class="keyword">:require</span> <span class="vector">&#91;<span class="symbol">clojure.java.io</span> <span class="keyword">:refer</span> <span class="vector">&#91;<span class="symbol">file</span>&#93;</span>&#93;</span>)</span>)</span><br><br><span class="list">(<span class="symbol">defn</span> <span class="def">generate</span> <span class="vector">&#91;&#93;</span><br>  <span class="list">(<span class="symbol">doto</span> <span class="list">(<span class="symbol">file</span> <span class="string">&quot;target&quot;</span> <span class="string">&quot;generated&quot;</span> <span class="string">&quot;my&quot;</span> <span class="string">&quot;gen.clj&quot;</span>)</span><br>    <span class="list">(<span class="symbol">-&gt;</span> <span class="fn">#(<span class="symbol">.getParentFile</span>)</span> <span class="fn">#(<span class="symbol">.mkdirs</span>)</span>)</span><br>    <span class="list">(<span class="symbol">spit</span> <span class="string">&quot;(ns my.gen)&quot;</span>)</span>)</span>)</span></span></code></pre></p><h3>Development only code</h3><p>The source generation code should not be packaged in the jar, so we place it in <code>dev-src/my/src&#95;generator.clj</code>, and add <code>dev-src</code> and the generated source directories to the <code>:dev</code> profile's <code>:source-paths</code>. The <code>:dev</code> profile is automatically used by leiningen unless it is producing a jar file.  When producing the jar, the <code>dev</code> profile will not be used, so <code>dev-src</code> will not be on the <code>:source-path</code> (we add the generated directory to the base <code>:source-path</code> below).</p><p><pre><code class="clojure hljs"><span class="forms"><span class="keyword">:profiles</span> <span class="map">{<span class="keyword">:dev</span> <span class="map">{<span class="keyword">:source-paths</span> <span class="vector">&#91;<span class="string">&quot;src&quot;</span> <span class="string">&quot;dev-src&quot;</span> <span class="string">&quot;target/generated&quot;</span>&#93;</span>}</span>}</span></span></code></pre></p><h3>Running project specific code with leininingen</h3><p>The <code>run</code> task can be used to invoke code in your project.  To use lein's <code>run</code> task we need to add a <code>-main</code> function to the <code>my.src-generator</code> namespace.</p><p><pre><code class="clojure hljs"><span class="forms"><span class="list">(<span class="symbol">defn</span> <span class="def">-main</span> <span class="vector">&#91;<span class="symbol">&amp;</span> <span class="local">args</span>&#93;</span><br>  <span class="list">(<span class="symbol">generate</span>)</span>)</span></span></code></pre></p><p>In the <code>project.clj</code> file we also tell lein about the main namespace. In order to avoid AOT compilation of the main namespace, we mark it with <code>:skip-aot</code> metadata.</p><p><pre><code class="clojure hljs"><span class="forms"><span class="keyword">:main</span> <span class="meta">&#94;<span class="keyword">:skip-aot</span> <span class="symbol">my.src-generator</span></span></span></code></pre></p><h3>Customising the jar contents</h3><p>The generated files need to end up in the jar (and possibly be compiled), so we put them on the <code>:source-paths</code> in the project.  If we had wanted to include the sources without further processing, we could have added the generated directory to <code>:resource-paths</code> instead.</p><p><pre><code class="clojure hljs"><span class="forms"><span class="keyword">:source-paths</span> <span class="vector">&#91;<span class="string">&quot;src&quot;</span> <span class="string">&quot;target/generated&quot;</span>&#93;</span></span></code></pre></p><h3>Extending the build process</h3><p>Now we can tell lein to generate the source files whenever we use the project.  We do this by adding the <code>run</code> task to the <code>:prep-tasks</code> key.  Leiningen runs all the tasks in <code>:prep-tasks</code> before any task invoked by the lein command line.</p><p>The tricky bit here is that the <code>run</code> task will itself invoke the <code>:prep-tasks</code>, so we want to make sure we don't end up calling the task recursively and generating a stack overflow.  To solve this, add a <code>gen</code> profile, and disable the prep tasks in it.  We use the <code>:replace</code> metadata to ensure this definition takes precedence.  See the <a href='https://github.com/technomancy/leiningen/blob/master/doc/PROFILES.md#merging'>leiningen profile documentation</a> for more information on <code>:replace</code> and it's sibling <code>:displace</code>.</p><p><pre><code class="clojure hljs"><span class="forms"><span class="keyword">:gen</span> <span class="map">{<span class="keyword">:prep-tasks</span> <span class="meta">&#94;<span class="keyword">:replace</span> <span class="vector">&#91;&#93;</span></span>}</span></span></code></pre></p><p>Then use this profile when setting the <code>:prep-tasks</code> key in the project.</p><p><pre><code class="clojure hljs"><span class="forms"><span class="keyword">:prep-tasks</span> <span class="vector">&#91;<span class="vector">&#91;<span class="string">&quot;with-profile&quot;</span> <span class="string">&quot;+gen,+dev&quot;</span> <span class="string">&quot;run&quot;</span>&#93;</span>  <span class="string">&quot;compile&quot;</span>&#93;</span></span></code></pre></p><p>Now when we run any command, the sources are generated.</p><h3>Adding an alias</h3><p>Finally we may want to just invoke the source generation, so let's create an alias to make <code>lein gen</code> run the generator.  We need the <code>gen</code> profile for this, or otherwise the generator will run twice.</p><p><pre><code class="clojure hljs"><span class="forms"><span class="keyword">:aliases</span> <span class="map">{<span class="string">&quot;gen&quot;</span> <span class="vector">&#91;<span class="string">&quot;with-profile&quot;</span> <span class="string">&quot;+gen,+dev&quot;</span> <span class="string">&quot;run&quot;</span>&#93;</span>}</span></span></code></pre></p><h3>The final project.clj</h3><p>For reference, the final project.clj looks like this:</p><p><pre><code class="clojure hljs"><span class="forms"><span class="list">(<span class="symbol">defproject</span> <span class="symbol">my-proj</span> <span class="string">&quot;0.1.0-SNAPSHOT&quot;</span><br>  <span class="keyword">:dependencies</span> <span class="vector">&#91;<span class="vector">&#91;<span class="symbol">org.clojure/clojure</span> <span class="string">&quot;1.4.0&quot;</span>&#93;</span>&#93;</span><br>  <span class="keyword">:source-paths</span> <span class="vector">&#91;<span class="string">&quot;src&quot;</span> <span class="string">&quot;target/generated&quot;</span>&#93;</span><br>  <span class="keyword">:main</span> <span class="meta">&#94;<span class="keyword">:skip-aot</span> <span class="symbol">my.src-generator</span></span><br>  <span class="keyword">:prep-tasks</span> <span class="vector">&#91;<span class="vector">&#91;<span class="string">&quot;with-profile&quot;</span> <span class="string">&quot;+gen,+dev&quot;</span> <span class="string">&quot;run&quot;</span>&#93;</span>  <span class="string">&quot;compile&quot;</span>&#93;</span><br>  <span class="keyword">:profiles</span> <span class="map">{<span class="keyword">:dev</span> <span class="map">{<span class="keyword">:source-paths</span> <span class="vector">&#91;<span class="string">&quot;src&quot;</span> <span class="string">&quot;dev-src&quot;</span> <span class="string">&quot;target/generated&quot;</span>&#93;</span>}</span><br>             <span class="keyword">:gen</span> <span class="map">{<span class="keyword">:prep-tasks</span> <span class="meta">&#94;<span class="keyword">:replace</span> <span class="vector">&#91;&#93;</span></span>}</span>}</span><br>  <span class="keyword">:aliases</span> <span class="map">{<span class="string">&quot;gen&quot;</span> <span class="vector">&#91;<span class="string">&quot;with-profile&quot;</span> <span class="string">&quot;+gen,+dev&quot;</span> <span class="string">&quot;run&quot;</span>&#93;</span>}</span>)</span></span></code></pre></p><h3>Conclusion</h3><p>This required using many of lein's features to get working - hopefully you'll find a use for some of them.</p><p>Discuss this post <a href="https://github.com/hugoduncan/hugoduncan.github.com/discussions/categories/posts">here</a>.</p><p><i>Published: 2013-10-28</i></p></div><div><h1><a href="post/alembic_reloads_your_project_clj_dependencies.html">Alembic Reloads your Leiningen project.clj Dependencies</a></h1><p>You're working away in a Clojure REPL, when you realise you need to add a dependency.  You add the dependency to your [leiningen][lein] <code>project.clj</code> file and then?  Instead of shutting down your REPL, loosing whatever state you have built up, you can use [Alembic][alembic] to load the new dependencies.  Simply call <code>&#40;alembic.still/load-project&#41;</code>.</p><p>Of course, it still has to work within the confines of the JVM's classloaders, so you can only add dependencies, and not modify versions or remove dependencies, but this should still cover a lot of use cases.</p><p>To use alembic on a single project, simply add it as a dependency in your <code>:dev</code> profile in <code>project.clj</code>:</p><pre><code class="clj">:profiles {:dev {:dependencies &#91;&#91;alembic &quot;0.2.0&quot;&#93;&#93;}}
+</code></pre><p>To make alembic available in all your projects, and it to the <code>:user</code> profile in <code>&#126;/.lein/profiles.clj</code> instead:</p><pre><code class="clj">{:user {:dependencies &#91;&#91;alembic &quot;0.2.0&quot;&#93;&#93;}}
+</code></pre><p>Alembic also allows you to directly add dependencies without editing your <code>project.clj</code> file, using the <code>distill</code> function.  Use this if you are just exploring libraries, for example.</p><p>Finally a big thank you to [Anthony Grimes][raynes] and the other [flatland][flatland] developers for removing classlojure's dependency on <code>useful</code>, which should make this all much more robust.</p><p>[alembic]: <a href='https://github.com/pallet/alembic#alembic'>https://github.com/pallet/alembic#alembic</a> "Alembic" [lein]: <a href='http://leiningen.org'>http://leiningen.org</a> "Leiningen" [raynes]: <a href='http://blog.raynes.me/'>http://blog.raynes.me/</a> "Raynes" [flatland]: <a href='https://github.com/flatland/'>https://github.com/flatland/</a> "flatland"</p><p>Discuss this post <a href="https://github.com/hugoduncan/hugoduncan.github.com/discussions/categories/posts">here</a>.</p><p><i>Published: 2013-08-29</i></p></div>
+
+      
+      <div style="margin-bottom: 20px; float: right;">
+        <a class="page-link" href="archive.html">Archive</a>
+      </div>
+      
+    </div>
+    <script>
+      document.addEventListener('DOMContentLoaded', (event) => {
+        document.querySelectorAll('pre code').forEach((el) => {
+          if (!el.classList.contains('clojure')) {
+            hljs.highlightElement(el);
+          }
+        });
+      });
+    </script>
+  </body>
 </html>

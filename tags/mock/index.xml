@@ -1,77 +1,35 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<feed xmlns='http://www.w3.org/2005/Atom' xml:lang='en-us'>
- <title>pelure</title>
- <id>http://hugoduncan.github.com/</id>
- <link href='./' />
- <link rel='self' href='' />
- <logo>rsslogo.jpg</logo>
- <icon>/favicon.ico</icon>
- <author><name>Hugo Duncan</name></author>
- <subtitle>Pelure </subtitle>
- <rights>All content written by Hugo Duncan and photos by Hugo Duncan Copyright Hugo Duncan, all rights reserved.</rights> 
- <updated>2013-10-28T00:00:00Z</updated>
-
-
-<entry xml:base="http://hugoduncan.github.com/post/mocking_clojure_functions_with_atticus"><title>Mocking Clojure Functions with Atticus</title><link href="http://hugoduncan.github.com/post/mocking_clojure_functions_with_atticus"/><id>http://hugoduncan.github.com/post/mocking_clojure_functions_with_atticus</id><published>2010-05-18T00:00:00Z</published><updated>2010-05-18T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;&lt;p&gt;I dislike most mocking, and try and avoid it as much as possible. Sometimes
-it is however the only realistic way of testing.  I did a quick survey of
-mocking tools in clojure, and found them very much reflecting the Java mocking
-libraries. Clojure has a few more dynamic capabilities than Java, so I thought a
-little about how these could be used to make a simple mocking facility, and &lt;a href=&#34;http://github.com/hugoduncan/atticus&#34;&gt;atticus&lt;/a&gt; is what I came up
-with.&lt;/p&gt;
-&lt;p&gt;There is a consensus that mocking should be implemented by binding a
-function&amp;rsquo;s var to a new function for the duration of a test, and atticus does
-this too. Atticus&amp;rsquo; premise is that we can do simple mocking by declaring the
-mock function as a local function definition, and have the local function do the
-argument checking, return value setting, etc.  The simplest case would be
-something like below, which checks the value of its argument and specifies a
-return value:&lt;/p&gt;
-&lt;pre class=&#34;clojure&#34;&gt;
-;; pull in namespaces
-(use &amp;lsquo;clojure.test)
-(require &amp;lsquo;atticus.mock)&lt;/p&gt;
-
-&lt;p&gt;;; define test which mocks f
-(deftest mock-test
-  (atticus.mock/expects
-    [(f &lt;a href=&#34;is (= arg 1&#34;&gt;arg&lt;/a&gt; &amp;ldquo;Check argument&amp;rdquo;)
-       arg)] ; set the return value
-    ;; in a real test case this would be called
-    ;; indirectly by some other function
-    (is (= 1 (f 1)) &amp;ldquo;Call mocked function&amp;rdquo;))
-&lt;/pre&gt;
-&lt;p&gt;At the moment, I have added two macros to this.  &lt;code&gt;once&lt;/code&gt;, which
-checks a function is called once, and &lt;code&gt;times&lt;/code&gt;, which checks that a
-function is called a specific number of times. The macros are used to wrap the
-body of the mock function, which keeps the function&amp;rsquo;s expected behaviour in one
-place.&lt;/p&gt;
-&lt;pre class=&#34;clojure&#34;&gt;
-;; define test, that should be called just once
-(deftest mock-test
-  (atticus.mock/expects
-    &lt;a href=&#34;is (= 1 (f 1&#34;&gt;(f &lt;a href=&#34;atticus.mock/once
-         (is (= arg 1&#34;&gt;arg&lt;/a&gt; &amp;ldquo;Check argument&amp;rdquo;)
-         arg))&lt;/a&gt;) &amp;ldquo;Call mocked function&amp;rdquo;))
-&lt;/pre&gt;
-&lt;pre class=&#34;clojure&#34;&gt;
-;; define test, that should be called exactly twice
-(deftest mock-test
-  (atticus.mock/expects
-    &lt;a href=&#34;is (= 1 (f 1&#34;&gt;(f &lt;a href=&#34;atticus.mock/times 2
-         (is (= arg 1&#34;&gt;arg&lt;/a&gt; &amp;ldquo;Check argument&amp;rdquo;)
-         arg))&lt;/a&gt;) &amp;ldquo;Call mocked function&amp;rdquo;)
-    (is (= 1 (f 1)) &amp;ldquo;Call mocked function&amp;rdquo;))
-&lt;/pre&gt;
-&lt;p&gt;So what do you think, is this a reasonable approach? Not having the explicit
-calls to &lt;code&gt;returns&lt;/code&gt;, etc, might be seen as a loss of declarative
-clarity, but I for one prefer this, as it gives you the full power of the
-language to test the arguments and set the return value.&lt;/p&gt;
-&lt;h3&gt;References&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;http://s-expressions.com/2010/01/24/conjure-simple-mocking-and-stubbing-for-clojure-unit-tests/&#34;&gt;conjure – simple mocking and stubbing for Clojure unit-tests&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;http://richhickey.github.com/clojure-contrib/mock-api.html&#34;&gt;clojure.contrib.mock&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;http://code.google.com/p/test-expect/&#34;&gt;test-expect&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;http://blog.n01se.net/?p=134&#34;&gt;Using binding to mock out even “direct linked” functions in Clojure&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;&lt;/p&gt;
-</content></entry>
-
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Pelure</title>
+  <link href="http://hugoduncan.org/index.xml" rel="self"/>
+  <link href="http://hugoduncan.org/"/>
+  <updated>2021-11-15T01:45:48+00:00</updated>
+  <id>http://hugoduncan.org/</id>
+  <author>
+    <name>Hugo Duncan</name>
+  </author>
+  <entry>
+    <id>http://hugoduncan.org/post/mocking_clojure_functions_with_atticus.html</id>
+    <link href="http://hugoduncan.org/post/mocking_clojure_functions_with_atticus.html"/>
+    <title>Mocking Clojure Functions with Atticus</title>
+    <summary>I dislike most mocking, and try and avoid it as much as possible. Sometimes it is however the only realistic way of testing.  I did a quick survey of mocking tools in clojure, and found them very much reflecting the Java mocking libraries. Clojure has a few more dynamic capabilities than Java, so I thought a little about how these could be used to make a simple mocking facility, and atticus is what I came up with.</summary>
+    <updated>2010-05-18T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p><p>I dislike most mocking, and try and avoid it as much as possible. Sometimes it is however the only realistic way of testing.  I did a quick survey of mocking tools in clojure, and found them very much reflecting the Java mocking libraries. Clojure has a few more dynamic capabilities than Java, so I thought a little about how these could be used to make a simple mocking facility, and <a href="http://github.com/hugoduncan/atticus">atticus</a> is what I came up with.</p> <p>There is a consensus that mocking should be implemented by binding a function's var to a new function for the duration of a test, and atticus does this too. Atticus' premise is that we can do simple mocking by declaring the mock function as a local function definition, and have the local function do the argument checking, return value setting, etc.  The simplest case would be something like below, which checks the value of its argument and specifies a return value:</p> <pre class="clojure"> ;; pull in namespaces (use 'clojure.test) (require 'atticus.mock)</p><p>;; define test which mocks f (deftest mock-test   (atticus.mock/expects<pre><code>&#91;&#40;f &#91;arg&#93;
+   &#40;is &#40;= arg 1&#41; &quot;Check argument&quot;&#41;
+   arg&#41;&#93; ; set the return value
+;; in a real test case this would be called
+;; indirectly by some other function
+&#40;is &#40;= 1 &#40;f 1&#41;&#41; &quot;Call mocked function&quot;&#41;&#41; </code></pre></pre> <p>At the moment, I have added two macros to this.  <code>once</code>, which checks a function is called once, and <code>times</code>, which checks that a function is called a specific number of times. The macros are used to wrap the body of the mock function, which keeps the function's expected behaviour in one place.</p> <pre class="clojure"> ;; define test, that should be called just once (deftest mock-test   (atticus.mock/expects<pre><code>&#91;&#40;f &#91;arg&#93;
+   &#40;atticus.mock/once
+     &#40;is &#40;= arg 1&#41; &quot;Check argument&quot;&#41;
+     arg&#41;&#41;&#93;
+&#40;is &#40;= 1 &#40;f 1&#41;&#41; &quot;Call mocked function&quot;&#41;&#41; </code></pre></pre> <pre class="clojure"> ;; define test, that should be called exactly twice (deftest mock-test   (atticus.mock/expects<pre><code>&#91;&#40;f &#91;arg&#93;
+   &#40;atticus.mock/times 2
+     &#40;is &#40;= arg 1&#41; &quot;Check argument&quot;&#41;
+     arg&#41;&#41;&#93;
+&#40;is &#40;= 1 &#40;f 1&#41;&#41; &quot;Call mocked function&quot;&#41;
+&#40;is &#40;= 1 &#40;f 1&#41;&#41; &quot;Call mocked function&quot;&#41;&#41; </code></pre></pre> <p>So what do you think, is this a reasonable approach? Not having the explicit calls to <code>returns</code>, etc, might be seen as a loss of declarative clarity, but I for one prefer this, as it gives you the full power of the language to test the arguments and set the return value.</p> <h3>References</h3> <ul> <li><a href="http://s-expressions.com/2010/01/24/conjure-simple-mocking-and-stubbing-for-clojure-unit-tests/">conjure – simple mocking and stubbing for Clojure unit-tests</a></li> <li><a href="http://richhickey.github.com/clojure-contrib/mock-api.html">clojure.contrib.mock</a></li> <li><a href="http://code.google.com/p/test-expect/">test-expect</a></li> <li><a href="http://blog.n01se.net/?p=134">Using binding to mock out even “direct linked” functions in Clojure</a></li> </ul></p>]]>
+    </content>
+  </entry>
 </feed>

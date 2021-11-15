@@ -1,28 +1,21 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<feed xmlns='http://www.w3.org/2005/Atom' xml:lang='en-us'>
- <title>pelure</title>
- <id>http://hugoduncan.github.com/</id>
- <link href='./' />
- <link rel='self' href='' />
- <logo>rsslogo.jpg</logo>
- <icon>/favicon.ico</icon>
- <author><name>Hugo Duncan</name></author>
- <subtitle>Pelure </subtitle>
- <rights>All content written by Hugo Duncan and photos by Hugo Duncan Copyright Hugo Duncan, all rights reserved.</rights> 
- <updated>2013-10-28T00:00:00Z</updated>
-
-
-<entry xml:base="http://hugoduncan.github.com/post/product_development_flow"><title>Product Development Flow</title><link href="http://hugoduncan.github.com/post/product_development_flow"/><id>http://hugoduncan.github.com/post/product_development_flow</id><published>2009-08-30T00:00:00Z</published><updated>2009-08-30T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;I have spent the last few months with my latest start-up, &lt;a href=&#34;http://artfox.com&#34;&gt;Artfox&lt;/a&gt;, where I have been trying to push home some of the lean start-up advice expounded by &lt;a href=&#34;http://startuplessonslearned.blogspot.com&#34;&gt;Eric Ries&lt;/a&gt; and &lt;a href=&#34;http://steveblank.com/&#34;&gt;Steve Blank&lt;/a&gt;.  I was hoping that &#34;The Principles of Product Development Flow&#34;, by &lt;a href=&#34;http://www.reinertsenassociates.com/&#34;&gt;Donald Reinertsen&lt;/a&gt;, might help me in making a persuasive argument for some of the more troublesome concepts around minimum viable product and ensuring that feedback loops are in place with your customers as soon as possible. Unfortunately, I don&#39;t think that this is the book if you are looking for immediate, practical prescription, but it is a thought provoking, rigorous view of the product development process, that pulls together ideas from manufacturing, telecommunications and the Marines.&lt;/p&gt;
-
-&lt;p&gt;Perhaps Reinertsen&#39;s most accessible advice is that decisions in product development should be based on a strong economic foundation, pulled together by a concept of the &#34;Cost of Delay&#34;.  Rather than on relying on prescriptions for each of several interconnected metrics, such as efficiency and utilisation, Reinertsen suggests that economics will provide different targets for each of these metrics depending on the costs of the project at hand.&lt;/p&gt;
-
-&lt;p&gt;His proposition that product development organisations should measure &#34;Design in Process&#34;, similar to the idea of &#34;Intellectual Working In Process&#34; proposed by Thomas Stewart in his book &#34;Intellectual Capital&#34;, is what allows him to make the parallels to manufacturing and queueing theory and enables the application of the wide body of work in these fields to product development.&lt;/p&gt;
-
-&lt;p&gt;His practical advice, such as working in small batches and using a cadence for activities that require coordination, will come as no surprise to practitioners of agile development, and Reinertsen provides clear reasoning of why these practices work.&lt;/p&gt;
-
-&lt;p&gt;During my time at Alcan, and later Novelis, I gave a lot of thought to scheduling, queues and cycle times in a transformation based manufacturing environment, and I found that this had many parallels to his view of the product development process, and little in common with what Reinertsen describes as manufacturing, which seems to be limited to high volume assembly type operations.  I found many ideas that could be usefully taken back to a manufacturing context.&lt;/p&gt;
-
-&lt;p&gt;If you look at this book as an introduction to scheduling, queueing theory and the reason&#39;s behind some of agile development practices, then you will not be disappointed.&lt;/p&gt;
-</content></entry>
-
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Pelure</title>
+  <link href="http://hugoduncan.org/index.xml" rel="self"/>
+  <link href="http://hugoduncan.org/"/>
+  <updated>2021-11-15T01:45:47+00:00</updated>
+  <id>http://hugoduncan.org/</id>
+  <author>
+    <name>Hugo Duncan</name>
+  </author>
+  <entry>
+    <id>http://hugoduncan.org/post/product_development_flow.html</id>
+    <link href="http://hugoduncan.org/post/product_development_flow.html"/>
+    <title>Product Development Flow</title>
+    <summary>I have spent the last few months with my latest start-up, Artfox, where I have been trying to push home some of the lean start-up advice expounded by Eric Lie's and Steve Blank.  I was hoping that 'The Principles of Product Development Flow', by Donald Reinertsen, might help me in making a persuasive argument for some of the more troublesome concepts around minimum viable product and ensuring that feedback loops are in place with your customers as soon as possible. Unfortunately, I don't think that this is the book if you are looking for immediate, practical prescription, but it is a thought provoking, rigorous view of the product development process, that pulls together ideas from manufacturing, telecommunications and the Marines.</summary>
+    <updated>2009-08-30T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p><p>I have spent the last few months with my latest start-up, <a href="http://artfox.com">Artfox</a>, where I have been trying to push home some of the lean start-up advice expounded by <a href="http://startuplessonslearned.blogspot.com">Eric Ries</a> and <a href="http://steveblank.com/">Steve Blank</a>.  I was hoping that "The Principles of Product Development Flow", by <a href="http://www.reinertsenassociates.com/">Donald Reinertsen</a>, might help me in making a persuasive argument for some of the more troublesome concepts around minimum viable product and ensuring that feedback loops are in place with your customers as soon as possible. Unfortunately, I don't think that this is the book if you are looking for immediate, practical prescription, but it is a thought provoking, rigorous view of the product development process, that pulls together ideas from manufacturing, telecommunications and the Marines.</p></p><p><p>Perhaps Reinertsen's most accessible advice is that decisions in product development should be based on a strong economic foundation, pulled together by a concept of the "Cost of Delay".  Rather than on relying on prescriptions for each of several interconnected metrics, such as efficiency and utilisation, Reinertsen suggests that economics will provide different targets for each of these metrics depending on the costs of the project at hand.</p></p><p><p>His proposition that product development organisations should measure "Design in Process", similar to the idea of "Intellectual Working In Process" proposed by Thomas Stewart in his book "Intellectual Capital", is what allows him to make the parallels to manufacturing and queueing theory and enables the application of the wide body of work in these fields to product development.</p></p><p><p>His practical advice, such as working in small batches and using a cadence for activities that require coordination, will come as no surprise to practitioners of agile development, and Reinertsen provides clear reasoning of why these practices work.</p></p><p><p>During my time at Alcan, and later Novelis, I gave a lot of thought to scheduling, queues and cycle times in a transformation based manufacturing environment, and I found that this had many parallels to his view of the product development process, and little in common with what Reinertsen describes as manufacturing, which seems to be limited to high volume assembly type operations.  I found many ideas that could be usefully taken back to a manufacturing context.</p></p><p><p>If you look at this book as an introduction to scheduling, queueing theory and the reason's behind some of agile development practices, then you will not be disappointed.</p></p>]]>
+    </content>
+  </entry>
 </feed>

@@ -1,76 +1,41 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<feed xmlns='http://www.w3.org/2005/Atom' xml:lang='en-us'>
- <title>pelure</title>
- <id>http://hugoduncan.github.com/</id>
- <link href='./' />
- <link rel='self' href='' />
- <logo>rsslogo.jpg</logo>
- <icon>/favicon.ico</icon>
- <author><name>Hugo Duncan</name></author>
- <subtitle>Pelure </subtitle>
- <rights>All content written by Hugo Duncan and photos by Hugo Duncan Copyright Hugo Duncan, all rights reserved.</rights> 
- <updated>2013-10-28T00:00:00Z</updated>
-
-
-<entry xml:base="http://hugoduncan.github.com/post/rails_environments_for_lisp"><title>Rails Environments For Lisp</title><link href="http://hugoduncan.github.com/post/rails_environments_for_lisp"/><id>http://hugoduncan.github.com/post/rails_environments_for_lisp</id><published>2009-04-07T00:00:00Z</published><updated>2009-04-07T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;The facility of Ruby on Rails&#39; test, development and production environments is one of those features that goes almost unremarked, but which makes using rails more pleasant.  No doubt everyone has their own solution for this in other environments, and while I am sure Common Lisp is not lacking in examples, I have not seen an idiomatic implementation.  In developing &lt;a href=&#34;http://github.com/hugoduncan/cl-blog-generator&#34;&gt;cl-blog-generator&lt;/a&gt; I came up with the following solution.&lt;/p&gt;
-&lt;p&gt;Configuration in Common Lisp usually depends on using special variables, which can be rebound across any block of code.  I started by putting the configuration of my blog into s-expressions in files, but got tired of specifying the file names for different blogs.  Instead, I created an association list for each configuration, and registered each using a symbol as key.  I can now switch to a given environment by specifying the symbol for the environment.
-&lt;/p&gt;
-&lt;p&gt;The implementation (in &lt;code&gt;src/configure.lisp&lt;/code&gt; under the &lt;a href=&#34;http://github.com/hugoduncan/cl-blog-generator&#34;&gt;GitHub repository&lt;/a&gt;) consists of two functions and a special variable.  &lt;code&gt;SET-ENVIRONMENT&lt;/code&gt; is used to register an environment, and &lt;code&gt;CONFIGURE&lt;/code&gt; is used to make an environment active.  The environments are stored in &lt;code&gt;*ENVIRONMENTS*&lt;/code&gt; special as an association list.  An example of setting up the configurations can be seen in the &lt;code&gt;config.lisp&lt;/code&gt; file.  In creating the configurations I drop the &#39;*&#39; from the special names.&lt;/p&gt;
-&lt;p&gt;I&#39;m relatively new to CL, so let me now if I have overlooked anything.  Writing this post makes me think I am missing a &lt;code&gt;WITH-ENVIRONMENT&lt;/code&gt; macro ...&lt;/p&gt;
-</content></entry>
-
-<entry xml:base="http://hugoduncan.github.com/post/cl_blog_generator_gets_comments"><title>cl-blog-generator Gets Comments</title><link href="http://hugoduncan.github.com/post/cl_blog_generator_gets_comments"/><id>http://hugoduncan.github.com/post/cl_blog_generator_gets_comments</id><published>2009-03-31T00:00:00Z</published><updated>2009-03-31T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;I have now added a comment system to &lt;a href=&#34;http://github.com/hugoduncan/cl-blog-generator&#34;&gt;cl-blog-generator&lt;/a&gt;.  My requirements were for a simple, low overhead, commenting system, preferable one that could possibly be fully automated.&lt;/p&gt;
-
-&lt;p&gt;The comment system was inspired by &lt;a href=&#34;http://www.steve.org.uk/Software/chronicle/&#34;&gt;Chronicle&lt;/a&gt;&#39;s, with a slight modification in approach - the comments are never saved on the web server, and are just sent by email to a dedicated email address.  Spam filtering is delegated to the whatever spam filtering is implemented on the mail server, or in your email client.  The comment emails are then processed in CL using &lt;a href=&#34;http://common-lisp.net/project/mel-base/&#34;&gt;mel-base&lt;/a&gt; and written to the local filesystem.  Moderation can optionally occur on the CL side, if that is preferable to using the email client.&lt;/p&gt;
-
-&lt;p&gt;There is still some work left to do - I would like to be able to switch off comments on individual posts, either on demand on after a default time period - but I thought I would let real world usage drive my development.&lt;/p&gt;
-</content></entry>
-
-<entry xml:base="http://hugoduncan.github.com/post/blog_site_generators"><title>Blog Site Generators</title><link href="http://hugoduncan.github.com/post/blog_site_generators"/><id>http://hugoduncan.github.com/post/blog_site_generators</id><published>2009-03-27T00:00:00Z</published><updated>2009-03-27T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;
-I recently uploaded some links to my &lt;a href=&#34;http://github.com/hugoduncan/cl-blog-generator&#34;&gt;cl-blog-generator&lt;/a&gt; project, and have been getting some feedback with comparisons to other blog site generators, or compilers, such as &lt;a href=&#34;http://www.advogato.org/person/Stevey/&#34;&gt;Steve Kemp&lt;/a&gt;&#39;s &lt;a href=&#34;http://www.steve.org.uk/Software/chronicle/&#34;&gt;Chronicle&lt;/a&gt;, or &lt;a href=&#34;http://github.com/mojombo/jekyll&#34;&gt;Jekyll&lt;/a&gt; as used on &lt;a href=&#34;http://github.com/blog/272-github-pages&#34;&gt;GitHub Pages&lt;/a&gt;.  Compared to these, cl-blog-generator is immature, but takes a different approach in several areas that &lt;a href=&#34;http://advogato.org/person/chalst/&#34;&gt;Charles Stewart&lt;/a&gt; suggested might be worth exploring.  I look forward to any comments you might have.
-&lt;/p&gt;
-&lt;h3&gt;Formatting&lt;/h3&gt;
-&lt;p&gt;
-All the blog generators seem to use a file based approach for writing content, but they differ in the choice of input formats supported, and in the approach to templating.
-&lt;code&gt;cl-blog-generator&lt;/code&gt; is the least flexible, requiring input in XHTML, while &lt;code&gt;Chronicle&lt;/code&gt; allows HTML, Textile or Markdown, and &lt;code&gt;Jekyll&lt;/code&gt; Textile or Markdown.  For templates, &lt;code&gt;Chronicle&lt;/code&gt; uses Perl&#39;s &lt;a href=&#34;http://search.cpan.org/~samtregar/HTML-Template-2.9/Template.pm&#34;&gt;HTML::Template&lt;/a&gt;, and &lt;code&gt;Jekyll&lt;/code&gt; uses &lt;a href=&#34;http://www.liquidmarkup.org/&#34;&gt;Liquid&lt;/a&gt;. &lt;code&gt;cl-blog-generator&lt;/code&gt; uses an approach which substitutes content into elements identified with specific id&#39;s or classes, similar to transforming the templates with XSLT.
-&lt;/p&gt;
-&lt;p&gt;
-&lt;code&gt;cl-blog-generator&lt;/code&gt;&#39;s choice of XHTML input was driven by a requirement to enable the validation of post content in the editor, which is not possible using &lt;code&gt;Chronicle&lt;/code&gt;&#39;s HTML input because of the headers and lack of a &lt;code&gt;body&lt;/code&gt; or &lt;code&gt;head&lt;/code&gt; element, and a desire to be able to use any CSS tricks I wanted, which ruled out Textile and Markdown, or any other markup language.  The lack of an external templating engine in &lt;code&gt;cl-blog-generator&lt;/code&gt; was driven by simplicity; I couldn&#39;t see a use for conditionals or loops given the fixed structure of the content, and this choice leads to templates that validate, unlike &lt;code&gt;Jekyll&lt;/code&gt;, and which are not full of HTML comments.  The current id and class naming scheme in &lt;code&gt;cl-blog-generator&lt;/code&gt; could certainly use some refinement to improve the flexibility of the output content format, and I would definitely welcome requests for enhancements should the scheme not fit your requirements.
-&lt;/p&gt;
-
-&lt;h3&gt;Database and Two Phase Publishing&lt;/h3&gt;
-&lt;p&gt;
-Perhaps the most significant difference in approach for &lt;code&gt;cl-blog-generator&lt;/code&gt; is its use of a database and an explicit publish step.  With &lt;code&gt;cl-blog-generator&lt;/code&gt; a draft can exist anywhere in the filesystem, and must be &#34;published&#34; to be recognised by the blog site generator.  The publishing process fills in some default metadata, such as post date, if this is not originally specified, copies the modified draft to a configurable location, and enters the metadata into the database.  This ensures that the post is completely specified by its representation in the filesystem, and that the database is recreatable.
-&lt;/p&gt;
-&lt;p&gt;
-The database enables the partial regeneration of the site, without having to parse the whole site, and makes the linking of content much simpler.
-However, having &lt;a href=&#34;http://common-lisp.net/project/elephant/&#34;&gt;Elephant&lt;/a&gt; as a dependency is probably the largest impediment to installation at present.
-&lt;/p&gt;
-
-&lt;h3&gt;On Titles, Dates, Tags and Filenames&lt;/h3&gt;
-
-&lt;p&gt;&lt;code&gt;cl-blog-generator&lt;/code&gt;&#39;s input XHTML has been augmented to add elements for specifying post title, date, update date (which I believe is missing from the other systems), slug, description, and tags.  On publising (see next section), any of these elements that is missing, except the mandatory title, is filled in with defaults.&lt;/p&gt;
-
-&lt;p&gt;Both &lt;code&gt;Chronicle&lt;/code&gt; and &lt;code&gt;Jekyll&lt;/code&gt; use a preamble to specify metadata, with the filename being used to generate the post&#39;s slug. &lt;code&gt;Jekyll&lt;/code&gt; also uses the filename and its path for specifying the post date, and tags.
-&lt;/p&gt;
-
-&lt;h3&gt;Bells and Whistles&lt;/h3&gt;
-
-&lt;p&gt;&lt;p&gt;Finally, here is a grab bag of features.&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;code&gt;Chronicle&lt;/code&gt; comes with a commenting system.
-&lt;/li&gt;
-&lt;li&gt;
-&lt;code&gt;cl-blog-generator&lt;/code&gt; generates a &lt;code&gt;meta&lt;/code&gt; description element, which is used by search engines to generate link text.  It also generates &lt;code&gt;meta&lt;/code&gt; elements with links to the previous and next posts.
-&lt;/li&gt;
-&lt;li&gt;
-&lt;code&gt;Jekyll&lt;/code&gt; has a &amp;ldquo;Related posts&amp;rdquo; feature for generating links to similar posts.
-&lt;/li&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;li&gt; &lt;code&gt;Chronicle&lt;/code&gt; and &lt;code&gt;Jekyll&lt;/code&gt; both have migration scripts for importing content. &lt;/li&gt;
-&lt;li&gt; &lt;code&gt;Chronicle&lt;/code&gt; has a spooler for posting pre-written content at specific times&lt;/li&gt;
-&lt;/ul&gt;&lt;/p&gt;
-</content></entry>
-
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Pelure</title>
+  <link href="http://hugoduncan.org/index.xml" rel="self"/>
+  <link href="http://hugoduncan.org/"/>
+  <updated>2021-11-15T01:45:47+00:00</updated>
+  <id>http://hugoduncan.org/</id>
+  <author>
+    <name>Hugo Duncan</name>
+  </author>
+  <entry>
+    <id>http://hugoduncan.org/post/rails_environments_for_lisp.html</id>
+    <link href="http://hugoduncan.org/post/rails_environments_for_lisp.html"/>
+    <title>Rails Environments For Lisp</title>
+    <summary>The facility of Ruby on Rails' test, development and production environments is one of those features that goes almost unremarked, but which makes using rails more pleasant.  No doubt everyone has their own solution for this in other environments, and while I am sure Common Lisp is not lacking in examples, I have not seen an idiomatic implementation.  In developing cl-blog-generator I came up with the following solution.</summary>
+    <updated>2009-04-07T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p><p>The facility of Ruby on Rails' test, development and production environments is one of those features that goes almost unremarked, but which makes using rails more pleasant.  No doubt everyone has their own solution for this in other environments, and while I am sure Common Lisp is not lacking in examples, I have not seen an idiomatic implementation.  In developing <a href="http://github.com/hugoduncan/cl-blog-generator">cl-blog-generator</a> I came up with the following solution.</p> <p>Configuration in Common Lisp usually depends on using special variables, which can be rebound across any block of code.  I started by putting the configuration of my blog into s-expressions in files, but got tired of specifying the file names for different blogs.  Instead, I created an association list for each configuration, and registered each using a symbol as key.  I can now switch to a given environment by specifying the symbol for the environment. </p> <p>The implementation (in <code>src/configure.lisp</code> under the <a href="http://github.com/hugoduncan/cl-blog-generator">GitHub repository</a>) consists of two functions and a special variable.  <code>SET-ENVIRONMENT</code> is used to register an environment, and <code>CONFIGURE</code> is used to make an environment active.  The environments are stored in <code><em>ENVIRONMENTS</em></code> special as an association list.  An example of setting up the configurations can be seen in the <code>config.lisp</code> file.  In creating the configurations I drop the '*' from the special names.</p> <p>I'm relatively new to CL, so let me now if I have overlooked anything.  Writing this post makes me think I am missing a <code>WITH-ENVIRONMENT</code> macro ...</p></p>]]>
+    </content>
+  </entry>
+  <entry>
+    <id>http://hugoduncan.org/post/cl_blog_generator_gets_comments.html</id>
+    <link href="http://hugoduncan.org/post/cl_blog_generator_gets_comments.html"/>
+    <title>cl-blog-generator Gets Comments</title>
+    <summary>I have now added a comment system to cl-blog-generator.  My requirements were for a simple, low overhead, commenting system, preferable one that could possibly be fully automated.</summary>
+    <updated>2009-03-31T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p><p>I have now added a comment system to <a href="http://github.com/hugoduncan/cl-blog-generator">cl-blog-generator</a>.  My requirements were for a simple, low overhead, commenting system, preferable one that could possibly be fully automated.</p></p><p><p>The comment system was inspired by <a href="http://www.steve.org.uk/Software/chronicle/">Chronicle</a>'s, with a slight modification in approach - the comments are never saved on the web server, and are just sent by email to a dedicated email address.  Spam filtering is delegated to the whatever spam filtering is implemented on the mail server, or in your email client.  The comment emails are then processed in CL using <a href="http://common-lisp.net/project/mel-base/">mel-base</a> and written to the local filesystem.  Moderation can optionally occur on the CL side, if that is preferable to using the email client.</p></p><p><p>There is still some work left to do - I would like to be able to switch off comments on individual posts, either on demand on after a default time period - but I thought I would let real world usage drive my development.</p></p>]]>
+    </content>
+  </entry>
+  <entry>
+    <id>http://hugoduncan.org/post/blog_site_generators.html</id>
+    <link href="http://hugoduncan.org/post/blog_site_generators.html"/>
+    <title>Blog Site Generators</title>
+    <summary>I recently uploaded some links to my cl-blog-generator project, and have been getting some feedback with comparisons to other blog site generators, or compilers, such as Steve Kemp's Chronicle, or Jekyll as used on GitHub Pages.  Compared to these, cl-blog-generator is immature, but takes a different approach in several areas that Charles Stewart suggested might be worth exploring.  I look forward to any comments you might have. </summary>
+    <updated>2009-03-27T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p><p> I recently uploaded some links to my <a href="http://github.com/hugoduncan/cl-blog-generator">cl-blog-generator</a> project, and have been getting some feedback with comparisons to other blog site generators, or compilers, such as <a href="http://www.advogato.org/person/Stevey/">Steve Kemp</a>'s <a href="http://www.steve.org.uk/Software/chronicle/">Chronicle</a>, or <a href="http://github.com/mojombo/jekyll">Jekyll</a> as used on <a href="http://github.com/blog/272-github-pages">GitHub Pages</a>.  Compared to these, cl-blog-generator is immature, but takes a different approach in several areas that <a href="http://advogato.org/person/chalst/">Charles Stewart</a> suggested might be worth exploring.  I look forward to any comments you might have. </p> <h3>Formatting</h3> <p> All the blog generators seem to use a file based approach for writing content, but they differ in the choice of input formats supported, and in the approach to templating. <code>cl-blog-generator</code> is the least flexible, requiring input in XHTML, while <code>Chronicle</code> allows HTML, Textile or Markdown, and <code>Jekyll</code> Textile or Markdown.  For templates, <code>Chronicle</code> uses Perl's <a href="http://search.cpan.org/~samtregar/HTML-Template-2.9/Template.pm">HTML::Template</a>, and <code>Jekyll</code> uses <a href="http://www.liquidmarkup.org/">Liquid</a>. <code>cl-blog-generator</code> uses an approach which substitutes content into elements identified with specific id's or classes, similar to transforming the templates with XSLT. </p> <p> <code>cl-blog-generator</code>'s choice of XHTML input was driven by a requirement to enable the validation of post content in the editor, which is not possible using <code>Chronicle</code>'s HTML input because of the headers and lack of a <code>body</code> or <code>head</code> element, and a desire to be able to use any CSS tricks I wanted, which ruled out Textile and Markdown, or any other markup language.  The lack of an external templating engine in <code>cl-blog-generator</code> was driven by simplicity; I couldn't see a use for conditionals or loops given the fixed structure of the content, and this choice leads to templates that validate, unlike <code>Jekyll</code>, and which are not full of HTML comments.  The current id and class naming scheme in <code>cl-blog-generator</code> could certainly use some refinement to improve the flexibility of the output content format, and I would definitely welcome requests for enhancements should the scheme not fit your requirements. </p></p><p><h3>Database and Two Phase Publishing</h3> <p> Perhaps the most significant difference in approach for <code>cl-blog-generator</code> is its use of a database and an explicit publish step.  With <code>cl-blog-generator</code> a draft can exist anywhere in the filesystem, and must be "published" to be recognised by the blog site generator.  The publishing process fills in some default metadata, such as post date, if this is not originally specified, copies the modified draft to a configurable location, and enters the metadata into the database.  This ensures that the post is completely specified by its representation in the filesystem, and that the database is recreatable. </p> <p> The database enables the partial regeneration of the site, without having to parse the whole site, and makes the linking of content much simpler. However, having <a href="http://common-lisp.net/project/elephant/">Elephant</a> as a dependency is probably the largest impediment to installation at present. </p></p><p><h3>On Titles, Dates, Tags and Filenames</h3></p><p><p><code>cl-blog-generator</code>'s input XHTML has been augmented to add elements for specifying post title, date, update date (which I believe is missing from the other systems), slug, description, and tags.  On publising (see next section), any of these elements that is missing, except the mandatory title, is filled in with defaults.</p></p><p><p>Both <code>Chronicle</code> and <code>Jekyll</code> use a preamble to specify metadata, with the filename being used to generate the post's slug. <code>Jekyll</code> also uses the filename and its path for specifying the post date, and tags. </p></p><p><h3>Bells and Whistles</h3></p><p><p>Finally, here is a grab bag of features.</p> <ul> <li> <code>Chronicle</code> comes with a commenting system. </li> <li> <code>cl-blog-generator</code> generates a <code>meta</code> description element, which is used by search engines to generate link text.  It also generates <code>meta</code> elements with links to the previous and next posts. </li> <li> <code>Jekyll</code> has a "Related posts" feature for generating links to similar posts. </li></p><p><li> <code>Chronicle</code> and <code>Jekyll</code> both have migration scripts for importing content. </li> <li> <code>Chronicle</code> has a spooler for posting pre-written content at specific times</li> </ul></p>]]>
+    </content>
+  </entry>
 </feed>

@@ -1,242 +1,82 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<feed xmlns='http://www.w3.org/2005/Atom' xml:lang='en-us'>
- <title>pelure</title>
- <id>http://hugoduncan.github.com/</id>
- <link href='./' />
- <link rel='self' href='' />
- <logo>rsslogo.jpg</logo>
- <icon>/favicon.ico</icon>
- <author><name>Hugo Duncan</name></author>
- <subtitle>Pelure </subtitle>
- <rights>All content written by Hugo Duncan and photos by Hugo Duncan Copyright Hugo Duncan, all rights reserved.</rights> 
- <updated>2013-10-28T00:00:00Z</updated>
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Pelure</title>
+  <link href="http://hugoduncan.org/index.xml" rel="self"/>
+  <link href="http://hugoduncan.org/"/>
+  <updated>2021-11-15T01:45:48+00:00</updated>
+  <id>http://hugoduncan.org/</id>
+  <author>
+    <name>Hugo Duncan</name>
+  </author>
+  <entry>
+    <id>http://hugoduncan.org/post/clojurescript-libs-with-js-dependencies.html</id>
+    <link href="http://hugoduncan.org/post/clojurescript-libs-with-js-dependencies.html"/>
+    <title>How to Build Clojurescript Libs with JavaScript Dependencies</title>
+    <summary>A summary of different strategies for packaging JavaScipt dependencies in a Clojurescript library</summary>
+    <updated>2013-08-16T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p>Using JavaScript dependencies in a Clojurescript library seems to be hard.  It took me many hours to understand how it should work.  A big thanks to [Chas Emerick][cemerick] for setting me straight on most of this.</p><p>Luke Vanderhart [posted][lukespost] a general introduction to using Javascript libraries in Clojurescript.  Go read it if you haven't already - this post assumes you have.</p><p>While that post is an excellent description of using JavaScript in a Clojurescript application, it doesn't really address JavaScript in Clojurescript libraries, which has the additional problem of how to ensure the JavaScript dependency is available in the consumer of the library.  A Clojurescript library should definitely be capable of providing it's dependencies, but should also allow the consumer to override the version of these dependencies.</p><h2>Don't package the JavaScript</h2><p>The first approach is to simply not provide the JavaScript at all.  This is the approach taken by [jayq][jayq] for example.  The consumer of jayq, or any library that uses jayq, is required to provide jQuery through the JavaScript runtime.  This can take the form of a <code>&amp;lt;script&amp;gt;</code> link in the browser page, or a call to <code>webPage#injectJs</code> in phantomJS.  The compile <code>:libs</code> or <code>:foreign-libs</code> options can not be used to provide the dependency, as there is no way for the compiler to know that jayq depends on the namespace provided by these options.</p><p>For the consumer of the library to use compiler<code>:optimizations</code> other than <code>:whitespace</code>, they will need to provide an <code>:externs</code> file.</p><h2>Package JavaScript</h2><p>The second approach is to package the JavaScript via a Clojurescript namespace. This involves adding a <code>require</code> on a namespace to the code that directly depends on the JavaScript, and arranging for that Clojurescript namespace to load the JavaScript, using either of the compiler<code>:libs</code> or <code>:foreign-libs</code> options.</p><p>The Clojurescript library can make the JavaScript library available in its resources.  The library consumer can then use resource via the <code>:libs</code> or <code>:foreign-libs</code> options, depending on whether or not the JavaScript contains a <code>goog.provides</code> call.</p><p>If the library is packaged with a <code>goog.provides</code> call, then the consumer can not replace the version using <code>:libs &#91;&quot;&quot;&#93;</code> - the use of an explicit prefix in <code>:libs</code> is needed to prevent more than one JavaScript implementation trying to provide the clojure namespace, or the use of <code>:foreign-libs</code> where the namespace is explicitly mapped.</p><p>For examples, the [pprng][pprng] library packages its dependency with a <code>goog.provides</code> call, allowing the use of <code>:libs &#91;&quot;&quot;&#93;</code> to pull in the dependency.  The [papadom][papadom] library on the other hand provides vanilla javascript dependencies, and requires the use of the more verbose <code>:foreign-libs</code> option.</p><p>If the JavaScript is to be provided in the runtime, then the consumer will have to provide an empty namespace definition to satisfy the require in the Clojurescript library, and the<code>:externs</code> file as in the first case.</p><h2>Postscript</h2><p>There are several assumptions in much of the documentation that I didn't see explicitly explained.  I'll record these here for posterity.</p><p>A clojurescript library is always a source code library.  There is no such thing as the linking of compiled clojurescript artifacts.</p><p>Neither<code>:libs</code> nor<code>:foreign-libs</code> actually changes how the JavaScript is accessed within the clojurescript code.  If you include jQuery via a <code>:libs</code>, and a <code>require</code>, you still access it through <code>js/jQuery</code>.  The <code>require</code> of the namespace specified by <code>goog.provide</code>, or the namespace specified in the <code>:foreign-libs</code>' <code>:provides</code> key, simply ensures the JavaScript is loaded.</p><p>The choice of compiler <code>:optimizations</code> affects what information you need to provide, and this differs depending on whether you are providing javascript libraries through the runtime (e.g. $lt;script&gt; tags in the browser), or through <code>:libs</code> or <code>:foreign-libs</code> compiler options.  The simplest here is to use the compiler options.  When providing the JavaScript via the runtime, then everything should also just work if you are using no optimisation, or just <code>:whitespace</code>, but as soon as you try anything else, you will need to provide an :externs definition for the JavaScript libraries.</p><p>[lukespost]: <a href='http://lukevanderhart.com/2011/09/30/using-javascript-and-clojurescript.html'>http://lukevanderhart.com/2011/09/30/using-javascript-and-clojurescript.html</a> "Luke Vanderhart's post on JavaScript libs"</p><p>[jayq]: <a href='https://github.com/ibdknox/jayq'>https://github.com/ibdknox/jayq</a> "jayq"</p><p>[cemerick]: <a href='http://cemerick.com'>http://cemerick.com</a> "Chas Emerick"</p><p>[pprng]: <a href='https://github.com/cemerick/pprng'>https://github.com/cemerick/pprng</a> "pprng" [papadom]: <a href='https://github.com/hugoduncan/papadom'>https://github.com/hugoduncan/papadom</a> "papadom"</p>]]>
+    </content>
+  </entry>
+  <entry>
+    <id>http://hugoduncan.org/post/webapp_with_core.async.html</id>
+    <link href="http://hugoduncan.org/post/webapp_with_core.async.html"/>
+    <title>Exploring a todo app with core.async</title>
+    <summary>Builds the equivalent of the angularJS TODO example with core.async</summary>
+    <updated>2013-08-15T23:59:59+00:00</updated>
+    <content type="html">
+      <![CDATA[<p>We're going to build an equivalent of the [AngularJS TODO example][angulartodo] using core.async, and a templating library, [papadom][papadom], that I've written to help in this.</p><p>[Clojurescript][clojurescript] recently gained a [CSP][csp] implemetation via [core.async][core.async], similar to [Go's channels][golangchannel], or [CML's channels][cmlchannel] (CML also has a nice select).  Bruce Haumann started exploring this with [ClojureScript Core.Async Todos][brucetodo], and David Nolen has been looking at how to use core.async for [responsive design][cspresponsive].  In this post, we'll take the TODO example, and take it a little further.</p><h2>Basic Display</h2><p>We'll start with just displaying a list of todo items.  For this we'll need a template, so we'll just write this in HTML, and add a <code>t-template</code> attribute, which enables us to use mustache style templating of values to display.  This doesn't use mustache sections for looping, in order to preserve valid HTML markup.</p><pre><code class="html">&lt;h1&gt;TODOS&lt;/h1&gt;
+&lt;ul class=&quot;unstyled&quot;&gt;
+  &lt;li t-template=&quot;todos&quot;&gt;{{text}}&lt;/li&gt;
+&lt;/ul&gt;
+</code></pre><p>To get this to show something we'll need some code:</p><pre><code class="clj">&#40;ns app
+  &#40;:require
+   &#91;papadom.template :refer &#91;compile-templates render&#93;&#93;&#41;&#41;
 
-
-<entry xml:base="http://hugoduncan.github.com/post/clojurescript-libs-with-js-dependencies"><title>How to Build Clojurescript Libs with JavaScript Dependencies</title><link href="http://hugoduncan.github.com/post/clojurescript-libs-with-js-dependencies"/><id>http://hugoduncan.github.com/post/clojurescript-libs-with-js-dependencies</id><published>2013-08-16T00:00:00Z</published><updated>2013-08-16T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;Using JavaScript dependencies in a Clojurescript library seems to be hard.  It
-took me many hours to understand how it should work.  A big thanks to
-&lt;a href=&#34;http://cemerick.com&#34; title=&#34;Chas Emerick&#34;&gt;Chas Emerick&lt;/a&gt; for setting me straight on most of this.&lt;/p&gt;
-
-&lt;p&gt;Luke Vanderhart &lt;a href=&#34;http://lukevanderhart.com/2011/09/30/using-javascript-and-clojurescript.html&#34; title=&#34;Luke Vanderhart&#39;s post on JavaScript libs&#34;&gt;posted&lt;/a&gt; a general introduction to using Javascript
-libraries in Clojurescript.  Go read it if you haven&amp;rsquo;t already - this post
-assumes you have.&lt;/p&gt;
-
-&lt;p&gt;While that post is an excellent description of using JavaScript in
-a Clojurescript application, it doesn&amp;rsquo;t really address JavaScript in
-Clojurescript libraries, which has the additional problem of how to ensure the
-JavaScript dependency is available in the consumer of the library.  A
-Clojurescript library should definitely be capable of providing it&amp;rsquo;s
-dependencies, but should also allow the consumer to override the version of
-these dependencies.&lt;/p&gt;
-
-&lt;h2&gt;Don&amp;rsquo;t package the JavaScript&lt;/h2&gt;
-
-&lt;p&gt;The first approach is to simply not provide the JavaScript at all.  This is the
-approach taken by &lt;a href=&#34;https://github.com/ibdknox/jayq&#34; title=&#34;jayq&#34;&gt;jayq&lt;/a&gt; for example.  The consumer of jayq, or any
-library that uses jayq, is required to provide jQuery through the JavaScript
-runtime.  This can take the form of a &lt;code&gt;&amp;amp;lt;script&amp;amp;gt;&lt;/code&gt; link in the browser page,
-or a call to &lt;code&gt;webPage#injectJs&lt;/code&gt; in phantomJS.  The compile &lt;code&gt;:libs&lt;/code&gt; or
-&lt;code&gt;:foreign-libs&lt;/code&gt; options can not be used to provide the dependency, as there is
-no way for the compiler to know that jayq depends on the namespace provided by
-these options.&lt;/p&gt;
-
-&lt;p&gt;For the consumer of the library to use compiler&lt;code&gt;:optimizations&lt;/code&gt; other than
-&lt;code&gt;:whitespace&lt;/code&gt;, they will need to provide an &lt;code&gt;:externs&lt;/code&gt; file.&lt;/p&gt;
-
-&lt;h2&gt;Package JavaScript&lt;/h2&gt;
-
-&lt;p&gt;The second approach is to package the JavaScript via a Clojurescript namespace.
-This involves adding a &lt;code&gt;require&lt;/code&gt; on a namespace to the code that directly
-depends on the JavaScript, and arranging for that Clojurescript namespace to
-load the JavaScript, using either of the compiler&lt;code&gt;:libs&lt;/code&gt; or &lt;code&gt;:foreign-libs&lt;/code&gt;
-options.&lt;/p&gt;
-
-&lt;p&gt;The Clojurescript library can make the JavaScript library available in its
-resources.  The library consumer can then use resource via the &lt;code&gt;:libs&lt;/code&gt; or
-&lt;code&gt;:foreign-libs&lt;/code&gt; options, depending on whether or not the JavaScript contains a
-&lt;code&gt;goog.provides&lt;/code&gt; call.&lt;/p&gt;
-
-&lt;p&gt;If the library is packaged with a &lt;code&gt;goog.provides&lt;/code&gt; call, then the consumer can
-not replace the version using &lt;code&gt;:libs [&amp;quot;&amp;quot;]&lt;/code&gt; - the use of an explicit prefix in
-&lt;code&gt;:libs&lt;/code&gt; is needed to prevent more than one JavaScript implementation trying to
-provide the clojure namespace, or the use of &lt;code&gt;:foreign-libs&lt;/code&gt; where the namespace
-is explicitly mapped.&lt;/p&gt;
-
-&lt;p&gt;For examples, the &lt;a href=&#34;https://github.com/cemerick/pprng&#34; title=&#34;pprng&#34;&gt;pprng&lt;/a&gt; library packages its dependency with a
-&lt;code&gt;goog.provides&lt;/code&gt; call, allowing the use of &lt;code&gt;:libs [&amp;quot;&amp;quot;]&lt;/code&gt; to pull in the
-dependency.  The &lt;a href=&#34;https://github.com/hugoduncan/papadom&#34; title=&#34;papadom&#34;&gt;papadom&lt;/a&gt; library on the other hand provides vanilla
-javascript dependencies, and requires the use of the more verbose
-&lt;code&gt;:foreign-libs&lt;/code&gt; option.&lt;/p&gt;
-
-&lt;p&gt;If the JavaScript is to be provided in the runtime, then the consumer will have
-to provide an empty namespace definition to satisfy the require in the
-Clojurescript library, and the&lt;code&gt;:externs&lt;/code&gt; file as in the first case.&lt;/p&gt;
-
-&lt;h2&gt;Postscript&lt;/h2&gt;
-
-&lt;p&gt;There are several assumptions in much of the documentation that I didn&amp;rsquo;t see
-explicitly explained.  I&amp;rsquo;ll record these here for posterity.&lt;/p&gt;
-
-&lt;p&gt;A clojurescript library is always a source code library.  There is no such thing
-as the linking of compiled clojurescript artifacts.&lt;/p&gt;
-
-&lt;p&gt;Neither&lt;code&gt;:libs&lt;/code&gt; nor&lt;code&gt;:foreign-libs&lt;/code&gt; actually changes how the JavaScript is
-accessed within the clojurescript code.  If you include jQuery via a &lt;code&gt;:libs&lt;/code&gt;,
-and a &lt;code&gt;require&lt;/code&gt;, you still access it through &lt;code&gt;js/jQuery&lt;/code&gt;.  The &lt;code&gt;require&lt;/code&gt; of the
-namespace specified by &lt;code&gt;goog.provide&lt;/code&gt;, or the namespace specified in the
-&lt;code&gt;:foreign-libs&lt;/code&gt;&amp;rsquo; &lt;code&gt;:provides&lt;/code&gt; key, simply ensures the JavaScript is loaded.&lt;/p&gt;
-
-&lt;p&gt;The choice of compiler &lt;code&gt;:optimizations&lt;/code&gt; affects what information you need to
-provide, and this differs depending on whether you are providing javascript
-libraries through the runtime (e.g. $lt;script&amp;gt; tags in the browser), or
-through &lt;code&gt;:libs&lt;/code&gt; or &lt;code&gt;:foreign-libs&lt;/code&gt; compiler options.  The simplest here is to
-use the compiler options.  When providing the JavaScript via the runtime, then
-everything should also just work if you are using no optimisation, or
-just &lt;code&gt;:whitespace&lt;/code&gt;, but as soon as you try anything else, you will need to
-provide an :externs definition for the JavaScript libraries.&lt;/p&gt;
-</content></entry>
-
-<entry xml:base="http://hugoduncan.github.com/post/webapp_with_core.async"><title>Exploring a todo app with core.async</title><link href="http://hugoduncan.github.com/post/webapp_with_core.async"/><id>http://hugoduncan.github.com/post/webapp_with_core.async</id><published>2013-08-15T00:00:00Z</published><updated>2013-08-15T00:00:00Z</updated><summary type="html"> </summary><content type="html">&lt;p&gt;We&amp;rsquo;re going to build an equivalent of the &lt;a href=&#34;http://angularjs.org/#add-some-control&#34; title=&#34;Angular TODO example&#34;&gt;AngularJS TODO example&lt;/a&gt;
-using core.async, and a templating library, &lt;a href=&#34;https://github.com/hugoduncan/papadom&#34; title=&#34;Papadom templating library&#34;&gt;papadom&lt;/a&gt;, that I&amp;rsquo;ve
-written to help in this.&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&#34;https://github.com/clojure/clojurescript&#34; title=&#34;Clojurescript&#34;&gt;Clojurescript&lt;/a&gt; recently gained a &lt;a href=&#34;http://en.wikipedia.org/wiki/Communicating_sequential_processes&#34; title=&#34;Communicating Sequential Processes&#34;&gt;CSP&lt;/a&gt; implemetation via
-&lt;a href=&#34;http://clojure.com/blog/2013/06/28/clojure-core-async-channels.html&#34; title=&#34;Clojure core.async Channels&#34;&gt;core.async&lt;/a&gt;, similar to &lt;a href=&#34;http://golang.org/ref/spec#Channel_types&#34; title=&#34;Go Channels&#34;&gt;Go&amp;rsquo;s channels&lt;/a&gt;, or
-&lt;a href=&#34;http://www.cs.cornell.edu/Courses/cs312/2006fa/recitations/rec24.html&#34; title=&#34;CML Channels&#34;&gt;CML&amp;rsquo;s channels&lt;/a&gt; (CML also has a nice select).  Bruce Haumann
-started exploring this with &lt;a href=&#34;http://rigsomelight.com/2013/07/18/clojurescript-core-async-todos.html&#34; title=&#34;Bruce Haumann&#39;s &#39;ClojureScript Core.Async Todos&#39;&#34;&gt;ClojureScript Core.Async Todos&lt;/a&gt;, and
-David Nolen has been looking at how to use core.async for
-&lt;a href=&#34;http://swannodette.github.io/2013/07/31/extracting-processes/&#34; title=&#34;David Nolan&#39;s &#39;CSP is Responsive Design&#39;&#34;&gt;responsive design&lt;/a&gt;.  In this post, we&amp;rsquo;ll take the TODO example,
-and take it a little further.&lt;/p&gt;
-
-&lt;h2&gt;Basic Display&lt;/h2&gt;
-
-&lt;p&gt;We&amp;rsquo;ll start with just displaying a list of todo items.  For this we&amp;rsquo;ll need a
-template, so we&amp;rsquo;ll just write this in HTML, and add a &lt;code&gt;t-template&lt;/code&gt; attribute,
-which enables us to use mustache style templating of values to display.  This
-doesn&amp;rsquo;t use mustache sections for looping, in order to preserve valid HTML
-markup.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;html&#34;&gt;&amp;lt;h1&amp;gt;TODOS&amp;lt;/h1&amp;gt;
-&amp;lt;ul class=&amp;quot;unstyled&amp;quot;&amp;gt;
-  &amp;lt;li t-template=&amp;quot;todos&amp;quot;&amp;gt;{{text}}&amp;lt;/li&amp;gt;
-&amp;lt;/ul&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;To get this to show something we&amp;rsquo;ll need some code:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;clj&#34;&gt;(ns app
-  (:require
-   [papadom.template :refer [compile-templates render]]))
-
-(defn start []
-  (compile-templates)
-  (render {:todos [{:text &amp;quot;learn papadom&amp;quot; :done false}
-                   {:text &amp;quot;write a papadom app&amp;quot; :done false}]}))
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;When you call &lt;code&gt;app.start()&lt;/code&gt; from the page containing the above template, you&amp;rsquo;ll
-see a list of two todo entries.&lt;/p&gt;
-
-&lt;h2&gt;Adding an event&lt;/h2&gt;
-
-&lt;p&gt;Now we have something displayed, lets add a checkbox to mark todo items as done:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;html&#34;&gt;&amp;lt;ul class=&amp;quot;unstyled&amp;quot;&amp;gt;
-  &amp;lt;li t-template=&amp;quot;todos&amp;quot;&amp;gt;
-    &amp;lt;input type=&amp;quot;checkbox&amp;quot; t-prop=&amp;quot;done&amp;quot; t-event=&amp;quot;done&amp;quot;
-           t-id=&amp;quot;index&amp;quot; index=&amp;quot;{{@index}}&amp;quot;&amp;gt;
-    &amp;lt;span&amp;gt;{{text}}&amp;lt;/span&amp;gt;
-  &amp;lt;/li&amp;gt;
-&amp;lt;/ul&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The &lt;code&gt;t-prop&lt;/code&gt; attribute tells the template to which data value to display as the
-checkbox.&lt;/p&gt;
-
-&lt;p&gt;The &lt;code&gt;t-event&lt;/code&gt; attribute specifies that we want an event.  When the checkbox is
-clicked, we will get a core.async message with a &lt;code&gt;:done&lt;/code&gt; event type.  We need to
-know which todo was clicked, so we use the &lt;code&gt;t-id&lt;/code&gt; attribute to list the
-attributes whose values should be sent as the event data &amp;ndash; in this case the
-index, which has a value based on handlebars style &lt;code&gt;@index&lt;/code&gt; property.&lt;/p&gt;
-
-&lt;p&gt;Now we need some code to process the events.  To do this we&amp;rsquo;ll define an
-&lt;code&gt;app&lt;/code&gt; function that will be passed a state atom containing a map with our todos
-state, and a core.async channel from which to read events.  The function will
-loop over events, and dispatch them as required.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;clj&#34;&gt;(defn app
-  [state event-chan]
-  (go
-   (loop [[event event-data] (&amp;lt;! event-chan)]
-     (case event
+&#40;defn start &#91;&#93;
+  &#40;compile-templates&#41;
+  &#40;render {:todos &#91;{:text &quot;learn papadom&quot; :done false}
+                   {:text &quot;write a papadom app&quot; :done false}&#93;}&#41;&#41;
+</code></pre><p>When you call <code>app.start&#40;&#41;</code> from the page containing the above template, you'll see a list of two todo entries.</p><h2>Adding an event</h2><p>Now we have something displayed, lets add a checkbox to mark todo items as done:</p><pre><code class="html">&lt;ul class=&quot;unstyled&quot;&gt;
+  &lt;li t-template=&quot;todos&quot;&gt;
+    &lt;input type=&quot;checkbox&quot; t-prop=&quot;done&quot; t-event=&quot;done&quot;
+           t-id=&quot;index&quot; index=&quot;{{@index}}&quot;&gt;
+    &lt;span&gt;{{text}}&lt;/span&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+</code></pre><p>The <code>t-prop</code> attribute tells the template to which data value to display as the checkbox.</p><p>The <code>t-event</code> attribute specifies that we want an event.  When the checkbox is clicked, we will get a core.async message with a <code>:done</code> event type.  We need to know which todo was clicked, so we use the <code>t-id</code> attribute to list the attributes whose values should be sent as the event data &ndash; in this case the index, which has a value based on handlebars style <code>@index</code> property.</p><p>Now we need some code to process the events.  To do this we'll define an <code>app</code> function that will be passed a state atom containing a map with our todos state, and a core.async channel from which to read events.  The function will loop over events, and dispatch them as required.</p><pre><code class="clj">&#40;defn app
+  &#91;state event-chan&#93;
+  &#40;go
+   &#40;loop &#91;&#91;event event-data&#93; &#40;&lt;! event-chan&#41;&#93;
+     &#40;case event
        :done
-       (let [nv (boolean (:checked event-data))]
-         (swap! state assoc-in [:todos (:index event-data) :done] nv)))
-     (recur (&amp;lt;! event-chan)))))
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;When the &lt;code&gt;app&lt;/code&gt; function receives a &lt;code&gt;:done&lt;/code&gt; event, it will update the state atom
-appropriately.  Now we have our state updating, we&amp;rsquo;ll need to display it, which
-we can again do with the &lt;code&gt;render&lt;/code&gt; function.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;clj&#34;&gt;(defn show-state [state]
-  (render &amp;quot;state&amp;quot; state))
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;We still need to get &lt;code&gt;show-state&lt;/code&gt; called, and we&amp;rsquo;ll arrange this in a modified
-&lt;code&gt;start&lt;/code&gt; function.  This will create an atom for the state, and add a watch on
-the atom that will call &lt;code&gt;show-state&lt;/code&gt;.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;clj&#34;&gt;(defn start
-  []
-  (let [event-chan (chan)
-        state (atom nil)]
-    (compile-templates)
-    (template-events event-chan)
-    (add-watch state :state (fn [key ref old new] (show-state new)))
-    (reset! state {:todos [{:text &amp;quot;Learn papadom&amp;quot; :done false}
-                           {:text &amp;quot;Build a papadom app&amp;quot; :done false}]})
-    (app state event-chan))))
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;We&amp;rsquo;ve also added a core.async channel, &lt;code&gt;event-chan&lt;/code&gt;, which we&amp;rsquo;ve passed to
-&lt;code&gt;template-events&lt;/code&gt; to arrange delivery of the events defined in our template.  We
-pass this channel to the &lt;code&gt;app&lt;/code&gt; function to start processing the events.&lt;/p&gt;
-
-&lt;p&gt;This shows the basic structure of the application.&lt;/p&gt;
-
-&lt;h2&gt;Adding New Todo Elements&lt;/h2&gt;
-
-&lt;p&gt;To allow you to add new todo items, we&amp;rsquo;ll add a form to our template,
-specifying a &lt;code&gt;t-event&lt;/code&gt; attribute, which will cause an event to be sent when the
-form is submitted, with the form&amp;rsquo;s input values as the event data.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;html&#34;&gt;&amp;lt;form t-event=&amp;quot;add-todo&amp;quot;&amp;gt;
-  &amp;lt;input type=&amp;quot;text&amp;quot; t-prop=&amp;quot;text&amp;quot; size=&amp;quot;30&amp;quot; placeholder=&amp;quot;add new todo here&amp;quot;&amp;gt;
-  &amp;lt;input class=&amp;quot;btn btn-primary&amp;quot; type=&amp;quot;submit&amp;quot; value=&amp;quot;add&amp;quot;&amp;gt;
-&amp;lt;/form&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;To process this new event, we&amp;rsquo;ll add a case to the &lt;code&gt;app&lt;/code&gt; function loop&amp;rsquo;s &lt;code&gt;case&lt;/code&gt;
-form.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;clj&#34;&gt;:add-todo
-(swap! state update-in [:todos]
-       conj {:text (:text (input-seq-&amp;gt;map event-data))
-             :done false})
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This uses the &lt;code&gt;input-seq-&amp;gt;map&lt;/code&gt; helper to convert the data from the form into a
-map, and we extract the &lt;code&gt;:text&lt;/code&gt; value (defined by &lt;code&gt;t-prop&lt;/code&gt; in the &lt;code&gt;input&lt;/code&gt;
-element).&lt;/p&gt;
-
-&lt;p&gt;And we&amp;rsquo;re done.  To see a full working example have a look at the
-&lt;a href=&#34;https://github.com/hugoduncan/papadom/blob/master/examples/todo/resources/public/index.html&#34; title=&#34;TODO HTML Template&#34;&gt;template&lt;/a&gt; and &lt;a href=&#34;https://github.com/hugoduncan/papadom/blob/master/examples/todo/src/papadom/example/todo.cljs&#34; title=&#34;TODO Clojurescript Code&#34;&gt;code&lt;/a&gt; in the todo example of papadom.
-To run the example:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;shell&#34;&gt;git clone https://github.com/hugoduncan/papadom.git
+       &#40;let &#91;nv &#40;boolean &#40;:checked event-data&#41;&#41;&#93;
+         &#40;swap! state assoc-in &#91;:todos &#40;:index event-data&#41; :done&#93; nv&#41;&#41;&#41;
+     &#40;recur &#40;&lt;! event-chan&#41;&#41;&#41;&#41;&#41;
+</code></pre><p>When the <code>app</code> function receives a <code>:done</code> event, it will update the state atom appropriately.  Now we have our state updating, we'll need to display it, which we can again do with the <code>render</code> function.</p><pre><code class="clj">&#40;defn show-state &#91;state&#93;
+  &#40;render &quot;state&quot; state&#41;&#41;
+</code></pre><p>We still need to get <code>show-state</code> called, and we'll arrange this in a modified <code>start</code> function.  This will create an atom for the state, and add a watch on the atom that will call <code>show-state</code>.</p><pre><code class="clj">&#40;defn start
+  &#91;&#93;
+  &#40;let &#91;event-chan &#40;chan&#41;
+        state &#40;atom nil&#41;&#93;
+    &#40;compile-templates&#41;
+    &#40;template-events event-chan&#41;
+    &#40;add-watch state :state &#40;fn &#91;key ref old new&#93; &#40;show-state new&#41;&#41;&#41;
+    &#40;reset! state {:todos &#91;{:text &quot;Learn papadom&quot; :done false}
+                           {:text &quot;Build a papadom app&quot; :done false}&#93;}&#41;
+    &#40;app state event-chan&#41;&#41;&#41;&#41;
+</code></pre><p>We've also added a core.async channel, <code>event-chan</code>, which we've passed to <code>template-events</code> to arrange delivery of the events defined in our template.  We pass this channel to the <code>app</code> function to start processing the events.</p><p>This shows the basic structure of the application.</p><h2>Adding New Todo Elements</h2><p>To allow you to add new todo items, we'll add a form to our template, specifying a <code>t-event</code> attribute, which will cause an event to be sent when the form is submitted, with the form's input values as the event data.</p><pre><code class="html">&lt;form t-event=&quot;add-todo&quot;&gt;
+  &lt;input type=&quot;text&quot; t-prop=&quot;text&quot; size=&quot;30&quot; placeholder=&quot;add new todo here&quot;&gt;
+  &lt;input class=&quot;btn btn-primary&quot; type=&quot;submit&quot; value=&quot;add&quot;&gt;
+&lt;/form&gt;
+</code></pre><p>To process this new event, we'll add a case to the <code>app</code> function loop's <code>case</code> form.</p><pre><code class="clj">:add-todo
+&#40;swap! state update-in &#91;:todos&#93;
+       conj {:text &#40;:text &#40;input-seq-&gt;map event-data&#41;&#41;
+             :done false}&#41;
+</code></pre><p>This uses the <code>input-seq-&gt;map</code> helper to convert the data from the form into a map, and we extract the <code>:text</code> value (defined by <code>t-prop</code> in the <code>input</code> element).</p><p>And we're done.  To see a full working example have a look at the [template][todotemplate] and [code][todocode] in the todo example of papadom. To run the example:</p><pre><code class="shell">git clone &#91;https://github.com/hugoduncan/papadom.git&#93;&#40;https://github.com/hugoduncan/papadom.git&#41;
 cd papadom/examples/todo
 lein ring server
-&lt;/code&gt;&lt;/pre&gt;
-</content></entry>
-
+</code></pre><p>[angulartodo]: <a href='http://angularjs.org/#add-some-control'>http://angularjs.org/#add-some-control</a> "Angular TODO example"</p><p>[brucetodo]: <a href='http://rigsomelight.com/2013/07/18/clojurescript-core-async-todos.html'>http://rigsomelight.com/2013/07/18/clojurescript-core-async-todos.html</a> "Bruce Haumann's 'ClojureScript Core.Async Todos'"</p><p>[clojurescript]: <a href='https://github.com/clojure/clojurescript'>https://github.com/clojure/clojurescript</a> "Clojurescript"</p><p>[cmlchannel]: <a href='http://www.cs.cornell.edu/Courses/cs312/2006fa/recitations/rec24.html'>http://www.cs.cornell.edu/Courses/cs312/2006fa/recitations/rec24.html</a> "CML Channels"</p><p>[core.async]:  <a href='http://clojure.com/blog/2013/06/28/clojure-core-async-channels.html'>http://clojure.com/blog/2013/06/28/clojure-core-async-channels.html</a> "Clojure core.async Channels"</p><p>[csp]: <a href='http://en.wikipedia.org/wiki/Communicating_sequential_processes'>http://en.wikipedia.org/wiki/Communicating<i>sequential</i>processes</a> "Communicating Sequential Processes"</p><p>[cspresponsive]: <a href='http://swannodette.github.io/2013/07/31/extracting-processes/'>http://swannodette.github.io/2013/07/31/extracting-processes/</a> "David Nolan's 'CSP is Responsive Design'"</p><p>[golangchannel]: <a href='http://golang.org/ref/spec#Channel_types'>http://golang.org/ref/spec#Channel_types</a> "Go Channels"</p><p>[kemingweather]: <a href='http://keminglabs.com/blog/angular-cljs-weather-app/'>http://keminglabs.com/blog/angular-cljs-weather-app/</a> "Kevin Lynagh's 'Building an iOS weather app with Angular and ClojureScript'"</p><p>[purnam]: <a href='https://github.com/zcaudate/purnam'>https://github.com/zcaudate/purnam</a> "purnam" [clang]: <a href='https://github.com/pangloss/clang/'>https://github.com/pangloss/clang/</a> "clang"</p><p>[todotemplate]: <a href='https://github.com/hugoduncan/papadom/blob/master/examples/todo/resources/public/index.html'>https://github.com/hugoduncan/papadom/blob/master/examples/todo/resources/public/index.html</a> "TODO HTML Template" [todocode]: <a href='https://github.com/hugoduncan/papadom/blob/master/examples/todo/src/papadom/example/todo.cljs'>https://github.com/hugoduncan/papadom/blob/master/examples/todo/src/papadom/example/todo.cljs</a> "TODO Clojurescript Code"</p><p>[papadom]: <a href='https://github.com/hugoduncan/papadom'>https://github.com/hugoduncan/papadom</a> "Papadom templating library"</p>]]>
+    </content>
+  </entry>
 </feed>
