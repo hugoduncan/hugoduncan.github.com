@@ -21,6 +21,7 @@
      src-posts-dir
      src-meta-dir
      asset-dir
+     category-dir
      post-dir
      base-html
      post-html
@@ -38,6 +39,7 @@
             :src-asset-dir (fs/file "assets")
             :src-meta-dir  (fs/file "meta")
             :asset-dir     (fs/file "assets")
+            :category-dir  (fs/file "tags")
             :post-dir      (fs/file "post")
             :meta-dir      (fs/file "meta")
             :base-html     (slurp "templates/base.html")
@@ -293,6 +295,17 @@
        edn/read-string
        vec))
 
+(defn categories [posts]
+  (reduce
+   (fn [res {:keys [categories] :as post}]
+     (reduce
+      (fn [res category]
+        (update res category (fnil conj []) post))
+      res
+      categories))
+   {}
+   posts))
+
 (defn render-archive
   [{:keys [out-dir base-html] :as structure} posts]
   (println "Rendering archive to :" (str (fs/file out-dir "archive.html")))
@@ -315,11 +328,43 @@
   (println "Rendering atom to :" feed-name)
   (spit (fs/file out-dir feed-name) (atom-feed blog-root posts bodies)))
 
+
+(defn category-name->path [category]
+  (str/replace category " " "-"))
+
+(defn render-category-page [{:keys [base-html] :as structure} category bodies]
+  (let [file (out-path structure :category-dir
+                       (category-name->path (key category))
+                       "index.html")]
+    (spit file
+          (selmer/render
+           base-html
+           {:body  (utils/convert-to
+                    (index structure (val category) bodies)
+                    :html)
+            :title (key category)
+            :base  "../../"}))))
+
+(defn render-category-feed [structure category bodies]
+  (render-atom
+   structure
+   (fs/path (:category-dir structure)
+            (category-name->path (key category))
+            "index.xml")
+   (val category)
+   bodies))
+
+(defn render-categories [structure categories bodies]
+  (doseq [category categories]
+    (render-category-page structure category bodies)
+    (render-category-feed structure category bodies)))
+
 (defn render []
   (let [structure    (structure "public")
         bodies       (atom {}) ; cache, re-used when generating atom, etc
         posts        (posts)
         public-posts (vec (remove :draft posts))
+        categories   (categories public-posts)
         metas        (metas)
         clj-posts    (posts-with-categories posts ["clojure" "clojurescript"])]
 
@@ -330,6 +375,7 @@
     (render-metas structure metas bodies)
     (render-index structure public-posts bodies)
     (render-archive structure public-posts)
+    (render-categories structure categories bodies)
     (render-atom structure "index.xml" public-posts bodies)
     (render-atom structure "planetclojure.xml" clj-posts bodies)))
 
