@@ -1,2 +1,8 @@
-{:deps {babashka/fs          {:mvn/version "0.1.0"}
-        clj-commons/clj-yaml {:mvn/version "0.7.0"}}}
+{:paths ["blog-code"]
+ :deps  {babashka/fs               {:mvn/version "0.1.0"}
+         clj-commons/clj-yaml      {:mvn/version "0.7.0"}
+         markdown-clj/markdown-clj {:mvn/version "1.10.7"}
+         hiccup/hiccup             {:mvn/version "1.0.5"}
+         org.clojure/data.xml      {:mvn/version "0.0.8"}
+         rewrite-clj/rewrite-clj   {:mvn/version "1.0.699-alpha"}
+         selmer/selmer             {:mvn/version "1.12.44"}}}

@@ -1,17 +1,14 @@
 (ns render
   (:require
    [babashka.fs :as fs]
-   [babashka.pods :as pods]
    [clojure.data.xml :as xml]
    [clojure.edn :as edn]
    [clojure.string :as str]
    [highlighter :as h]
+   [hiccup2.core :as hiccup]
+   [markdown.core :as md]
    [selmer.parser :as selmer]))
 
-(pods/load-pod 'retrogradeorbit/bootleg "0.1.9")
-
-(require '[pod.retrogradeorbit.bootleg.markdown :as md])
-(require '[pod.retrogradeorbit.bootleg.utils :as utils])
 
 ;;;; Structure
 (defrecord Structure
@@ -86,7 +83,7 @@
         markdown (str/replace markdown #"\[[^\]]+\n"
                               (fn [match]
                                 (str/replace match "\n" "$$RET$$")))
-        html     (md/markdown markdown :data :html :reference-links? true)
+        html     (md/md-to-html-string markdown :reference-links? true)
         html     (str/replace html "$$RET$$" "\n")]
     html))
 
@@ -313,7 +310,9 @@
         (selmer/render
          base-html
          {:skip-archive true
-          :body         (utils/convert-to (post-links structure posts) :html)
+          :body         (hiccup/html
+                         {:escape-strings? false}
+                         (post-links structure posts))
           :base         ""})))
 
 (defn render-index [{:keys [out-dir base-html] :as structure} posts bodies]
@@ -321,7 +320,9 @@
   (spit (fs/file out-dir "index.html")
         (selmer/render
          base-html
-         {:body (utils/convert-to (index structure posts bodies) :html)
+         {:body (hiccup/html
+                 {:escape-strings? false}
+                 (index structure posts bodies))
           :base ""})))
 
 (defn render-atom [{:keys [out-dir]} feed-name posts bodies]
@@ -339,9 +340,9 @@
     (spit file
           (selmer/render
            base-html
-           {:body  (utils/convert-to
-                    (index structure (val category) bodies)
-                    :html)
+           {:body  (hiccup/html
+                    {:escape-strings? false}
+                    (index structure (val category) bodies))
             :title (key category)
             :base  "../../"}))))
 
@@ -379,4 +380,4 @@
     (render-atom structure "index.xml" public-posts bodies)
     (render-atom structure "planetclojure.xml" clj-posts bodies)))
 
-(render)
+;; (render)
