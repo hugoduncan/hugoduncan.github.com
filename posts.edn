@@ -173,3 +173,7 @@
  :categories  #{"clojure" "blog"}
  :date        "2021-11-14"
  :discuss     "https://github.com/hugoduncan/hugoduncan.github.com/discussions/4"}
+{:title      "Versions in the Time of Git Dependencies"
+ :file       "versions_in_the_time_of_git_dependencies.md"
+ :categories #{"clojure"}
+ :date       "2021-11-21"}
