@@ -3,7 +3,7 @@
   <title>Pelure</title>
   <link href="http://hugoduncan.org/index.xml" rel="self"/>
   <link href="http://hugoduncan.org/"/>
-  <updated>2021-11-15T01:45:47+00:00</updated>
+  <updated>2021-11-22T02:39:16+00:00</updated>
   <id>http://hugoduncan.org/</id>
   <author>
     <name>Hugo Duncan</name>
@@ -15,7 +15,7 @@
     <summary>Snarf PGP Keys from Signed Messages in the mu4e message view.</summary>
     <updated>2013-08-25T23:59:59+00:00</updated>
     <content type="html">
-      <![CDATA[<p>I just moved to [mu][mu] for reading my email.  One feature I was missing was the ability to receive [PGP][pgp] keys for signed messages.</p><p>When you receive a signed message, <code>mu</code> shows the verification status in the <code>Signature</code> field in the message view (see [MSGV-Crypto][mucrypto]).  If you don't have the sender's PGP key on your keyring, this will show <code>unverified</code>.  Click on the <code>Details</code> link within field will show the sender's key id.  To manually import the key you can use [<code>gpg</code>][gpg]:</p><pre><code>$ gpg --recv &lt;the-key-id&gt;
+      <![CDATA[<p>I just moved to <a href='[http://www.djcbsoftware.nl/code/mu/](http://www.djcbsoftware.nl/code/mu/)' title='mu mail reader'>mu</a> for reading my email.  One feature I was missing was the ability to receive <a href='[http://en.wikipedia.org/wiki/Pretty_Good_Privacy](http://en.wikipedia.org/wiki/Pretty_Good_Privacy)' title='Pretty Good Privacy'>PGP</a> keys for signed messages.</p><p>When you receive a signed message, <code>mu</code> shows the verification status in the <code>Signature</code> field in the message view (see <a href='[http://www.djcbsoftware.nl/code/mu/mu4e/MSGV-Crypto.html#MSGV-Crypto](http://www.djcbsoftware.nl/code/mu/mu4e/MSGV-Crypto.html#MSGV-Crypto)' title='mu message cryptography'>MSGV-Crypto</a>).  If you don't have the sender's PGP key on your keyring, this will show <code>unverified</code>.  Click on the <code>Details</code> link within field will show the sender's key id.  To manually import the key you can use <a href='[http://www.gnupg.org/](http://www.gnupg.org/)' title='GNU Privacy Guard'><code>gpg</code></a>:</p><pre><code>$ gpg --recv &lt;the-key-id&gt;
 </code></pre><p>This seemed a little labourious, so some automation was in order. <code>mu4e</code> allows you to define actions that can be run on messages (or attachments), so I just wrote an action to do this.</p><pre><code class="lisp">&#40;defun mu4e-view-snarf-pgp-key &#40;&amp;optional msg&#41;
   &quot;Snarf the pgp key for the specified message.&quot;
   &#40;interactive&#41;
@@ -34,7 +34,7 @@
 
 </code></pre><p>This works by parsing the output of the <code>mu</code> program itself, as displayed in the <code>Details</code> window, to obtain the PGP key id.  It then executes the <code>gpg --recv</code> command, parsing in the parsed key id.</p><p>To install the action, we simply add it to <code>mu4e-view-actions</code>:</p><pre><code class="lisp">&#40;add-to-list 'mu4e-view-actions
              '&#40;&quot;Snarf PGP keys&quot; . mu4e-view-snarf-pgp-key&#41; t&#41;
-</code></pre><p>[pgp]: <a href='http://en.wikipedia.org/wiki/Pretty_Good_Privacy'>http://en.wikipedia.org/wiki/Pretty<i>Good</i>Privacy</a> "Pretty Good Privacy" [gpg]: <a href='http://www.gnupg.org/'>http://www.gnupg.org/</a> "GNU Privacy Guard" [mu]: <a href='http://www.djcbsoftware.nl/code/mu/'>http://www.djcbsoftware.nl/code/mu/</a> "mu mail reader" [mucrypto]: <a href='http://www.djcbsoftware.nl/code/mu/mu4e/MSGV-Crypto.html#MSGV-Crypto'>http://www.djcbsoftware.nl/code/mu/mu4e/MSGV-Crypto.html#MSGV-Crypto</a> "mu message cryptography"</p>]]>
+</code></pre>]]>
     </content>
   </entry>
 </feed>

@@ -3,7 +3,7 @@
   <title>Pelure</title>
   <link href="http://hugoduncan.org/index.xml" rel="self"/>
   <link href="http://hugoduncan.org/"/>
-  <updated>2021-11-15T01:45:47+00:00</updated>
+  <updated>2021-11-22T02:39:16+00:00</updated>
   <id>http://hugoduncan.org/</id>
   <author>
     <name>Hugo Duncan</name>
@@ -15,7 +15,7 @@
     <summary>When editing Clojure blocks in mardown or asciidoc documents, allow formating and evaluation of code blocks with clojure-mode.  Using mmm-mode, you can mix whichever major modes you want.</summary>
     <updated>2013-08-26T23:59:59+00:00</updated>
     <content type="html">
-      <![CDATA[<p>When writing documentation or blog posts about Clojure code, it is very useful to be able to format Clojure code blocks using [<code>clojure-mode</code>][clojure-mode] and evaluate code with [<code>nrepl.el</code>][nrepl].</p><p>This can be enabled using [<code>mmm-mode</code>][mmm-mode], which allows a single buffer to use different major modes for different sections of the buffer (and is not limited to just web modes). Install <code>mmm-mode</code> using <code>M-x package-install mmm-mode</code>, or using <code>M-x el-get-install mmm-mode</code> from the excellent [<code>el-get</code>][el-get], or by checking the project from github and installing manually.</p><p>To configure this for clojure and markdown, add this in your <code>init.el</code> or <code>.emacs</code> file.</p><pre><code class="lisp">&#40;require 'mmm-auto&#41;
+      <![CDATA[<p>When writing documentation or blog posts about Clojure code, it is very useful to be able to format Clojure code blocks using <a href='[https://github.com/clojure-emacs/clojure-mode](https://github.com/clojure-emacs/clojure-mode)' title='clojure-mode'><code>clojure-mode</code></a> and evaluate code with <a href='[https://github.com/clojure-emacs/nrepl.el](https://github.com/clojure-emacs/nrepl.el)' title='nrepl.el'><code>nrepl.el</code></a>.</p><p>This can be enabled using <a href='[https://github.com/purcell/mmm-mode/](https://github.com/purcell/mmm-mode/)' title='mmm-mode'><code>mmm-mode</code></a>, which allows a single buffer to use different major modes for different sections of the buffer (and is not limited to just web modes). Install <code>mmm-mode</code> using <code>M-x package-install mmm-mode</code>, or using <code>M-x el-get-install mmm-mode</code> from the excellent <a href='[http://tapoueh.org/emacs/el-get.html](http://tapoueh.org/emacs/el-get.html)' title='el-get'><code>el-get</code></a>, or by checking the project from github and installing manually.</p><p>To configure this for clojure and markdown, add this in your <code>init.el</code> or <code>.emacs</code> file.</p><pre><code class="lisp">&#40;require 'mmm-auto&#41;
 &#40;mmm-add-classes
  '&#40;&#40;markdown-clojure
     :submode clojure-mode
@@ -29,7 +29,7 @@
   &#40;inc x&#41;&#41;
 
 &#40;my-fn 1&#41;
-</code></pre></p><p></pre></p><p>Inside the code block you can format and evaluate your code as in any <code>clojure-mode</code> buffer, and the code will display exactly as in a <code>.clj</code> file.  By default the evaluation uses a running inferior lisp process, which you must start yourself.  To use a running [nrepl][nrepl] session instead, use <code>M-x nrepl-interaction-mode</code> inside the code block.</p><h2>Using with AsciiDoc</h2><p>This technique is not limited to clojure and markdown, but could be made to work whenever you would like differing major modes in distinct parts of your Emacs buffers.  You can add class to <code>mmm-mode</code> appropriately, for as many major mode combinations as you need.  The regions for each major mode are detected using regular expressions (or by some function).</p><p>For example, if you're writing asciidoc, you might use:</p><pre><code class="lisp">&#40;mmm-add-classes
+</code></pre></p><p></pre></p><p>Inside the code block you can format and evaluate your code as in any <code>clojure-mode</code> buffer, and the code will display exactly as in a <code>.clj</code> file.  By default the evaluation uses a running inferior lisp process, which you must start yourself.  To use a running <a href='[https://github.com/clojure-emacs/nrepl.el](https://github.com/clojure-emacs/nrepl.el)' title='nrepl.el'>nrepl</a> session instead, use <code>M-x nrepl-interaction-mode</code> inside the code block.</p><h2>Using with AsciiDoc</h2><p>This technique is not limited to clojure and markdown, but could be made to work whenever you would like differing major modes in distinct parts of your Emacs buffers.  You can add class to <code>mmm-mode</code> appropriately, for as many major mode combinations as you need.  The regions for each major mode are detected using regular expressions (or by some function).</p><p>For example, if you're writing asciidoc, you might use:</p><pre><code class="lisp">&#40;mmm-add-classes
  '&#40;&#40;asciidoc-clojure
     :submode clojure
     :face mmm-declaration-submode-face
@@ -37,7 +37,7 @@
     :back &quot;&#94;----$&quot;&#41;&#41;&#41;
 &#40;mmm-add-mode-ext-class 'adoc-mode nil 'asciidoc-clojure&#41;
 &#40;mmm-add-mode-ext-class 'doc-mode nil 'asciidoc-clojure&#41;
-</code></pre><h2>Summary</h2><p><code>mmm-mode</code> allows you to flexibly use multiple major modes in different parts of a single emacs buffer.  Here we have shown how to use it for <code>clojure-mode</code> code blocks in markdown or asciidoc, but it is in no way limited to this, and it allows some fine grained customisation to the appearance and behaviour of each major mode block. I'm sure you'll find your own uses for <code>mmm-mode</code>.</p><p>[dirlocals]: <a href='http://www.gnu.org/software/emacs/manual/html_node/emacs/Directory-Variables.html'>http://www.gnu.org/software/emacs/manual/html_node/emacs/Directory-Variables.html</a> "Emacs Directory variales" [nrepl]: <a href='https://github.com/clojure-emacs/nrepl.el'>https://github.com/clojure-emacs/nrepl.el</a> "nrepl.el" [clojure-mode]: <a href='https://github.com/clojure-emacs/clojure-mode'>https://github.com/clojure-emacs/clojure-mode</a> "clojure-mode" [el-get]: <a href='http://tapoueh.org/emacs/el-get.html'>http://tapoueh.org/emacs/el-get.html</a> "el-get" [mmm-mode]: <a href='https://github.com/purcell/mmm-mode/'>https://github.com/purcell/mmm-mode/</a> "mmm-mode"</p>]]>
+</code></pre><h2>Summary</h2><p><code>mmm-mode</code> allows you to flexibly use multiple major modes in different parts of a single emacs buffer.  Here we have shown how to use it for <code>clojure-mode</code> code blocks in markdown or asciidoc, but it is in no way limited to this, and it allows some fine grained customisation to the appearance and behaviour of each major mode block. I'm sure you'll find your own uses for <code>mmm-mode</code>.</p>]]>
     </content>
   </entry>
 </feed>
