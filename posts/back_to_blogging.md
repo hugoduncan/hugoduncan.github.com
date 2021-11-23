@@ -64,16 +64,3 @@ Speaking of which, I have tried writing my own before, in common-lisp:
 ## And…
 
 So I have a blogging setup.  Now I just need to write something.
-
-<!---
-[borkdude-octopress][https://blog.michielborkent.nl/migrating-octopress-to-babashka.html]
-[borkdude-blog][https://blog.michielborkent.nl/]
-[cryogen][https://github.com/cryogen-project/cryogen]
-[static][https://github.com/nakkaya/static]
-[nota][https://github.com/rafaeldelboni/nota]
-[hugo][https://gohugo.io/]
-[babashka][https://book.babashka.org/]
-[tools.build][https://clojure.org/guides/tools_build]
-[gh][https://cli.github.com/]
-[bootleg][https://github.com/retrogradeorbit/bootleg]
---->

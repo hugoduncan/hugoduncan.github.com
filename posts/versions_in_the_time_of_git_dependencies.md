@@ -4,6 +4,44 @@
 > themselves.”  ― Gabriel García Márquez, Love in the Time of Cholera
 
 
+*Edit*
+
+This is a re-write - the original is below.  It now aims to provide some
+recommendations on how to release for consumption by a git dependency.
+It all seems very obvious in retrospect
+
+Firstly only publish a single artifact from a single git repository, or
+several artifacts with identical versions if it is a monorepo.  You can
+imagine schemes that would work with multiple artifacts with independent
+versions, but tooling is going to have a hard time with any such scheme.
+This was the piece of the puzzle I was missing in my original post.
+
+Once we've agreed to the above, then it becomes simple - versions become
+monotonically increasing, and easy for tooling to deal with.
+
+Just put a git tag on a release in the same way you would a version
+published to maven.  For a good scheme see
+[Golang Modules](https://golang.org/doc/modules/version-numbers).  Make
+sure the scheme you choose sorts well with
+[version-clj](https://github.com/xsc/version-clj) (h/t
+[@borkdude](https://twitter.com/borkdude) for both).
+
+Remember you can have multiple tags for a given sha, so you could tag it
+`v1.0.0-alpha` to start with and promote it to `v1.0.0`, if that is your
+cup of tea.
+
+Many thanks to the collective wisdom of Michiel Borkent
+[@borkdude](https://twitter.com/borkdude), Alex Miller
+[@puredanger](https://twitter.com/puredanger), [Sean
+Corfield](https://github.com/seancorfield) and Erik Assum
+[@slipset](https://twitter.com/slipset) on the clojurians slack.
+
+
+*Original post below*
+
+<hr>
+
+
 When you want to consume a library using git dependencies, you go to the
 project's GitHub page, lookup the SHA from the `README`, put it in your
 `deps.edn`, and your done, right? -- But what happens when you want to
